@@ -29,10 +29,10 @@ public class MineFiledGenerator {
     private static void addBombCounts(Integer[][] field, int x, int y) {
         for (int oy = -1; oy < 2; oy++) {
             int yb = y + oy;
-            if (!(yb < 1 | yb > field.length - 2))
+            if (!(yb < 1 | yb >= field.length - 2))
                 for (int ox = -1; ox < 2; ox++) {
                     int xb = x + ox;
-                    if (!(xb < 1 | xb > field.length)) {
+                    if (!(xb < 1 | xb >= field.length)) {
                         Integer value = field[yb][xb];
                         if (value == null)
                             field[yb][xb] = 1;
