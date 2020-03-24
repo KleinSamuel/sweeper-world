@@ -10,11 +10,7 @@ import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.repositories.ChunkRepository;
 import de.sksdev.infiniteminesweeper.db.repositories.TileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.LinkedList;
 
 @Service
 public class ChunkService {

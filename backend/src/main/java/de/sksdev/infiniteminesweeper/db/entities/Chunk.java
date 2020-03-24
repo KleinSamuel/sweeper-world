@@ -6,6 +6,7 @@ import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 
 import javax.persistence.*;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -20,7 +21,6 @@ public class Chunk {
 
     public Chunk(long x, long y) {
         this(new ChunkId(x, y));
-
     }
 
     public Chunk(ChunkId id) {
@@ -32,6 +32,7 @@ public class Chunk {
     private ChunkId id;
 
     @Column
+    @JsonIgnore
     private boolean filled = false;
 
     @OneToMany(mappedBy = "chunk", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -92,8 +93,12 @@ public class Chunk {
 
     @JsonGetter("tiles")
     public Object getTilesJson() {
-        //TODO return json-map
-        return tiles;
+        HashMap<Integer, HashMap<Integer, Tile>> out = new HashMap<>();
+        for (int i = 0; i < Config.CHUNK_SIZE; i++)
+            out.put(i, new HashMap<>());
+
+        tiles.forEach(t -> out.get(t.getX_tile()).put(t.getY_tile(), t));
+        return out;
     }
 
     public Set<Tile> getTiles() {

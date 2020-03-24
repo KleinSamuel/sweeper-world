@@ -32,16 +32,20 @@ public class Tile implements Comparable<Tile> {
 
     @Id
     @Column(columnDefinition = "TINYINT(1)")
+    @JsonIgnore
     private int x_tile;
 
     @Id
     @Column(columnDefinition = "TINYINT(1)")
+    @JsonIgnore
     private int y_tile;
 
     @Id
+    @JsonIgnore
     private long x;
 
     @Id
+    @JsonIgnore
     private long y;
 
     @MapsId
@@ -51,6 +55,7 @@ public class Tile implements Comparable<Tile> {
     })
     @ManyToOne
     @JsonIgnore
+    @J
     private Chunk chunk;
 
 
@@ -65,13 +70,13 @@ public class Tile implements Comparable<Tile> {
     private User user;
 
 
-//    public Row getRow() {
-//        return row;
-//    }
-//
-//    public void setRow(Row row) {
-//        this.row = row;
-//    }
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public Integer getValue() {
         return value;
@@ -89,65 +94,11 @@ public class Tile implements Comparable<Tile> {
         this.hidden = hidden;
     }
 
-//    public User getUser() {
-//        return user;
-//    }
-//
-//    public void setUser(User user) {
-//        this.user = user;
-//    }
-
-//    public EdgeColumn getEdgeColumn() {
-//        return edgeColumn;
-//    }
-//
-//    public void setEdgeColumn(EdgeColumn edgeColumn) {
-//        this.edgeColumn = edgeColumn;
-//    }
-
-//    public TileId getId() {
-//        return id;
-//    }
-//
-//    public void setId(TileId id) {
-//        this.id = id;
-//    }
 
     public void setValue(Integer value) {
         this.value = value;
     }
 
-//    public long getX() {
-//        return getId().getX();
-//    }
-//
-//    public void setX(long x) {
-//        getId().setX(x);
-//    }
-//
-//    public long getY() {
-//        return getId().getY();
-//    }
-//
-//    public void setY(long y) {
-//        getId().setY(y);
-//    }
-//
-//    public int getX_tile() {
-//        return getId().getX_tile();
-//    }
-//
-//    public void setX_tile(int x_tile) {
-//        getId().setX_tile(x_tile);
-//    }
-//
-//    public int getY_tile() {
-//        return getId().getY_tile();
-//    }
-//
-//    public void setY_tile(int y_tile) {
-//        getId().setY_tile(y_tile);
-//    }
 
 
     public int getX_tile() {
