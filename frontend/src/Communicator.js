@@ -50,6 +50,6 @@ export default class Communicator {
     }
 
     requestChunk(chunkX, chunkY) {
-        return axios.get(URL_API+"/fuckingshit");
+        return axios.get(URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY);
     }
 }
