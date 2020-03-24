@@ -8,8 +8,8 @@ export default class MinefieldModel {
     constructor(chunkX, chunkY) {
         console.log("MinefieldModel created");
 
-        this.BUFFER = 1;
-        this.BUFFER_REMOVE = 1;
+        this.BUFFER = 2;
+        this.BUFFER_REMOVE = 2;
 
         this.chunkX = chunkX;
         this.chunkY = chunkY;
