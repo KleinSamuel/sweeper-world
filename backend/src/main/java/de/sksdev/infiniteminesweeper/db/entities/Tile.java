@@ -1,70 +1,50 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
 
+import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
+
 import javax.persistence.*;
-import java.io.Serializable;
 
-
-class TileId implements Serializable {
-    private long x;
-    private long y;
-    private int x_tile;
-    private int y_tile;
-
-    public TileId(){
-    }
-}
 
 @Entity
 @Table(name = "tiles")
-@IdClass(TileId.class)
 public class Tile implements Comparable<Tile> {
 
     public Tile(){
     }
 
     public Tile(Chunk chunk, int x_tile, int y_tile) {
-        this.x = chunk.getX();
-        this.y = chunk.getY();
-        this.x_tile = x_tile;
-        this.y_tile = y_tile;
+       id = new TileId(chunk.getX(),chunk.getY(),x_tile,y_tile);
         this.value = null;
     }
 
     @Override
     public int compareTo(Tile other) {
-        int y_dist = this.y_tile - other.getY_tile();
-        return y_dist != 0 ? y_dist : this.x_tile - other.getX_tile();
+        int y_dist = this.getY_tile() - other.getY_tile();
+        return y_dist != 0 ? y_dist : this.getX_tile() - other.getX_tile();
     }
 
 
     @Id
-    private long x;
-
-    @Id
-    private long y;
-
-    @Id
-    private int x_tile;
-
-    @Id
-    private int y_tile;
+    private TileId id;
 
     @OneToOne
     @JoinColumns({
-            @JoinColumn(name = "x"),
-            @JoinColumn(name = "y"),
-            @JoinColumn(name = "y_tile")
+            @JoinColumn(name = "x", insertable = false, updatable = false),
+            @JoinColumn(name = "y", insertable = false, updatable = false),
+            @JoinColumn(name = "y_tile", insertable = false, updatable = false)
     })
-    @MapsId
+//    @MapsId
     private Row row;
+
+
     @OneToOne
     @JoinColumns({
-            @JoinColumn(name = "x"),
-            @JoinColumn(name = "x_tile"),
-            @JoinColumn(name = "y")
+            @JoinColumn(name = "x", insertable = false, updatable = false),
+            @JoinColumn(name = "x_tile", insertable = false, updatable = false),
+            @JoinColumn(name = "y", insertable = false, updatable = false)
     })
-    @MapsId
+//    @MapsId
     private EdgeColumn edgeColumn;
 
     @OneToOne
@@ -72,7 +52,7 @@ public class Tile implements Comparable<Tile> {
             @JoinColumn(name = "x", insertable = false, updatable = false),
             @JoinColumn(name = "y", insertable = false, updatable = false)
     })
-    @MapsId
+//    @MapsId
     private Chunk chunk;
 
 
@@ -126,36 +106,48 @@ public class Tile implements Comparable<Tile> {
         this.edgeColumn = edgeColumn;
     }
 
+    public TileId getId() {
+        return id;
+    }
+
+    public void setId(TileId id) {
+        this.id = id;
+    }
+
+    public void setValue(Integer value) {
+        this.value = value;
+    }
+
     public long getX() {
-        return x;
+        return getId().getX();
     }
 
     public void setX(long x) {
-        this.x = x;
+        getId().setX(x);
     }
 
     public long getY() {
-        return y;
+        return getId().getY();
     }
 
     public void setY(long y) {
-        this.y = y;
+        getId().setY(y);
     }
 
     public int getX_tile() {
-        return x_tile;
+        return getId().getX_tile();
     }
 
     public void setX_tile(int x_tile) {
-        this.x_tile = x_tile;
+        getId().setX_tile(x_tile);
     }
 
     public int getY_tile() {
-        return y_tile;
+        return getId().getY_tile();
     }
 
     public void setY_tile(int y_tile) {
-        this.y_tile = y_tile;
+        getId().setY_tile(y_tile);
     }
 
 

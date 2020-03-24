@@ -1,6 +1,7 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
 import de.sksdev.infiniteminesweeper.Config;
+import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -9,27 +10,21 @@ import java.util.TreeSet;
 
 @Entity
 @Table(name = "chunks")
-@IdClass(ChunkId.class)
 public class Chunk {
 
-    public Chunk(){
+    public Chunk() {
     }
 
     public Chunk(long x, long y) {
-        this.x = x;
-        this.y = y;
+        id = new ChunkId(x,y);
         initTiles();
     }
 
-
     @Id
-    public long x;
-
-    @Id
-    public long y;
+    private ChunkId id;
 
     @Column
-    private boolean filled=false;
+    private boolean filled = false;
 
     @OneToMany(mappedBy = "chunk", fetch = FetchType.LAZY)
     private Set<Row> rows;
@@ -60,19 +55,19 @@ public class Chunk {
 
 
     public long getX() {
-        return this.x;
+        return this.id.getX();
     }
 
     public void setX(long x) {
-        this.x = x;
+        this.id.setX(x);
     }
 
     public long getY() {
-        return this.y;
+        return this.id.getY();
     }
 
     public void setY(long y) {
-        this.y = y;
+        this.id.setY(y);
     }
 
     private void setValues(int[][] values) {

@@ -1,5 +1,7 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
+import de.sksdev.infiniteminesweeper.db.entities.Ids.RowId;
+
 import javax.persistence.*;
 import java.util.Set;
 import java.util.TreeSet;
@@ -7,36 +9,26 @@ import java.util.TreeSet;
 
 @Entity
 @Table(name = "rows")
-@IdClass(RowId.class)
 public class Row implements Comparable<Row> {
-
 
     public Row(){
     }
 
     public Row(Chunk chunk, int y_tile) {
         this.chunk = chunk;
-        this.x = chunk.getX();
-        this.y = chunk.getY();
-        this.y_tile = y_tile;
+        id = new RowId(chunk.getX(),chunk.getY(),y_tile);
     }
 
 
     @Id
-    private long x;
-
-    @Id
-    private long y;
-
-    @Id
-    private int y_tile;
+    private RowId id;
 
     @OneToOne
     @JoinColumns({
             @JoinColumn(name = "x", insertable = false, updatable = false),
             @JoinColumn(name = "y", insertable = false, updatable = false)
     })
-    @MapsId
+//    @MapsId
     private Chunk chunk;
 
     @OneToMany(mappedBy = "row", cascade = CascadeType.ALL)
@@ -44,31 +36,39 @@ public class Row implements Comparable<Row> {
 
     @Override
     public int compareTo(Row other) {
-        return this.y_tile - other.getY_tile();
+        return this.getY_tile() - other.getY_tile();
+    }
+
+    public RowId getId() {
+        return id;
+    }
+
+    public void setId(RowId id) {
+        this.id = id;
     }
 
     public long getX() {
-        return x;
+        return getId().getX();
     }
 
     public void setX(long x) {
-        this.x = x;
+        this.getId().setX(x);
     }
 
     public long getY() {
-        return y;
+        return getId().getY();
     }
 
     public void setY(long y) {
-        this.y = y;
+        getId().setY(y);
     }
 
     public int getY_tile() {
-        return y_tile;
+        return getId().getY_tile();
     }
 
     public void setY_tile(int y_tile) {
-        this.y_tile = y_tile;
+        getId().setY_tile(y_tile);
     }
 
     public TreeSet<Tile> getTiles() {

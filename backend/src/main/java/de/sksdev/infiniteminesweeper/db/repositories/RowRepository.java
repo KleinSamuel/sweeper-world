@@ -1,7 +1,7 @@
 package de.sksdev.infiniteminesweeper.db.repositories;
 
 import de.sksdev.infiniteminesweeper.db.entities.Row;
-import de.sksdev.infiniteminesweeper.db.entities.RowId;
+import de.sksdev.infiniteminesweeper.db.entities.Ids.RowId;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

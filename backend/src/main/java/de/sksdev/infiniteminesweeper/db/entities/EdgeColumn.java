@@ -1,24 +1,14 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
+import de.sksdev.infiniteminesweeper.db.entities.Ids.ColId;
+
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
-
-class ColId implements Serializable {
-    private long x;
-    private long y;
-    private int x_tile;
-
-    public ColId() {
-
-    }
-}
 
 
 @Entity
 @Table(name = "edge_columns")
-@IdClass(ColId.class)
 public class EdgeColumn {
 
     public EdgeColumn() {
@@ -26,26 +16,18 @@ public class EdgeColumn {
 
     public EdgeColumn(Chunk chunk, int x_tile) {
         this.chunk = chunk;
-        this.x = chunk.getX();
-        this.y = chunk.getY();
-        this.x_tile = x_tile;
+        id = new ColId(chunk.getX(),chunk.getY(),x_tile);
     }
 
     @Id
-    private long x;
-
-    @Id
-    private long y;
-
-    @Id
-    private int x_tile;
+    private ColId id;
 
     @OneToOne
     @JoinColumns({
             @JoinColumn(name = "x", insertable = false, updatable = false),
             @JoinColumn(name = "y", insertable = false, updatable = false)
     })
-    @MapsId
+//    @MapsId
     private Chunk chunk;
 
 
@@ -53,28 +35,40 @@ public class EdgeColumn {
     private Set<Tile> tiles = new TreeSet<>();
 
 
+    public ColId getId() {
+        return id;
+    }
+
+    public void setId(ColId id) {
+        this.id = id;
+    }
+
+    public void setTiles(Set<Tile> tiles) {
+        this.tiles = tiles;
+    }
+
     public long getX() {
-        return x;
+        return getId().getX();
     }
 
     public void setX(long x) {
-        this.x = x;
+        getId().setX(x);
     }
 
     public long getY() {
-        return y;
+        return getId().getY();
     }
 
     public void setY(long y) {
-        this.y = y;
+        getId().setY(y);
     }
 
     public int getX_tile() {
-        return x_tile;
+        return getId().getX_tile();
     }
 
     public void setX_tile(int x_tile) {
-        this.x_tile = x_tile;
+        getId().setX_tile(x_tile);
     }
 
     public TreeSet<Tile> getTiles() {
