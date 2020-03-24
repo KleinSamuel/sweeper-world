@@ -2,11 +2,21 @@ import * as CONFIG from "./Config";
 import CellChunk from "./CellChunk";
 import Communicator from "./Communicator";
 
-/*
-    Represents the global minefield which consists of quadratic cell chunks.
+/**
+ * Represents the global minefield which consists of quadratic cell chunks
+ * each of which has a dedicated x and y coordinate in this global field.
+ *
+ * @author Samuel Klein
  */
 export default class MinefieldModel {
 
+    /**
+     * Sets the coordinates of the player in the global field and
+     * gets an instance of the Communicator object to be able to
+     * talk to the server and send or receive field updates.
+     * @param chunkX
+     * @param chunkY
+     */
     constructor(chunkX, chunkY) {
 
         this.chunkX = chunkX;
@@ -29,6 +39,15 @@ export default class MinefieldModel {
         });
     }
 
+    /**
+     * Retrieves a cell chunk of given coordinates from the server.
+     * Stores alls the cells of this chunk in the local model and adds the cells
+     * to the scene so they are visible to the player.
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @returns {Promise}
+     */
     retrieveChunkFromServer(chunkX, chunkY) {
         let context = this;
         return this.com.requestChunk(chunkX, chunkY).then(function(response){
@@ -42,6 +61,13 @@ export default class MinefieldModel {
         });
     }
 
+    /**
+     * Checks if a cell chunk of the given coordinates exists in the local buffer.
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @returns {boolean} true if the chunk already exists
+     */
     containsChunk(chunkX, chunkY) {
         if (chunkX in this.field) {
             if (chunkY in this.field[chunkX]) {

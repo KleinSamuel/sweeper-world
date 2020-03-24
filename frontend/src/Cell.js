@@ -1,25 +1,40 @@
 import { textures } from "./TextureLoader";
 
-/*
-    Represents a single cell within a cell chunk.
-    It has a local x and y coordinaten within that chunk.
+/**
+ * Represents a single cell within a cell chunk.
+ * It has a local x and y coordinaten within that chunk.
+ *
+ * @author Samuel Klein
  */
 export default class Cell {
 
-    /*
-        Initializes a cell.
-        State: {
-            isHidden: boolean,
-            value: int (0-9),
-            user: long (player id)
-        }
+    /**
+     * Initializes a cell.
+     * State: {
+     *      isHidden: boolean,
+     *      value: int (0-9),
+     *      user: long (player id)
+     * }
+     * @param state
      */
     constructor(state) {
-        this.state = state;
         this.sprite = undefined;
-        this.updateSprite()
+        this.setState(state);
     }
 
+    /**
+     * Updates the state and the sprite of the cell.
+     * @param state
+     */
+    setState(state) {
+        this.state = state;
+        this.updateSprite();
+    }
+
+    /**
+     * Updates the internal sprite object to the respective
+     * texture of the cell state.
+     */
     updateSprite() {
         if (this.state.isHidden && !this.state.user) {
             this.sprite = new PIXI.Sprite(textures.closed);
@@ -32,10 +47,5 @@ export default class Cell {
         } else {
             this.sprite = new PIXI.Sprite(textures["num"+this.state.value]);
         }
-    }
-
-    setState(state) {
-        this.state = state;
-        this.updateSprite();
     }
 }
