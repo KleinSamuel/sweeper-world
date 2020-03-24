@@ -1,26 +1,35 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
 
+class ColId implements Serializable {
+    private long x;
+    private long y;
+    private int x_tile;
+
+    public ColId() {
+
+    }
+}
+
 
 @Entity
-@Table(name = "rows")
-@IdClass(RowId.class)
-public class Row implements Comparable<Row> {
+@Table(name = "edge_columns")
+@IdClass(ColId.class)
+public class EdgeColumn {
 
-
-    public Row(){
+    public EdgeColumn() {
     }
 
-    public Row(Chunk chunk, int y_tile) {
+    public EdgeColumn(Chunk chunk, int x_tile) {
         this.chunk = chunk;
         this.x = chunk.getX();
         this.y = chunk.getY();
-        this.y_tile = y_tile;
+        this.x_tile = x_tile;
     }
-
 
     @Id
     private long x;
@@ -29,7 +38,7 @@ public class Row implements Comparable<Row> {
     private long y;
 
     @Id
-    private int y_tile;
+    private int x_tile;
 
     @OneToOne
     @JoinColumns({
@@ -39,13 +48,10 @@ public class Row implements Comparable<Row> {
     @MapsId
     private Chunk chunk;
 
-    @OneToMany(mappedBy = "row", cascade = CascadeType.ALL)
+
+    @OneToMany(mappedBy = "edgeColumn", cascade = CascadeType.ALL)
     private Set<Tile> tiles = new TreeSet<>();
 
-    @Override
-    public int compareTo(Row other) {
-        return this.y_tile - other.getY_tile();
-    }
 
     public long getX() {
         return x;
@@ -63,25 +69,24 @@ public class Row implements Comparable<Row> {
         this.y = y;
     }
 
-    public int getY_tile() {
-        return y_tile;
+    public int getX_tile() {
+        return x_tile;
     }
 
-    public void setY_tile(int y_tile) {
-        this.y_tile = y_tile;
+    public void setX_tile(int x_tile) {
+        this.x_tile = x_tile;
     }
 
     public TreeSet<Tile> getTiles() {
         return (TreeSet<Tile>) tiles;
     }
 
-    public void setTiles(Set<Tile> tiles) {
+    public void setTiles(TreeSet<Tile> tiles) {
         this.tiles = tiles;
     }
 
-
     public void addTile(Tile t) {
-        tiles.add(t);
+        this.tiles.add(t);
     }
 
 }
