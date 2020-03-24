@@ -23,12 +23,15 @@ public class RequestController {
 
     ChunkService chunkService;
     ObjectMapper objectMapper;
+    private SimpMessagingTemplate template;
 
     @Autowired
     public RequestController(ObjectMapper objectMapper,
-                             ChunkService chunkService) {
+                             ChunkService chunkService,
+                             SimpMessagingTemplate simpMessagingTemplate) {
         this.objectMapper = objectMapper;
         this.chunkService = chunkService;
+        this.template = simpMessagingTemplate;
     }
 
     @RequestMapping(value = "/api/getChunk")
@@ -84,14 +87,11 @@ public class RequestController {
         }
     }
 
-    @Autowired
-    private SimpMessagingTemplate template;
-
     @GetMapping("/fuckingshit")
     @ResponseBody
     public String teset() {
-        String text = "FICKEN ARSCH SAU HURENSOHN";
-        template.convertAndSend("/topic/test", text);
+        //String text = "FICKEN ARSCH SAU HURENSOHN";
+        //template.convertAndSend("/topic/test", text);
         return "FICKEN";
     }
 

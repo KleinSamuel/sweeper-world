@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import * as Textures from "./TextureLoader";
 import {textures} from "./TextureLoader";
 import MinefieldModel from "./MinefieldModel";
+import Communicator from "./Communicator";
 
 export default class MinefieldViewer {
 
@@ -16,6 +17,7 @@ export default class MinefieldViewer {
 
         let context = this;
         Textures.init().then(function() {
+            context.com = new Communicator();
             context.minefieldModel = new MinefieldModel(0, 0);
             return context.initApplication();
         }).then(function(app){
