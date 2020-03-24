@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@stomp/stompjs": "^5.4.4",
+    "axios": "^0.19.2",
     "css-loader": "^3.4.2",
     "express": "^4.17.1",
     "file-loader": "^6.0.0",

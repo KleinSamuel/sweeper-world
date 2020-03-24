@@ -1,4 +1,5 @@
 import CellChunk from "./CellChunk";
+import Communicator from "./Communicator";
 
 /*
     Represents the global minefield which consists of quadratic cell chunks.
@@ -14,6 +15,9 @@ export default class MinefieldModel {
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.field = {};
+
+        this.com = new Communicator();
+
         this.init();
     }
 
@@ -28,6 +32,12 @@ export default class MinefieldModel {
 
     retrieveChunkFromServer(chunkX, chunkY) {
         // TODO: implement request to server
+
+        this.com.requestChunk(chunkX, chunkY).then(function(response){
+            let chunk = response.data.tiles;
+            console.log(chunk);
+        });
+
         let c = new CellChunk(chunkX, chunkY);
         c.initTest();
         return c;

@@ -18,16 +18,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class RequestController {
 
-    ChunkService chunkService;
-    ObjectMapper objectMapper;
-    SavingService savingService;
+    private ChunkService chunkService;
+    private ObjectMapper objectMapper;
+    private SimpMessagingTemplate template;
+    private SavingService savingService;
 
     @Autowired
     public RequestController(ObjectMapper objectMapper,
-                             ChunkService chunkService,SavingService savingService) {
+                             ChunkService chunkService,
+                             SimpMessagingTemplate simpMessagingTemplate,
+                             SavingService savingService) {
         this.objectMapper = objectMapper;
         this.chunkService = chunkService;
-        this.savingService=savingService;
+        this.template = simpMessagingTemplate;
+        this.savingService = savingService;
     }
 
     @RequestMapping(value = "/api/getChunk")
@@ -84,14 +88,11 @@ public class RequestController {
         }
     }
 
-    @Autowired
-    private SimpMessagingTemplate template;
-
     @GetMapping("/fuckingshit")
     @ResponseBody
     public String teset() {
-        String text = "FICKEN ARSCH SAU HURENSOHN";
-        template.convertAndSend("/topic/test", text);
+        //String text = "FICKEN ARSCH SAU HURENSOHN";
+        //template.convertAndSend("/topic/test", text);
         return "FICKEN";
     }
 

@@ -11,7 +11,7 @@ export default class Cell {
         State: {
             isHidden: boolean,
             value: int (0-9),
-            player: long (player id)
+            user: long (player id)
         }
      */
     constructor(state) {
@@ -22,16 +22,16 @@ export default class Cell {
     }
 
     updateSprite() {
-        if (this.state.isHidden && !this.state.player) {
+        if (this.state.isHidden && !this.state.user) {
             this.sprite = new PIXI.Sprite(textures.closed);
-        } else if (this.state.isHidden && this.state.player) {
+        } else if (this.state.isHidden && this.state.user) {
             this.sprite = new PIXI.Sprite(textures.flag);
         } else if (this.state.value === 0) {
             this.sprite = new PIXI.Sprite(textures.open);
         } else if (this.state.value === 9) {
             this.sprite = new PIXI.Sprite(textures.mine);
         } else {
-            //this.sprite = this.textureLoader.getSprite("" + this.state.value);
+            this.sprite = this.textureLoader.getSprite("num" + this.state.value);
         }
     }
 
