@@ -6,6 +6,8 @@ import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
@@ -13,7 +15,7 @@ import java.util.TreeSet;
 
 @Entity
 @Table(name = "chunks")
-public class Chunk {
+public class Chunk implements Serializable {
 
 
     public Chunk() {
@@ -38,37 +40,9 @@ public class Chunk {
     @OneToMany(mappedBy = "chunk", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Tile> tiles;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Transient
     @JsonIgnore
-    private Set<Tile> r_first;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Set<Tile> r_last;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Set<Tile> c_first;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Set<Tile> c_last;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Tile t_upper_left;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Tile t_lower_left;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Tile t_upper_right;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Tile t_lower_right;
+    private Tile[][] grid;
 
 
     public long getX() {
@@ -105,6 +79,14 @@ public class Chunk {
         return tiles;
     }
 
+    public Tile[][] getGrid() {
+        if (grid == null) {
+            grid = new Tile[Config.CHUNK_SIZE][Config.CHUNK_SIZE];
+            getTiles().forEach(t -> grid[t.getY_tile()][t.getX_tile()] = t);
+        }
+        return grid;
+    }
+
     public void setTiles(Set<Tile> tiles) {
         this.tiles = tiles;
     }
@@ -119,101 +101,54 @@ public class Chunk {
 
     private void initTiles() {
         tiles = new TreeSet<>();
-        r_first = new TreeSet<>();
-        r_last = new TreeSet<>();
-        c_first = new TreeSet<>();
-        c_last = new TreeSet<>();
 
         for (int y = 0; y < Config.CHUNK_SIZE; y++) {
-            TreeSet<Tile> r = new TreeSet<>();
             for (int x = 0; x < Config.CHUNK_SIZE; x++) {
-                Tile t = new Tile(this, x, y);
-                tiles.add(t);
-                if (y < 1)
-                    r_first.add(t);
-                else if (y > Config.CHUNK_SIZE - 2)
-                    r_last.add(t);
-                if (x == 0) {
-                    c_first.add(t);
-                    if (y == 0)
-                        t_upper_left = t;
-                    else if (y == Config.CHUNK_SIZE - 1)
-                        t_lower_left = t;
-                }
-                if (x == Config.CHUNK_SIZE - 1) {
-                    c_last.add(t);
-                    if (y == 0)
-                        t_upper_right = t;
-                    else if (y == Config.CHUNK_SIZE - 1)
-                        t_lower_right = t;
-                }
+                tiles.add(new Tile(this, x, y));
             }
         }
     }
 
 
     public TreeSet<Tile> getR_first() {
-        return (TreeSet<Tile>) r_first;
-    }
-
-    public void setR_first(TreeSet<Tile> r_first) {
-        this.r_first = r_first;
+        return new TreeSet<>(Arrays.asList(getGrid()[0]));
     }
 
     public TreeSet<Tile> getR_last() {
-        return (TreeSet<Tile>) r_last;
-    }
-
-    public void setR_last(TreeSet<Tile> r_last) {
-        this.r_last = r_last;
+        return new TreeSet<>(Arrays.asList(getGrid()[Config.CHUNK_SIZE - 1]));
     }
 
     public TreeSet<Tile> getC_first() {
-        return (TreeSet<Tile>) c_first;
+        TreeSet<Tile> out = new TreeSet<>();
+        for (Tile[] row : getGrid())
+            out.add(row[0]);
+        return out;
     }
 
-    public void setC_first(TreeSet<Tile> c_first) {
-        this.c_first = c_first;
-    }
 
     public TreeSet<Tile> getC_last() {
-        return (TreeSet<Tile>) c_last;
-    }
-
-    public void setC_last(TreeSet<Tile> c_last) {
-        this.c_last = c_last;
+        TreeSet<Tile> out = new TreeSet<>();
+        for (Tile[] row : getGrid())
+            out.add(row[Config.CHUNK_SIZE - 1]);
+        return out;
     }
 
     public Tile getT_upper_left() {
-        return t_upper_left;
+        return getGrid()[0][0];
     }
 
-    public void setT_upper_left(Tile t_upper_left) {
-        this.t_upper_left = t_upper_left;
-    }
 
     public Tile getT_lower_left() {
-        return t_lower_left;
-    }
-
-    public void setT_lower_left(Tile t_lower_left) {
-        this.t_lower_left = t_lower_left;
+        return getGrid()[Config.CHUNK_SIZE - 1][0];
     }
 
     public Tile getT_upper_right() {
-        return t_upper_right;
+        return getGrid()[0][Config.CHUNK_SIZE - 1];
     }
 
-    public void setT_upper_right(Tile t_upper_right) {
-        this.t_upper_right = t_upper_right;
-    }
 
     public Tile getT_lower_right() {
-        return t_lower_right;
-    }
-
-    public void setT_lower_right(Tile t_lower_right) {
-        this.t_lower_right = t_lower_right;
+        return getGrid()[Config.CHUNK_SIZE - 1][Config.CHUNK_SIZE - 1];
     }
 
     public boolean isFilled() {

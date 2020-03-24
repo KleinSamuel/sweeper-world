@@ -37,7 +37,7 @@ public class ChunkService {
         return chunkRepository.findById(new ChunkId(x, y)).orElseGet(() -> {
             Chunk c = newChunk(x, y);
             if (persist)
-                save(c,false);
+                c=save(c,true);
             return c;
         });
     }
