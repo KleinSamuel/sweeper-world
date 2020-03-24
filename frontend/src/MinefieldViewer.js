@@ -1,11 +1,12 @@
 import * as PIXI from "pixi.js";
+import * as Textures from "./TextureLoader";
+import {textures} from "./TextureLoader";
+import MinefieldModel from "./MinefieldModel";
 
 export default class MinefieldViewer {
 
-    constructor(minefieldModel, textureLoader) {
+    constructor(minefieldModel) {
         console.log("MinefieldViewer started");
-        this.minefieldModel = minefieldModel;
-        this.textureLoader = textureLoader;
 
         this.SIZE = 30;
         this.CHUNK_AMOUNT = 32;
@@ -14,14 +15,15 @@ export default class MinefieldViewer {
         this.GLOBAL_POS_Y = 0;
 
         let context = this;
-        this.textureLoader.initialLoad().then(function() {
+        Textures.init().then(function() {
+            context.minefieldModel = new MinefieldModel(0, 0);
             return context.initApplication();
         }).then(function(app){
             context.app = app;
             context.field = new PIXI.Container();
 
             context.cursor = new PIXI.Container();
-            let cursor = context.textureLoader.getSprite("cursor");
+            let cursor = new PIXI.Sprite(textures.cursor);
             cursor.width = context.SIZE;
             cursor.height = context.SIZE;
             context.cursor.addChild(cursor);
@@ -95,11 +97,11 @@ export default class MinefieldViewer {
                     cellY = (cellY < 0) ? context.CHUNK_AMOUNT + cellY : cellY;
 
                     if (event.button === 0) {
-                        // TODO: implement function to open cell
-                        console.log("open cell: chunk: "+chunkX+" : "+chunkY+", cell: "+cellX+" : "+cellY);
+                        context.minefieldModel.clickCell(chunkX, chunkY, cellX, cellY);
+                        context.updateField();
                     } else if (event.button === 2) {
-                        // TODO: implement function to set flag
-                        console.log("set flag: chunk: "+chunkX+" : "+chunkY+", cell: "+cellX+" : "+cellY);
+                        context.minefieldModel.flagCell(chunkX, chunkY, cellX, cellY);
+                        context.updateField();
                     }
                 }
             });
@@ -121,10 +123,28 @@ export default class MinefieldViewer {
                     context.field.x = context.field.x - (tmpX - x);
                     context.field.y = context.field.y - (tmpY - y);
 
+                    let oldGlobalX = context.GLOBAL_POS_X;
+                    let oldGlobalY = context.GLOBAL_POS_Y;
+
                     let fX = context.field.x*-1;
                     context.GLOBAL_POS_X = ~~(fX / context.CHUNK_SIZE) + ((fX < 0) ? -1 : 0);
                     let fY = context.field.y*-1;
                     context.GLOBAL_POS_Y = ~~(fY / context.CHUNK_SIZE) + ((fY < 0) ? -1 : 0);
+                    context.minefieldModel.chunkX = context.GLOBAL_POS_X;
+                    context.minefieldModel.chunkY = context.GLOBAL_POS_Y;
+
+                    // loads the next chunks
+                    let movedX = context.GLOBAL_POS_X - oldGlobalX;
+                    if (movedX !== 0) {
+                        context.minefieldModel.moveX(movedX);
+                        context.updateField();
+                    }
+
+                    let movedY = context.GLOBAL_POS_Y - oldGlobalY;
+                    if (movedY !== 0) {
+                        context.minefieldModel.moveY(movedY);
+                        context.updateField();
+                    }
 
                 }
                 // used to compute the position of the field
@@ -143,8 +163,8 @@ export default class MinefieldViewer {
                 context.cursor.x = dX;
                 context.cursor.y = dY;
                 // adds the auxiliary cell coordinates to the cursor object
-                context.cursor.tmpX = cX;
-                context.cursor.tmpY = cY;
+                context.cursor.tmpX = (offsetX < 0) ? cX - 1 : cX;
+                context.cursor.tmpY = (offsetY < 0) ? cY - 1 : cY;
 
             });
 
@@ -162,18 +182,27 @@ export default class MinefieldViewer {
     }
 
     updateField() {
-        let chunk = this.minefieldModel.getChunk(0, 0);
 
-        for (let x = 0; x < chunk.innerField.length; x++) {
-            for (let y = 0; y < chunk.innerField[x].length; y++) {
+        this.field.removeChildren();
 
-                let closed = this.textureLoader.getSprite("closed");
-                this.field.addChild(closed);
+        for (let chunkX in this.minefieldModel.field) {
+            for (let chunkY in this.minefieldModel.field[chunkX]) {
 
-                closed.width = this.SIZE;
-                closed.height = this.SIZE;
-                closed.x = x * this.SIZE;
-                closed.y = y * this.SIZE;
+                let chunk = this.minefieldModel.getChunk(chunkX, chunkY);
+
+                for (let x = 0; x < chunk.innerField.length; x++) {
+                    for (let y = 0; y < chunk.innerField[x].length; y++) {
+
+                        let cell = chunk.innerField[x][y];
+                        let cellSprite = cell.sprite;
+                        this.field.addChild(cellSprite);
+
+                        cellSprite.width = this.SIZE;
+                        cellSprite.height = this.SIZE;
+                        cellSprite.x = chunkX * this.CHUNK_SIZE + x * this.SIZE;
+                        cellSprite.y = chunkY * this.CHUNK_SIZE + y * this.SIZE;
+                    }
+                }
             }
         }
 

@@ -6,9 +6,8 @@ import Cell from "./Cell";
     local x and y coordinate.
  */
 export default class CellChunk {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+
+    constructor() {
         this.innerField = [];
         for (let i = 0; i < 32; i++) {
             this.innerField[i] = [];
@@ -23,7 +22,7 @@ export default class CellChunk {
                     value: 1,
                     player: undefined
                 };
-                this.innerField[x][y] = new Cell(x, y, state);
+                this.innerField[x][y] = new Cell(state);
             }
         }
     }
@@ -31,9 +30,13 @@ export default class CellChunk {
     initField(fieldStates) {
         for (let x = 0; x < fieldStates.length; x++) {
             for (let y = 0; y < fieldStates[x].length; y++) {
-                this.innerField[x][y] = new Cell(x, y, fieldStates[x][y].state);
+                this.innerField[x][y] = new Cell(fieldStates[x][y].state);
             }
         }
+    }
+
+    getCell(x, y) {
+        return this.innerField[x][y];
     }
 
     printChunk() {

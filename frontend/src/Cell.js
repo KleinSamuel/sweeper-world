@@ -1,3 +1,5 @@
+import { textures } from "./TextureLoader";
+
 /*
     Represents a single cell within a cell chunk.
     It has a local x and y coordinaten within that chunk.
@@ -12,41 +14,29 @@ export default class Cell {
             player: long (player id)
         }
      */
-    constructor(x, y, state) {
-        this.x = x;
-        this.y = y;
+    constructor(state) {
         this.state = state;
+
+        this.sprite = undefined;
+        this.updateSprite()
     }
 
-    getSpriteName() {
+    updateSprite() {
         if (this.state.isHidden && !this.state.player) {
-            return "closed";
+            this.sprite = new PIXI.Sprite(textures.closed);
+        } else if (this.state.isHidden && this.state.player) {
+            this.sprite = new PIXI.Sprite(textures.flag);
+        } else if (this.state.value === 0) {
+            this.sprite = new PIXI.Sprite(textures.open);
+        } else if (this.state.value === 9) {
+            this.sprite = new PIXI.Sprite(textures.mine);
+        } else {
+            //this.sprite = this.textureLoader.getSprite("" + this.state.value);
         }
-        if (this.state.isHidden && this.state.player) {
-            return "flagged";
-        }
-        if (this.state.value === 0) {
-            return "empty";
-        }
-        if (this.state.value === 9) {
-            return "bomb";
-        }
-        return ""+this.state.value;
     }
 
-    toString() {
-        if (this.state.isHidden && !this.state.player) {
-            return "o";
-        }
-        if (this.state.isHidden && this.state.player) {
-            return "F";
-        }
-        if (this.state.value === 0) {
-            return " ";
-        }
-        if (this.state.value === 9) {
-            return "x";
-        }
-        return this.state.value;
+    setState(state) {
+        this.state = state;
+        this.updateSprite();
     }
 }

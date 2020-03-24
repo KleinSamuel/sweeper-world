@@ -2,26 +2,42 @@ import * as PIXI from "pixi.js";
 
 import cursor from "./assets/cursor.png";
 import closed from "./assets/closed.png";
+import open from "./assets/open.png";
+import mine from "./assets/mine.png";
+import flag from "./assets/flag.png";
 
-/*
-    Handles all textures.
- */
-export default class TextureLoader {
+let pipeline;
 
-    constructor() {
-        console.log("TextureLoader started")
-    }
+export let textures = null;
 
-    initialLoad() {
-        return new Promise(function(resolve, reject){
-            PIXI.loader
-                .add("closed", closed)
-                .add("cursor", cursor)
-                .load(resolve);
+export function init() {
+    if(!pipeline) {
+        pipeline = preloadTextures().then(function(resources){
+            textures = {
+                cursor: resources.cursor.texture,
+                closed: resources.closed.texture,
+                open: resources.open.texture,
+                flag: resources.flag.texture,
+                mine: resources.mine.texture
+            };
+            return textures;
+        }).catch(function(err){
+            console.log(err);
         });
     }
+    return pipeline;
+}
 
-    getSprite(name) {
-        return new PIXI.Sprite(PIXI.loader.resources[name].texture);
-    }
+function preloadTextures() {
+    return new Promise(function(resolve, reject){
+        PIXI.loader
+            .add("cursor", cursor)
+            .add("closed", closed)
+            .add("open", open)
+            .add("flag", flag)
+            .add("mine", mine)
+            .load(function(loader, resources){
+                resolve(resources);
+            });
+    });
 }
