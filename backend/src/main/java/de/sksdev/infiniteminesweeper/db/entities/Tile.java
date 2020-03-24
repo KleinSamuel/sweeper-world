@@ -55,7 +55,6 @@ public class Tile implements Comparable<Tile> {
     })
     @ManyToOne
     @JsonIgnore
-    @J
     private Chunk chunk;
 
 

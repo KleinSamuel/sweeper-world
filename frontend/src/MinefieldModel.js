@@ -1,3 +1,4 @@
+import * as CONFIG from "./Config";
 import CellChunk from "./CellChunk";
 import Communicator from "./Communicator";
 
@@ -7,40 +8,38 @@ import Communicator from "./Communicator";
 export default class MinefieldModel {
 
     constructor(chunkX, chunkY) {
-        console.log("MinefieldModel created");
-
-        this.BUFFER = 2;
-        this.BUFFER_REMOVE = 2;
 
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.field = {};
 
         this.com = new Communicator();
-
-        this.init();
     }
 
     init() {
-        for (let i = this.chunkX - this.BUFFER; i <= this.chunkX + this.BUFFER; i++) {
-            for (let j = this.chunkY - this.BUFFER; j <= this.chunkY + this.BUFFER; j++) {
-                let c = this.retrieveChunkFromServer(i, j);
-                this.addChunk(i, j, c);
+        let context = this;
+        return new Promise(function(resolve, reject){
+            let promiseStack = [];
+            for (let i = context.chunkX - CONFIG.BUFFER_ADD; i <= context.chunkX + CONFIG.BUFFER_ADD; i++) {
+                for (let j = context.chunkY - CONFIG.BUFFER_ADD; j <= context.chunkY + CONFIG.BUFFER_ADD; j++) {
+                    promiseStack.push(context.retrieveChunkFromServer(i, j));
+                }
             }
-        }
+            Promise.all(promiseStack).then(resolve);
+        });
     }
 
     retrieveChunkFromServer(chunkX, chunkY) {
-        // TODO: implement request to server
-
-        this.com.requestChunk(chunkX, chunkY).then(function(response){
-            let chunk = response.data.tiles;
-            console.log(chunk);
+        let context = this;
+        return this.com.requestChunk(chunkX, chunkY).then(function(response){
+            return new Promise(function(resolve, reject){
+                let chunk = response.data.tiles;
+                let c = new CellChunk(chunkX, chunkY);
+                c.initFieldMaps(chunk);
+                context.addChunk(chunkX, chunkY, c);
+                resolve();
+            });
         });
-
-        let c = new CellChunk(chunkX, chunkY);
-        c.initTest();
-        return c;
     }
 
     containsChunk(chunkX, chunkY) {
@@ -54,10 +53,10 @@ export default class MinefieldModel {
 
     moveX(direction) {
         // calculates new x coordinate
-        let genX = this.chunkX+(this.BUFFER*direction);
+        let genX = this.chunkX+(CONFIG.BUFFER_ADD*direction);
 
         // calculates all buffered y coordinates for the new chunks
-        for (let i = -1 * this.BUFFER; i <= this.BUFFER; i++) {
+        for (let i = -1 * CONFIG.BUFFER_ADD; i <= CONFIG.BUFFER_ADD; i++) {
             let genY = this.chunkY + i;
             // checks if the chunk is already in buffer
             if (!this.containsChunk(genX, genY)) {
@@ -71,7 +70,7 @@ export default class MinefieldModel {
         let toRemove = [];
         for (let i in this.field) {
             for (let j in this.field[i]) {
-                if (Math.abs(this.chunkX - i) > this.BUFFER_REMOVE) {
+                if (Math.abs(this.chunkX - i) > CONFIG.BUFFER_REMOVE) {
                     toRemove.push([i, j]);
                 }
             }
@@ -84,10 +83,10 @@ export default class MinefieldModel {
 
     moveY(direction) {
         // calculates new y coordinate
-        let genY = this.chunkY+(this.BUFFER*direction);
+        let genY = this.chunkY+(CONFIG.BUFFER_ADD*direction);
 
         // calculates all buffered x coordinates for the new chunks
-        for (let i = -1 * this.BUFFER; i <= this.BUFFER; i++) {
+        for (let i = -1 * CONFIG.BUFFER_ADD; i <= CONFIG.BUFFER_ADD; i++) {
             let genX = this.chunkX + i;
             // checks if the chunk is already in buffer
             if (!this.containsChunk(genX, genY)) {
@@ -101,7 +100,7 @@ export default class MinefieldModel {
         let toRemove = [];
         for (let i in this.field) {
             for (let j in this.field[i]) {
-                if (Math.abs(this.chunkY - j) > this.BUFFER_REMOVE) {
+                if (Math.abs(this.chunkY - j) > CONFIG.BUFFER_REMOVE) {
                     toRemove.push([i, j]);
                 }
             }

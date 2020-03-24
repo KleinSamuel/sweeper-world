@@ -1,3 +1,4 @@
+import * as CONFIG from "./Config";
 import Cell from "./Cell";
 
 /*
@@ -9,14 +10,14 @@ export default class CellChunk {
 
     constructor() {
         this.innerField = [];
-        for (let i = 0; i < 32; i++) {
+        for (let i = 0; i < CONFIG.CHUNK_SIZE; i++) {
             this.innerField[i] = [];
         }
     }
 
     initTest(){
-        for (let x = 0; x < 32; x++) {
-            for (let y = 0; y < 32; y++) {
+        for (let x = 0; x < CONFIG.CHUNK_SIZE; x++) {
+            for (let y = 0; y < CONFIG.CHUNK_SIZE; y++) {
                 let state = {
                     isHidden: true,
                     value: 1,
@@ -35,18 +36,15 @@ export default class CellChunk {
         }
     }
 
-    getCell(x, y) {
-        return this.innerField[x][y];
+    initFieldMaps(fieldStates) {
+        for (let x in fieldStates) {
+            for (let y in fieldStates[x]) {
+                this.innerField[x][y] = new Cell(fieldStates[x][y]);
+            }
+        }
     }
 
-    printChunk() {
-        console.log("--- chunk x="+this.x+" y="+this.y+" ---");
-        for (let x = 0; x < this.innerField.length; x++) {
-            let row = ((x < 10) ? "0"+x : x)+" |";
-            for (let y = 0; y < this.innerField[x].length; y++) {
-                row += this.innerField[x][y].toString()+"|";
-            }
-            console.log(row);
-        }
+    getCell(x, y) {
+        return this.innerField[x][y];
     }
 }
