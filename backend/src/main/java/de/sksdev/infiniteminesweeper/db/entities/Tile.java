@@ -6,12 +6,13 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 
 @Entity
 @Table(name = "tiles")
 @IdClass(TileId.class)
-public class Tile implements Comparable<Tile> {
+public class Tile implements Comparable<Tile>, Serializable {
 
     public Tile() {
     }
@@ -53,9 +54,8 @@ public class Tile implements Comparable<Tile> {
             @JoinColumn(name = "x", insertable = false, updatable = false),
             @JoinColumn(name = "y", insertable = false, updatable = false)
     })
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
-    @J
     private Chunk chunk;
 
 
