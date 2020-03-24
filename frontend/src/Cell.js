@@ -16,7 +16,6 @@ export default class Cell {
      */
     constructor(state) {
         this.state = state;
-
         this.sprite = undefined;
         this.updateSprite()
     }
@@ -31,7 +30,7 @@ export default class Cell {
         } else if (this.state.value === 9) {
             this.sprite = new PIXI.Sprite(textures.mine);
         } else {
-            this.sprite = this.textureLoader.getSprite("num" + this.state.value);
+            this.sprite = new PIXI.Sprite(textures["num"+this.state.value]);
         }
     }
 

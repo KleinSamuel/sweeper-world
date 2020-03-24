@@ -1,4 +1,4 @@
-import { URL_API } from "./Config";
+import * as CONFIG from "./Config";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import axios from "axios";
@@ -19,7 +19,7 @@ export default class Communicator {
         let context = this;
         this.client.configure({
             webSocketFactory: function() {
-                return new SockJS(URL_API+"/minesweeper");
+                return new SockJS(CONFIG.URL_API+"/minesweeper");
             },
             onConnect: function(frame) {
                 console.log("connected!");
@@ -50,6 +50,6 @@ export default class Communicator {
     }
 
     requestChunk(chunkX, chunkY) {
-        return axios.get(URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY);
+        return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY);
     }
 }

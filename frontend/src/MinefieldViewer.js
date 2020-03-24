@@ -1,3 +1,4 @@
+import * as CONFIG from "./Config";
 import * as PIXI from "pixi.js";
 import * as Textures from "./TextureLoader";
 import {textures} from "./TextureLoader";
@@ -6,28 +7,28 @@ import Communicator from "./Communicator";
 
 export default class MinefieldViewer {
 
-    constructor(minefieldModel) {
-        console.log("MinefieldViewer started");
+    constructor() {
 
-        this.SIZE = 30;
-        this.CHUNK_AMOUNT = 32;
-        this.CHUNK_SIZE = this.CHUNK_AMOUNT * this.SIZE;
         this.GLOBAL_POS_X = 0;
         this.GLOBAL_POS_Y = 0;
 
         let context = this;
         Textures.init().then(function() {
-            context.com = new Communicator();
-            context.minefieldModel = new MinefieldModel(0, 0);
-            return context.initApplication();
+            return new Promise(function(resolve, reject){
+                context.com = new Communicator();
+                context.minefieldModel = new MinefieldModel(context.GLOBAL_POS_X, context.GLOBAL_POS_X);
+                context.minefieldModel.init().then(function () {
+                    return context.initApplication();
+                }).then(resolve);
+            });
         }).then(function(app){
             context.app = app;
             context.field = new PIXI.Container();
 
             context.cursor = new PIXI.Container();
             let cursor = new PIXI.Sprite(textures.cursor);
-            cursor.width = context.SIZE;
-            cursor.height = context.SIZE;
+            cursor.width = CONFIG.CELL_PIXEL_SIZE;
+            cursor.height = CONFIG.CELL_PIXEL_SIZE;
             context.cursor.addChild(cursor);
 
             context.app.stage.addChildAt(context.field, 0);
@@ -80,23 +81,23 @@ export default class MinefieldViewer {
                 } else {
 
                     // offset of how much of the leftmost chunk is visible
-                    let chunkOffsetX = (context.field.x > 0) ? (context.field.x % context.CHUNK_SIZE) : context.CHUNK_SIZE + (context.field.x % context.CHUNK_SIZE);
-                    let chunkOffsetY = (context.field.y > 0) ? (context.field.y % context.CHUNK_SIZE) : context.CHUNK_SIZE + (context.field.y % context.CHUNK_SIZE);
+                    let chunkOffsetX = (context.field.x > 0) ? (context.field.x % CONFIG.CHUNK_PIXEL_SIZE) : CONFIG.CHUNK_PIXEL_SIZE + (context.field.x % CONFIG.CHUNK_PIXEL_SIZE);
+                    let chunkOffsetY = (context.field.y > 0) ? (context.field.y % CONFIG.CHUNK_PIXEL_SIZE) : CONFIG.CHUNK_PIXEL_SIZE + (context.field.y % CONFIG.CHUNK_PIXEL_SIZE);
 
                     // calculates the chunk relative to the screen
-                    let tmpChunkX = ~~((context.cursor.x+(context.CHUNK_SIZE-chunkOffsetX)) / context.CHUNK_SIZE);
-                    let tmpChunkY = ~~((context.cursor.y+(context.CHUNK_SIZE-chunkOffsetY)) / context.CHUNK_SIZE);
+                    let tmpChunkX = ~~((context.cursor.x+(CONFIG.CHUNK_PIXEL_SIZE-chunkOffsetX)) / CONFIG.CHUNK_PIXEL_SIZE);
+                    let tmpChunkY = ~~((context.cursor.y+(CONFIG.CHUNK_PIXEL_SIZE-chunkOffsetY)) / CONFIG.CHUNK_PIXEL_SIZE);
                     // calculates the global coordinates of the chunk the mouse is in
                     let chunkX = context.GLOBAL_POS_X + tmpChunkX;
                     let chunkY = context.GLOBAL_POS_Y + tmpChunkY;
 
                     // calculates the cell relative in the respective chunk
-                    let cellOffsetX = ~~(chunkOffsetX / context.SIZE) % context.CHUNK_AMOUNT;
-                    let cellOffsetY = ~~(chunkOffsetY / context.SIZE) % context.CHUNK_AMOUNT;
-                    let cellX = (context.cursor.tmpX - cellOffsetX) % context.CHUNK_AMOUNT;
-                    cellX = (cellX < 0) ? context.CHUNK_AMOUNT + cellX : cellX;
-                    let cellY = (context.cursor.tmpY - cellOffsetY) % context.CHUNK_AMOUNT;
-                    cellY = (cellY < 0) ? context.CHUNK_AMOUNT + cellY : cellY;
+                    let cellOffsetX = ~~(chunkOffsetX / CONFIG.CELL_PIXEL_SIZE) % CONFIG.CHUNK_SIZE;
+                    let cellOffsetY = ~~(chunkOffsetY / CONFIG.CELL_PIXEL_SIZE) % CONFIG.CHUNK_SIZE;
+                    let cellX = (context.cursor.tmpX - cellOffsetX) % CONFIG.CHUNK_SIZE;
+                    cellX = (cellX < 0) ? CONFIG.CHUNK_SIZE + cellX : cellX;
+                    let cellY = (context.cursor.tmpY - cellOffsetY) % CONFIG.CHUNK_SIZE;
+                    cellY = (cellY < 0) ? CONFIG.CHUNK_SIZE + cellY : cellY;
 
                     if (event.button === 0) {
                         context.minefieldModel.clickCell(chunkX, chunkY, cellX, cellY);
@@ -115,7 +116,7 @@ export default class MinefieldViewer {
 
                 if(isMouseDown) {
 
-                    if (Math.abs(lastX - x) > context.SIZE || Math.abs(lastY - y) > context.SIZE) {
+                    if (Math.abs(lastX - x) > CONFIG.CELL_PIXEL_SIZE || Math.abs(lastY - y) > CONFIG.CELL_PIXEL_SIZE) {
                         currentX = x;
                         currentY = y;
                         isDragged = true;
@@ -129,9 +130,9 @@ export default class MinefieldViewer {
                     let oldGlobalY = context.GLOBAL_POS_Y;
 
                     let fX = context.field.x*-1;
-                    context.GLOBAL_POS_X = ~~(fX / context.CHUNK_SIZE) + ((fX < 0) ? -1 : 0);
+                    context.GLOBAL_POS_X = ~~(fX / CONFIG.CHUNK_PIXEL_SIZE) + ((fX < 0) ? -1 : 0);
                     let fY = context.field.y*-1;
-                    context.GLOBAL_POS_Y = ~~(fY / context.CHUNK_SIZE) + ((fY < 0) ? -1 : 0);
+                    context.GLOBAL_POS_Y = ~~(fY / CONFIG.CHUNK_PIXEL_SIZE) + ((fY < 0) ? -1 : 0);
                     context.minefieldModel.chunkX = context.GLOBAL_POS_X;
                     context.minefieldModel.chunkY = context.GLOBAL_POS_Y;
 
@@ -154,12 +155,12 @@ export default class MinefieldViewer {
                 tmpY = y;
 
                 // calculates the position of the cursor regarding the field offset
-                let offsetX = (context.field.x % context.SIZE);
-                let offsetY = (context.field.y % context.SIZE);
+                let offsetX = (context.field.x % CONFIG.CELL_PIXEL_SIZE);
+                let offsetY = (context.field.y % CONFIG.CELL_PIXEL_SIZE);
                 let cX = context.computeCursorCellCoordinate(x, offsetX);
                 let cY = context.computeCursorCellCoordinate(y, offsetY);
-                let dX = context.SIZE * cX + offsetX;
-                let dY = context.SIZE * cY + offsetY;
+                let dX = CONFIG.CELL_PIXEL_SIZE * cX + offsetX;
+                let dY = CONFIG.CELL_PIXEL_SIZE * cY + offsetY;
 
                 // moves the cursor
                 context.cursor.x = dX;
@@ -180,10 +181,12 @@ export default class MinefieldViewer {
     }
 
     computeCursorCellCoordinate(screen, offset) {
-        return ~~((screen-offset) / this.SIZE);
+        return ~~((screen-offset) / CONFIG.CELL_PIXEL_SIZE);
     }
 
     updateField() {
+
+        console.log("UPDATE");
 
         this.field.removeChildren();
 
@@ -196,13 +199,14 @@ export default class MinefieldViewer {
                     for (let y = 0; y < chunk.innerField[x].length; y++) {
 
                         let cell = chunk.innerField[x][y];
+
                         let cellSprite = cell.sprite;
                         this.field.addChild(cellSprite);
 
-                        cellSprite.width = this.SIZE;
-                        cellSprite.height = this.SIZE;
-                        cellSprite.x = chunkX * this.CHUNK_SIZE + x * this.SIZE;
-                        cellSprite.y = chunkY * this.CHUNK_SIZE + y * this.SIZE;
+                        cellSprite.width = CONFIG.CELL_PIXEL_SIZE;
+                        cellSprite.height = CONFIG.CELL_PIXEL_SIZE;
+                        cellSprite.x = chunkX * CONFIG.CHUNK_PIXEL_SIZE + x * CONFIG.CELL_PIXEL_SIZE;
+                        cellSprite.y = chunkY * CONFIG.CHUNK_PIXEL_SIZE + y * CONFIG.CELL_PIXEL_SIZE;
                     }
                 }
             }
