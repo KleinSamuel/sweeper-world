@@ -4,34 +4,34 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
+import de.sksdev.infiniteminesweeper.db.services.SavingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.io.OutputStream;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class RequestController {
 
-    ChunkService chunkService;
-    ObjectMapper objectMapper;
+    private ChunkService chunkService;
+    private ObjectMapper objectMapper;
     private SimpMessagingTemplate template;
+    private SavingService savingService;
 
     @Autowired
     public RequestController(ObjectMapper objectMapper,
                              ChunkService chunkService,
-                             SimpMessagingTemplate simpMessagingTemplate) {
+                             SimpMessagingTemplate simpMessagingTemplate,
+                             SavingService savingService) {
         this.objectMapper = objectMapper;
         this.chunkService = chunkService;
         this.template = simpMessagingTemplate;
+        this.savingService = savingService;
     }
 
     @RequestMapping(value = "/api/getChunk")
@@ -66,7 +66,7 @@ public class RequestController {
             long time = System.currentTimeMillis();
             Chunk c = chunkService.getOrCreateChunkContent(x,y,true);
             time = System.currentTimeMillis()-time;
-            long saving = chunkService.getSavingTime();
+            long saving = savingService.getSavingTime();
             System.out.println("Saving: "+saving +"ms ("+(int)(saving/(time/100d))+"%)");
             System.out.println("Total: "+time+"ms");
             return objectMapper.writeValueAsString(c);
@@ -77,6 +77,7 @@ public class RequestController {
     }
 
     @RequestMapping(value="/api/getTile")
+    @ResponseBody
     public String getTile( @RequestParam("x") Long x, @RequestParam("y") Long y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile){
         System.out.println("Request for tile "+x+"/"+y + "(" +x_tile+"/"+y_tile+")");
         try {
