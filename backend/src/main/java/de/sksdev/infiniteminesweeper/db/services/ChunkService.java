@@ -10,6 +10,7 @@ import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.repositories.ChunkRepository;
 import de.sksdev.infiniteminesweeper.db.repositories.TileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -19,37 +20,40 @@ import java.util.LinkedList;
 public class ChunkService {
 
 
-    @Autowired
+    final
     ChunkRepository chunkRepository;
 
-    @Autowired
+    final
     TileRepository tileRepository;
 
-    private long saving;
+    final
+    SavingService savingService;
 
-
-    public long getSavingTime(){
-       return saving;
+    @Autowired
+    public ChunkService(ChunkRepository chunkRepository, TileRepository tileRepository, SavingService savingService) {
+        this.chunkRepository = chunkRepository;
+        this.tileRepository = tileRepository;
+        this.savingService = savingService;
     }
 
     //    TODO use objectgetter for cached entries?
     public Chunk getOrCreateChunk(long x, long y, boolean persist) {
         return chunkRepository.findById(new ChunkId(x, y)).orElseGet(() -> {
             Chunk c = newChunk(x, y);
-            if(persist)
-                save(c);
+            if (persist)
+                save(c,false);
             return c;
         });
     }
 
 
     public Chunk getOrCreateChunkContent(long x, long y, boolean persist) {
-        Chunk c = getOrCreateChunk(x, y,false);
+        Chunk c = getOrCreateChunk(x, y, false);
         return c.isFilled() ? c : generateContent(c);
     }
 
-    public Tile getTile(long x, long y, int x_tile, int y_tile){
-        return tileRepository.findById(new TileId(x,y,x_tile,y_tile)).get();
+    public Tile getTile(long x, long y, int x_tile, int y_tile) {
+        return tileRepository.findById(new TileId(x, y, x_tile, y_tile)).get();
     }
 
     private Chunk newChunk(long x, long y) {
@@ -71,7 +75,7 @@ public class ChunkService {
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
                 if (!(x == 1 & y == 1))
-                    neighborhood[y][x] = getOrCreateChunk(x + c.getX() - 1, y + c.getY() - 1,false);
+                    neighborhood[y][x] = getOrCreateChunk(x + c.getX() - 1, y + c.getY() - 1, false);
             }
         }
         return neighborhood;
@@ -80,7 +84,7 @@ public class ChunkService {
     private void generateField(Chunk[][] n) {
         Tile[][] field = new Tile[Config.CHUNK_SIZE + 2][Config.CHUNK_SIZE + 2];
 
-        n[1][1].getTiles().forEach(t->field[t.getY_tile()+1][t.getX_tile()+1]=t);
+        n[1][1].getTiles().forEach(t -> field[t.getY_tile() + 1][t.getX_tile() + 1] = t);
 
         field[0][0] = n[0][0].getT_lower_right();
         field[0][Config.CHUNK_SIZE + 1] = n[0][2].getT_lower_left();
@@ -94,18 +98,7 @@ public class ChunkService {
 
 
         determineValues(field);
-        saveAllNeighbors(n);
-    }
-
-    private void saveAllNeighbors(Chunk[][] n) {
-        LinkedList<Chunk> cs = new LinkedList<>();
-        System.out.println("Batch save chunks:");
-        for (Chunk[] chunks : n) {
-            cs.addAll(Arrays.asList(chunks));
-        }
-        long start = System.currentTimeMillis();
-        chunkRepository.saveAll(cs);
-        saving+=System.currentTimeMillis()-start;
+        savingService.saveAllNeighbors(n);
     }
 
     private void determineValues(Tile[][] field) {
@@ -124,14 +117,15 @@ public class ChunkService {
         }
     }
 
-    public Chunk save(Chunk c) {
+    public Chunk save(Chunk c, boolean wait) {
         long start = System.currentTimeMillis();
-        System.out.println("Saving Chunk "+c.getX()+"/"+c.getY());
-        c = chunkRepository.save(c);
-        saving+=System.currentTimeMillis()-start;
+        System.out.println("Saving Chunk " + c.getX() + "/" + c.getY());
+        if (wait)
+            c = chunkRepository.save(c);
+        else
+            savingService.save(c);
         return c;
     }
-
 
 
 }
