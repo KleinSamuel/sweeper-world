@@ -15,7 +15,7 @@ public class ChunkBuffer {
 
     private HashMap<ChunkId, Chunk> buffer;
 
-    private TreeSet<BufferedChunk> stack;
+    private HashSet<BufferedChunk> stack;
 
     final
     ChunkRepository chunkRepository;
@@ -27,7 +27,7 @@ public class ChunkBuffer {
     @Autowired
     public ChunkBuffer(ChunkRepository chunkRepository, SavingService savingService, AsyncService asyncService) {
         buffer = new HashMap<>();
-        stack = new TreeSet<>();
+        stack = new HashSet<>();
         this.chunkRepository = chunkRepository;
         this.savingService = savingService;
         this.asyncService = asyncService;
@@ -66,7 +66,7 @@ public class ChunkBuffer {
 
     }
 
-    @Scheduled(fixedRate = Config.BUFFER_REMOVAL / 2)
+    @Scheduled(fixedRate = Config.CLEANER_INTERVAL)
     public void executeBufferCleaner() {
         System.out.println("Cleaner:start\tBuffer Size = " + buffer.size());
         if (Config.BUFFERD_CHUNK_CAP <= buffer.size()) {
@@ -80,22 +80,21 @@ public class ChunkBuffer {
         }
     }
 
-    public HashSet<Chunk> runBufferCleaner(TreeSet<BufferedChunk> stack, HashMap<ChunkId, Chunk> buffer) {
-        Iterator<BufferedChunk> it = stack.iterator();
+    public HashSet<Chunk> runBufferCleaner(HashSet<BufferedChunk> stack, HashMap<ChunkId, Chunk> buffer) {
+        TreeSet<BufferedChunk> orderedStack = new TreeSet<>(stack);
+        Iterator<BufferedChunk> it = orderedStack.iterator();
         HashSet<Chunk> chunks = new HashSet<>();
+        long currentTime =System.currentTimeMillis();
         while (it.hasNext()) {
             BufferedChunk bc = it.next();
-            if (System.currentTimeMillis() - bc.getTimestamp() > Config.CHUNK_SIZE) {
+            if (currentTime - bc.getTimestamp() > Config.BUFFER_DECAY) {
                 chunks.add(bc.getChunk());
-            } else
+            }
+            else
                 break;
         }
         chunks.forEach(c -> {
-            try {
-                buffer.remove(c.getId()).getBuffer();
-            }catch(NullPointerException e){
-                System.err.println("Could not remove Chunk "+c.getId());
-            }
+            buffer.remove(c.getId());
             stack.remove(c.getBuffer());
         });
         return chunks;
