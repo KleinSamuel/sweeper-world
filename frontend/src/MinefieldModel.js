@@ -196,8 +196,8 @@ export default class MinefieldModel {
             // adds the clicked cell
             updatedCells.push(cell);
             // opens the clicked cell
-            //cell.state.hidden = false;
-            //cell.updateSprite();
+            cell.state.hidden = false;
+            cell.updateSprite();
 
             // clicked on empty cell -> open empty block
             if (cell.state.value === 0) {
@@ -211,12 +211,14 @@ export default class MinefieldModel {
         // user clicked on an opened cell that contains a number
         else {
             updatedCells = updatedCells.concat(this.openAdjacent(chunkX, chunkY, x, y));
+            for (let c of updatedCells) {
+                c.state.hidden = false;
+                c.updateSprite();
+            }
         }
 
         // sends all updates to the server
         for (let uCell of updatedCells) {
-            uCell.state.hidden = false;
-            uCell.updateSprite();
             this.com.openCell(uCell);
         }
     }
@@ -248,18 +250,23 @@ export default class MinefieldModel {
     openBlock(chunkX, chunkY, x, y) {
         let updatedCells = [];
         let stack = this.getAdjacentCells(chunkX, chunkY, x, y);
+
         while (stack.length > 0) {
             let c = stack.pop();
+            // skips the cell if it already opened
             if (!c.state.hidden) {
                 continue;
             }
-            if (c.state.value  === 0) {
-                stack = stack.concat(this.getAdjacentCells(c.chunkX, c.chunkY, c.x, c.y));
+            // adds all adjacent cells to the stack if the cell is empty
+            if (c.state.value === 0) {
+                stack = stack.concat(this.getAdjacentCells(c.chunkX, c.chunkX, c.x, c.y));
             }
-            //c.state.hidden = false;
-            //c.updateSprite();
+            // adds the cell to the cell that need to be updated
             updatedCells.push(c);
+            c.state.hidden = false;
+            c.updateSprite();
         }
+
         return updatedCells;
     }
 
@@ -272,11 +279,10 @@ export default class MinefieldModel {
                     if (!cell.state.user) {
                         return [];
                     }
+                } else if (cell.state.value === 0) {
+                    toOpen = toOpen.concat(this.openBlock(cell.chunkX, cell.chunkY, cell.x, cell.y));
                 } else {
                     toOpen.push(cell);
-                    if (cell.state.value === 0) {
-                        toOpen = toOpen.concat(this.openBlock(cell.chunkX, cell.chunkY, cell.x, cell.y));
-                    }
                 }
             }
         }
