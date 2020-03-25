@@ -53,6 +53,7 @@ public class AsyncService {
         }
         isSaving = false;
         System.out.println("Stopping Saver");
+        System.gc();
     }
 
 }
