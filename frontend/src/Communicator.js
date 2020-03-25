@@ -103,12 +103,12 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY).then(function (data) {
-            return new Promise(function(resolve, reject) {
-                setTimeout(function(){
-                    resolve(data);
-                }, 100);
-            });
+        return new Promise(function(resolve, reject) {
+            setTimeout(function(){
+                resolve();
+            }, 100);
+        }).then(function(){
+            return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY)
         });
     }
 }
