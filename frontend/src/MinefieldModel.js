@@ -1,6 +1,5 @@
 import * as CONFIG from "./Config";
 import CellChunk from "./CellChunk";
-import Communicator from "./Communicator";
 
 /**
  * Represents the global minefield which consists of quadratic cell chunks
@@ -14,16 +13,18 @@ export default class MinefieldModel {
      * Sets the coordinates of the player in the global field and
      * gets an instance of the Communicator object to be able to
      * talk to the server and send or receive field updates.
+     * @param communicator
+     * @param userID
      * @param chunkX
      * @param chunkY
      */
-    constructor(chunkX, chunkY) {
+    constructor(userID, communicator, chunkX, chunkY) {
 
+        this.com = communicator;
+        this.userID = userID;
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.field = {};
-
-        this.com = new Communicator();
     }
 
     init() {
@@ -50,7 +51,7 @@ export default class MinefieldModel {
      */
     retrieveChunkFromServer(chunkX, chunkY) {
         let context = this;
-        return this.com.requestChunk(chunkX, chunkY).then(function(response){
+        return this.com.requestChunk(chunkY, chunkX).then(function(response){
             return new Promise(function(resolve, reject){
                 let chunk = response.data.tiles;
                 let c = new CellChunk(chunkX, chunkY);
@@ -181,9 +182,12 @@ export default class MinefieldModel {
         if (!cell.state.hidden || cell.state.hidden && cell.state.user) {
             return;
         }
+
+        let updatedCells = [cell];
+
         // clicked on empty cell -> open empty block
         if (cell.state.value === 0) {
-            this.openBlock(chunkX, chunkY, x, y);
+            updatedCells = updatedCells.concat(this.openBlock(chunkX, chunkY, x, y));
         }
         // clicked on mine
         else if (cell.state.value === 9) {
@@ -192,6 +196,10 @@ export default class MinefieldModel {
         // opens the clicked cell
         cell.state.hidden = false;
         cell.updateSprite();
+
+        for (let uCell of updatedCells) {
+            this.com.openCell(uCell);
+        }
     }
 
     flagCell(chunkX, chunkY, x, y) {
@@ -207,6 +215,7 @@ export default class MinefieldModel {
         }
         cell.state.user = 1;
         cell.updateSprite();
+        this.com.flagCell(cell);
     }
 
     /**
@@ -218,6 +227,7 @@ export default class MinefieldModel {
      * @param y coordinate of the cell
      */
     openBlock(chunkX, chunkY, x, y) {
+        let updatedCells = [];
         let stack = this.getAdjacentCells(chunkX, chunkY, x, y);
         while (stack.length > 0) {
             let c = stack.pop();
@@ -229,7 +239,9 @@ export default class MinefieldModel {
             }
             c.state.hidden = false;
             c.updateSprite();
+            updatedCells.push(c);
         }
+        return updatedCells;
     }
 
     /**

@@ -13,8 +13,12 @@ import axios from "axios";
  */
 export default class Communicator {
 
-    constructor() {
+    constructor(userID) {
         this.isConnected = false;
+
+        if (this.userID === undefined) {
+            this.userID = userID;
+        }
 
         if(!this.client) {
             this.initClient();
@@ -61,6 +65,32 @@ export default class Communicator {
         this.client.publish({
             destination: "/report/hello",
             body: message
+        });
+    }
+
+    openCell(cell) {
+        this.client.publish({
+            destination: "/report/openCell",
+            body: JSON.stringify({
+                chunkX: cell.chunkX,
+                chunkY: cell.chunkY,
+                x: cell.x,
+                y: cell.y,
+                user: this.userID
+            })
+        });
+    }
+
+    flagCell(cell) {
+        this.client.publish({
+            destination: "/report/flagCell",
+            body: JSON.stringify({
+                chunkX: cell.chunkX,
+                chunkY: cell.chunkY,
+                x: cell.x,
+                y: cell.y,
+                user: this.userID
+            })
         });
     }
 

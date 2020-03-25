@@ -12,11 +12,13 @@ export default class MinefieldViewer {
         this.GLOBAL_POS_X = 0;
         this.GLOBAL_POS_Y = 0;
 
+        let userID = 1;
+
         let context = this;
         Textures.init().then(function() {
             return new Promise(function(resolve, reject){
-                context.com = new Communicator();
-                context.minefieldModel = new MinefieldModel(context.GLOBAL_POS_X, context.GLOBAL_POS_X);
+                context.com = new Communicator(userID);
+                context.minefieldModel = new MinefieldModel(userID, context.com, context.GLOBAL_POS_X, context.GLOBAL_POS_X);
                 context.minefieldModel.init().then(function () {
                     return context.initApplication();
                 }).then(resolve);

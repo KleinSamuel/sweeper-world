@@ -10,8 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ChunkRepository extends CrudRepository<Chunk, ChunkId> {
 
-
-
     Optional<Chunk> findById(ChunkId chunkId);
 
 }

@@ -2,11 +2,13 @@ package de.sksdev.infiniteminesweeper.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.sksdev.infiniteminesweeper.Config;
-import de.sksdev.infiniteminesweeper.MineFiledGenerator;
+import de.sksdev.infiniteminesweeper.communication.CellOperationMessage;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
+import de.sksdev.infiniteminesweeper.db.entities.Tile;
+import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.SavingService;
+import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -24,16 +26,19 @@ public class RequestController {
     private ObjectMapper objectMapper;
     private SimpMessagingTemplate template;
     private SavingService savingService;
+    private UserService userService;
 
     @Autowired
     public RequestController(ObjectMapper objectMapper,
                              ChunkService chunkService,
                              SimpMessagingTemplate simpMessagingTemplate,
-                             SavingService savingService) {
+                             SavingService savingService,
+                             UserService userService) {
         this.objectMapper = objectMapper;
         this.chunkService = chunkService;
         this.template = simpMessagingTemplate;
         this.savingService = savingService;
+        this.userService = userService;
     }
 
     @RequestMapping(value = "/api/getChunk")
@@ -102,4 +107,53 @@ public class RequestController {
         return "Hello World!";
     }
 
+    @MessageMapping("/openCell")
+    public void openCell(CellOperationMessage message) {
+
+        try {
+            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkY(), message.getChunkX(), false);
+            Tile tile = chunk.getGrid()[message.getY()][message.getX()];
+
+            if (tile.getUser() != null) {
+                throw new RuntimeException("tile already owned by another user!");
+            }
+
+            User newUser = userService.getUserById(message.getUser());
+
+            if (newUser == null) {
+                throw new RuntimeException("user id not valid!");
+            }
+
+            tile.setHidden(false);
+            tile.setUser(newUser);
+
+        } catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+    }
+
+    @MessageMapping("/flagCell")
+    public void flagCell(CellOperationMessage message) {
+
+        try {
+            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkY(), message.getChunkX(), false);
+            Tile tile = chunk.getGrid()[message.getY()][message.getX()];
+
+            if (tile.getUser() != null) {
+                throw new RuntimeException("tile already owned by another user!");
+            }
+
+            User newUser = userService.getUserById(message.getUser());
+
+            if (newUser == null) {
+                throw new RuntimeException("user id not valid!");
+            }
+
+            tile.setHidden(true);
+            tile.setUser(newUser);
+
+        } catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+    }
 }
