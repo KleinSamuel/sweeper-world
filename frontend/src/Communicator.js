@@ -13,8 +13,12 @@ import axios from "axios";
  */
 export default class Communicator {
 
-    constructor() {
+    constructor(userID) {
         this.isConnected = false;
+
+        if (this.userID === undefined) {
+            this.userID = userID;
+        }
 
         if(!this.client) {
             this.initClient();
@@ -64,6 +68,32 @@ export default class Communicator {
         });
     }
 
+    openCell(cell) {
+        this.client.publish({
+            destination: "/report/openCell",
+            body: JSON.stringify({
+                chunkX: cell.chunkY,
+                chunkY: cell.chunkX,
+                x: cell.y,
+                y: cell.x,
+                user: this.userID
+            })
+        });
+    }
+
+    flagCell(cell) {
+        this.client.publish({
+            destination: "/report/flagCell",
+            body: JSON.stringify({
+                chunkX: cell.chunkY,
+                chunkY: cell.chunkX,
+                x: cell.y,
+                y: cell.x,
+                user: this.userID
+            })
+        });
+    }
+
     /**
      * Requests a cell chunk at given coordinates from the server and returns
      * the promise which contains the response.
@@ -73,6 +103,6 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY);
+        return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkY+"&y="+chunkX);
     }
 }
