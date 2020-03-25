@@ -176,6 +176,8 @@ export default class MinefieldModel {
 
     clickCell(chunkX, chunkY, x, y) {
 
+        let returnValue = 0;
+
         let cell = this.getChunk(chunkX, chunkY).getCell(x, y);
 
         // do nothing if the cell is flagged
@@ -206,6 +208,7 @@ export default class MinefieldModel {
             // clicked on mine
             else if (cell.state.value === 9) {
                 console.log("opened mine");
+                returnValue = 1;
             }
         }
         // user clicked on an opened cell that contains a number
@@ -221,6 +224,8 @@ export default class MinefieldModel {
         for (let uCell of updatedCells) {
             this.com.openCell(uCell);
         }
+
+        return returnValue;
     }
 
     flagCell(chunkX, chunkY, x, y) {

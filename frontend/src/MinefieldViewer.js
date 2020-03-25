@@ -4,6 +4,7 @@ import * as Textures from "./TextureLoader";
 import {textures} from "./TextureLoader";
 import MinefieldModel from "./MinefieldModel";
 import Communicator from "./Communicator";
+import { Howl } from "howler";
 
 export default class MinefieldViewer {
 
@@ -31,10 +32,35 @@ export default class MinefieldViewer {
             let cursor = new PIXI.Sprite(textures.cursor);
             cursor.width = CONFIG.CELL_PIXEL_SIZE;
             cursor.height = CONFIG.CELL_PIXEL_SIZE;
+
             context.cursor.addChild(cursor);
 
             context.app.stage.addChildAt(context.field, 0);
             context.app.stage.addChildAt(context.cursor, 1);
+
+            const explosionTextures = [];
+            let i;
+
+            for (i = 0; i < 26; i++) {
+                const texture = PIXI.Texture.from(`Explosion_Sequence_A ${i + 1}.png`);
+                explosionTextures.push(texture);
+            }
+
+            const explosion = new PIXI.AnimatedSprite(explosionTextures);
+            explosion.x = 100;
+            explosion.y = 100;
+            explosion.anchor.set(0.5);
+            explosion.scale.set(1);
+            //explosion.gotoAndPlay(1);
+            explosion.visible = false;
+            explosion.loop = false;
+            context.app.stage.addChild(explosion);
+            context.exp = explosion;
+
+            context.exp_sound = new Howl({
+                src: "assets/explosion.mp3"
+            });
+
             context.updateField();
         });
     }
@@ -47,7 +73,7 @@ export default class MinefieldViewer {
             let app = new PIXI.Application({
                     width: 256,
                     height: 256,
-                    antialias: false,
+                    antialias: true,
                     transparent: false,
                     resolution: 1
                 }
@@ -102,8 +128,16 @@ export default class MinefieldViewer {
                     cellY = (cellY < 0) ? CONFIG.CHUNK_SIZE + cellY : cellY;
 
                     if (event.button === 0) {
-                        context.minefieldModel.clickCell(chunkX, chunkY, cellX, cellY);
+                        let code = context.minefieldModel.clickCell(chunkX, chunkY, cellX, cellY);
                         context.updateField();
+                        if (code === 1) {
+                            context.exp.visible = true;
+                            context.exp.animationSpeed = 0.5;
+                            context.exp.x = context.cursor.x + CONFIG.CELL_PIXEL_SIZE/2;
+                            context.exp.y = context.cursor.y + CONFIG.CELL_PIXEL_SIZE/2;
+                            context.exp.gotoAndPlay(1);
+                            context.exp_sound.play();
+                        }
                     } else if (event.button === 2) {
                         context.minefieldModel.flagCell(chunkX, chunkY, cellX, cellY);
                         context.updateField();
