@@ -193,6 +193,14 @@ export default class MinefieldViewer {
         for (let chunkX in this.minefieldModel.field) {
             for (let chunkY in this.minefieldModel.field[chunkX]) {
 
+                // does not draw chunks that are outside of the drawing buffer
+                if (Math.abs(this.GLOBAL_POS_X - chunkX) > CONFIG.BUFFER_ADD) {
+                    continue;
+                }
+                if (Math.abs(this.GLOBAL_POS_Y - chunkY) > CONFIG.BUFFER_ADD) {
+                    continue;
+                }
+
                 let chunk = this.minefieldModel.getChunk(chunkX, chunkY);
 
                 for (let x = 0; x < chunk.innerField.length; x++) {

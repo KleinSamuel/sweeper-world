@@ -178,7 +178,7 @@ export default class MinefieldModel {
         let cell = this.getChunk(chunkX, chunkY).getCell(x, y);
 
         // do nothing if the cell is already opened
-        if (!cell.state.hidden) {
+        if (!cell.state.hidden || cell.state.hidden && cell.state.user) {
             return;
         }
         // clicked on empty cell -> open empty block
