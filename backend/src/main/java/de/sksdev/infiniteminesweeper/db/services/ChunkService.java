@@ -7,37 +7,35 @@ import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
-import de.sksdev.infiniteminesweeper.db.repositories.ChunkRepository;
 import de.sksdev.infiniteminesweeper.db.repositories.TileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.LinkedList;
 
 @Service
 public class ChunkService {
 
 
     final
-    ChunkRepository chunkRepository;
-
-    final
     TileRepository tileRepository;
 
     final
-    SavingService savingService;
+    ChunkBuffer chunkBuffer;
 
     @Autowired
-    public ChunkService(ChunkRepository chunkRepository, TileRepository tileRepository, SavingService savingService) {
-        this.chunkRepository = chunkRepository;
+    public ChunkService(TileRepository tileRepository, ChunkBuffer chunkBuffer) {
         this.tileRepository = tileRepository;
-        this.savingService = savingService;
+        this.chunkBuffer = chunkBuffer;
     }
 
     //    TODO use objectgetter for cached entries?
     public Chunk getOrCreateChunk(long x, long y, boolean persist) {
-        return chunkRepository.findById(new ChunkId(x, y)).orElseGet(() -> {
+        return chunkBuffer.findById(new ChunkId(x, y)).orElseGet(() -> {
             Chunk c = newChunk(x, y);
             if (persist)
-                c=save(c,true);
+                c = save(c, true);
             return c;
         });
     }
@@ -94,7 +92,15 @@ public class ChunkService {
 
 
         determineValues(field);
-        savingService.saveAllNeighbors(n);
+        saveAllNeighbors(n);
+    }
+
+    public void saveAllNeighbors(Chunk[][] n) {
+        LinkedList<Chunk> cs = new LinkedList<>();
+        for (Chunk[] chunks : n) {
+            cs.addAll(Arrays.asList(chunks));
+        }
+        chunkBuffer.saveAll(cs);
     }
 
     private void determineValues(Tile[][] field) {
@@ -116,10 +122,7 @@ public class ChunkService {
     public Chunk save(Chunk c, boolean wait) {
         long start = System.currentTimeMillis();
         System.out.println("Saving Chunk " + c.getX() + "/" + c.getY());
-        if (wait)
-            c = chunkRepository.save(c);
-        else
-            savingService.save(c);
+        chunkBuffer.save(c);
         return c;
     }
 

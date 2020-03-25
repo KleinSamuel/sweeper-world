@@ -1,10 +1,8 @@
 package de.sksdev.infiniteminesweeper.db.entities.Ids;
 
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Objects;
 
 @Embeddable
 public class ChunkId implements Serializable {
@@ -39,4 +37,26 @@ public class ChunkId implements Serializable {
         this.y = y;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChunkId chunkId = (ChunkId) o;
+        return x == chunkId.x &&
+                y == chunkId.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return (x+"_"+y).hashCode();
+    }
+
+
+    @Override
+    public String toString() {
+        return "ChunkId{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }

@@ -7,10 +7,7 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 
 @Entity
@@ -157,5 +154,25 @@ public class Chunk implements Serializable {
 
     public void setFilled(boolean filled) {
         this.filled = filled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Chunk chunk = (Chunk) o;
+        return this.id.equals(chunk.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Chunk{" +
+                "id=" + id +
+                '}';
     }
 }

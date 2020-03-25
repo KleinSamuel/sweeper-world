@@ -68,8 +68,6 @@ public class RequestController {
             long time = System.currentTimeMillis();
             Chunk c = chunkService.getOrCreateChunkContent(x,y,true);
             time = System.currentTimeMillis()-time;
-            long saving = savingService.getSavingTime();
-            System.out.println("Saving: "+saving +"ms ("+(int)(saving/(time/100d))+"%)");
             System.out.println("Total: "+time+"ms");
             return objectMapper.writeValueAsString(c);
         } catch (JsonProcessingException e) {
