@@ -113,8 +113,9 @@ public class ChunkService {
         values = MineFiledGenerator.generateField(values);
         for (int y = 0; y < values.length; y++) {
             for (int x = 0; x < values[y].length; x++) {
-                if (!(values[y][x] != 9 & (y < 1 | y > Config.CHUNK_SIZE - 2 | x < 1 | x > Config.CHUNK_SIZE - 2)))
+                if (!(values[y][x] != 9 & (y < 1 | y > Config.CHUNK_SIZE | x < 1 | x > Config.CHUNK_SIZE))) {
                     field[y][x].setValue(values[y][x]);
+                }
             }
         }
     }
