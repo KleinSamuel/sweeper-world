@@ -13,30 +13,20 @@ export default class CellChunk {
     /**
      * Initializes the dictionary which contains the cells.
      */
-    constructor() {
+    constructor(chunkX, chunkY) {
+        this.chunkX = chunkX;
+        this.chunkY = chunkY;
+
         this.innerField = [];
         for (let i = 0; i < CONFIG.CHUNK_SIZE; i++) {
             this.innerField[i] = [];
         }
     }
 
-    initTest(){
-        for (let x = 0; x < CONFIG.CHUNK_SIZE; x++) {
-            for (let y = 0; y < CONFIG.CHUNK_SIZE; y++) {
-                let state = {
-                    isHidden: true,
-                    value: 1,
-                    player: undefined
-                };
-                this.innerField[x][y] = new Cell(state);
-            }
-        }
-    }
-
     initField(fieldStates) {
         for (let x = 0; x < fieldStates.length; x++) {
             for (let y = 0; y < fieldStates[x].length; y++) {
-                this.innerField[x][y] = new Cell(fieldStates[x][y].state);
+                this.innerField[x][y] = new Cell(this.chunkX, this.chunkY, x, y, fieldStates[x][y].state);
             }
         }
     }
@@ -51,7 +41,7 @@ export default class CellChunk {
     initFieldMaps(fieldStates) {
         for (let x in fieldStates) {
             for (let y in fieldStates[x]) {
-                this.innerField[x][y] = new Cell(fieldStates[x][y]);
+                this.innerField[x][y] = new Cell(this.chunkX, this.chunkY, x, y, fieldStates[x][y]);
             }
         }
     }
