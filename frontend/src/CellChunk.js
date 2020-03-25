@@ -23,14 +23,6 @@ export default class CellChunk {
         }
     }
 
-    initField(fieldStates) {
-        for (let x = 0; x < fieldStates.length; x++) {
-            for (let y = 0; y < fieldStates[x].length; y++) {
-                this.innerField[x][y] = new Cell(this.chunkX, this.chunkY, x, y, fieldStates[x][y].state);
-            }
-        }
-    }
-
     /**
      * Updates the internal cells of this chunk with the given cell information.
      * The cells are organized in an outer dictionary whose keys are the x coordinate.

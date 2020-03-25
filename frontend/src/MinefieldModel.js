@@ -155,6 +155,13 @@ export default class MinefieldModel {
         this.field[""+x][""+y] = chunk;
     }
 
+    getChunk(x, y) {
+        if (this.field[""+x] && this.field[""+x][""+y]) {
+            return this.field[""+x][""+y];
+        }
+        return undefined;
+    }
+
     removeChunk(x, y) {
         // removes the y coordinate dict
         if (""+x in this.field && y in this.field[""+x]) {
@@ -164,13 +171,6 @@ export default class MinefieldModel {
         if (Object.keys(this.field[""+x]).length === 0) {
             delete this.field[""+x];
         }
-    }
-
-    getChunk(x, y) {
-        if (this.field[""+x] && this.field[""+x][""+y]) {
-            return this.field[""+x][""+y];
-        }
-        return undefined;
     }
 
     clickCell(chunkX, chunkY, x, y) {
@@ -209,6 +209,14 @@ export default class MinefieldModel {
         cell.updateSprite();
     }
 
+    /**
+     * Opens a field of empty cells and all adjacent fields.
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     */
     openBlock(chunkX, chunkY, x, y) {
         let stack = this.getAdjacentCells(chunkX, chunkY, x, y);
         while (stack.length > 0) {
@@ -224,6 +232,15 @@ export default class MinefieldModel {
         }
     }
 
+    /**
+     * Returns a list of all 8 adjacent cells for a cell at the given coordinates.
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {[]} list of adjacent cells
+     */
     getAdjacentCells(chunkX, chunkY, x, y) {
         let adjacentCells = [];
         chunkX = parseInt(chunkX);
@@ -241,31 +258,75 @@ export default class MinefieldModel {
         return adjacentCells;
     }
 
+    /**
+     * Returns the cell left to the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getLeftCell(chunkX, chunkY, x, y) {
         if (x === 0) {
             return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, y);
         }
         return this.getChunk(chunkX, chunkY).getCell(x - 1, y);
     }
+    /**
+     * Returns the cell right to the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getRightCell(chunkX, chunkY, x, y) {
         if (x === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX + 1, chunkY).getCell(0, y);
         }
         return this.getChunk(chunkX, chunkY).getCell(x + 1, y);
     }
+    /**
+     * Returns the cell to the top of the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getTopCell(chunkX, chunkY, x, y) {
-        console.log("get top cell");
         if (y === 0) {
             return this.getChunk(chunkX, chunkY - 1).getCell(x, CONFIG.CHUNK_SIZE - 1);
         }
         return this.getChunk(chunkX, chunkY).getCell(x, y - 1);
     }
+    /**
+     * Returns the cell to the bottom of the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getBottomCell(chunkX, chunkY, x, y) {
         if (y === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX, chunkY + 1).getCell(x, 0);
         }
         return this.getChunk(chunkX, chunkY).getCell(x, y + 1);
     }
+    /**
+     * Returns the cell to the top left of the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getTopLeftCell(chunkX, chunkY, x, y) {
         if (x === 0 && y === 0) {
             return this.getChunk(chunkX - 1, chunkY - 1).getCell(CONFIG.CHUNK_SIZE - 1, CONFIG.CHUNK_SIZE - 1);
@@ -276,6 +337,15 @@ export default class MinefieldModel {
         }
         return this.getChunk(chunkX, chunkY).getCell(x - 1, y - 1);
     }
+    /**
+     * Returns the cell to the top right of the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getTopRightCell(chunkX, chunkY, x, y) {
         if (x === CONFIG.CHUNK_SIZE - 1 && y === 0) {
             return this.getChunk(chunkX + 1, chunkY - 1).getCell(0, CONFIG.CHUNK_SIZE - 1);
@@ -286,6 +356,15 @@ export default class MinefieldModel {
         }
         return this.getChunk(chunkX, chunkY).getCell(x + 1, y - 1);
     }
+    /**
+     * Returns the cell to the bottom left of the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getBottomLeftCell(chunkX, chunkY, x, y) {
         if (x === 0 && y === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX - 1, chunkY + 1).getCell(CONFIG.CHUNK_SIZE - 1, 0);
@@ -296,6 +375,15 @@ export default class MinefieldModel {
         }
         return this.getChunk(chunkX, chunkY).getCell(x - 1, y + 1);
     }
+    /**
+     * Returns the cell to the bottom right of the cell of the given coordinates
+     *
+     * @param chunkX x coordinate of the chunk
+     * @param chunkY y coordinate of the chunk
+     * @param x coordinate of the cell
+     * @param y coordinate of the cell
+     * @returns {Cell}
+     */
     getBottomRightCell(chunkX, chunkY, x, y) {
         if (x === CONFIG.CHUNK_SIZE - 1 && y === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX + 1, chunkY + 1).getCell(0, 0);
