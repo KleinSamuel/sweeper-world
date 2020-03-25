@@ -72,8 +72,8 @@ export default class Communicator {
         this.client.publish({
             destination: "/report/openCell",
             body: JSON.stringify({
-                chunkX: cell.chunkY,
-                chunkY: cell.chunkX,
+                chunkX: cell.chunkX,
+                chunkY: cell.chunkY,
                 x: cell.y,
                 y: cell.x,
                 user: this.userID
@@ -85,8 +85,8 @@ export default class Communicator {
         this.client.publish({
             destination: "/report/flagCell",
             body: JSON.stringify({
-                chunkX: cell.chunkY,
-                chunkY: cell.chunkX,
+                chunkX: cell.chunkX,
+                chunkY: cell.chunkY,
                 x: cell.y,
                 y: cell.x,
                 user: this.userID
@@ -103,6 +103,6 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkY+"&y="+chunkX);
+        return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY);
     }
 }
