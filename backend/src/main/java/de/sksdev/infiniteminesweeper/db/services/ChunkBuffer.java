@@ -37,7 +37,6 @@ public class ChunkBuffer {
         }
     }
 
-
     public void save(Chunk chunk) {
         buffer(chunk);
         savingService.save(chunk);
@@ -53,7 +52,6 @@ public class ChunkBuffer {
     }
 
     private Chunk buffer(Chunk chunk) {
-//        findById(chunk.getId()).ifPresent(savingService::save);
         buffer.put(chunk.getId(), new Pair<>(chunk, System.currentTimeMillis()));
         return chunk;
     }

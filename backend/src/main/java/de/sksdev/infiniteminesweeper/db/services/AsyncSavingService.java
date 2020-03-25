@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -14,8 +13,10 @@ import java.util.LinkedList;
 public class AsyncSavingService {
 
 
+    final
     ChunkRepository chunkRepository;
 
+    //TODO intelligent queue (maybe 2 TreeSet queues (one used one not)), -> bulk save & not duplicate saving
     LinkedList<Iterable<Chunk>> saveQueue;
     boolean isSaving = false;
 
@@ -24,11 +25,6 @@ public class AsyncSavingService {
         this.chunkRepository = chunkRepository;
         saveQueue = new LinkedList<>();
     }
-
-//    @Async
-//    public void saveAll(Iterable<Chunk> chunks) {
-//        chunkRepository.saveAll(chunks);
-//    }
 
     @Async
     public void save(Chunk chunk) {
