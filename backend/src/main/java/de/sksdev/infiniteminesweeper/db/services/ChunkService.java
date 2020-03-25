@@ -51,12 +51,10 @@ public class ChunkService {
     }
 
     private Chunk newChunk(long x, long y) {
-        System.out.println("Creating Chunk " + x + "/" + y);
         return new Chunk(x, y);
     }
 
     private Chunk generateContent(Chunk c) {
-        System.out.println("Filling Chunk " + c.getX() + "/" + c.getY());
         Chunk[][] neighborhood = getNeighborhood(c);
         generateField(neighborhood);
         c.setFilled(true);
@@ -121,8 +119,6 @@ public class ChunkService {
     }
 
     public Chunk save(Chunk c, boolean wait) {
-        long start = System.currentTimeMillis();
-        System.out.println("Saving Chunk " + c.getX() + "/" + c.getY());
         chunkBuffer.save(c);
         return c;
     }
