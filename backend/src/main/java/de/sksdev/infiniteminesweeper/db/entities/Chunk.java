@@ -122,7 +122,6 @@ public class Chunk implements Serializable {
         return out;
     }
 
-
     public TreeSet<Tile> getC_last() {
         TreeSet<Tile> out = new TreeSet<>();
         for (Tile[] row : getGrid())
