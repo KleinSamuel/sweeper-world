@@ -1,16 +1,17 @@
 package de.sksdev.infiniteminesweeper.db.services;
 
+import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
+import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.repositories.ChunkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
 
 @Service
-public class AsyncSavingService {
+public class AsyncService {
 
 
     final
@@ -21,7 +22,7 @@ public class AsyncSavingService {
     boolean isSaving = false;
 
     @Autowired
-    public AsyncSavingService(ChunkRepository chunkRepository) {
+    public AsyncService(ChunkRepository chunkRepository) {
         this.chunkRepository = chunkRepository;
         saveQueue = new LinkedList<>();
     }
@@ -42,7 +43,6 @@ public class AsyncSavingService {
             saver();
     }
 
-    //    @Async
     public void saver() {
         System.out.println("Launch Saver");
         isSaving = true;

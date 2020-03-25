@@ -8,19 +8,19 @@ import org.springframework.stereotype.Service;
 public class SavingService {
 
 
-    AsyncSavingService asyncSavingService;
+    AsyncService asyncService;
 
     @Autowired
-    public SavingService(AsyncSavingService asyncSavingService) {
-        this.asyncSavingService = asyncSavingService;
+    public SavingService(AsyncService asyncService) {
+        this.asyncService = asyncService;
     }
 
     public void saveAll(Iterable<Chunk> chunks) {
-        asyncSavingService.saveAll(chunks);
+        asyncService.saveAll(chunks);
     }
 
     public void save(Chunk chunk) {
-        asyncSavingService.save(chunk);
+        asyncService.save(chunk);
     }
 
 

@@ -68,13 +68,8 @@ public class RequestController {
     @RequestMapping(value = "/api/getChunkContent")
     @ResponseBody
     public String getChunkContent(@RequestParam("x") Long x, @RequestParam("y") Long y) {
-        System.out.println("Request for chunkContent "+x+"/"+y);
         try {
-            long time = System.currentTimeMillis();
-            Chunk c = chunkService.getOrCreateChunkContent(x,y,true);
-            time = System.currentTimeMillis()-time;
-            System.out.println("Total: "+time+"ms");
-            return objectMapper.writeValueAsString(c);
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(x,y,true));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;

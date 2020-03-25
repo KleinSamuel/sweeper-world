@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
+import de.sksdev.infiniteminesweeper.db.services.BufferedChunk;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 @Entity
@@ -24,6 +28,7 @@ public class Chunk implements Serializable {
 
     public Chunk(ChunkId id) {
         setId(id);
+        buffer = new BufferedChunk(this);
         initTiles();
     }
 
@@ -41,6 +46,21 @@ public class Chunk implements Serializable {
     @JsonIgnore
     private Tile[][] grid;
 
+    @Transient
+    @JsonIgnore
+    private TreeSet<Tile> columnFirst;
+
+    @Transient
+    @JsonIgnore
+    private TreeSet<Tile> columnLast;
+
+    @Transient
+    @JsonIgnore
+    private BufferedChunk buffer;
+
+    @Transient
+    @JsonIgnore
+    private boolean buffered = false;
 
     public long getX() {
         return this.id.getX();
@@ -106,43 +126,52 @@ public class Chunk implements Serializable {
         }
     }
 
-
+    @JsonIgnore
     public TreeSet<Tile> getR_first() {
         return new TreeSet<>(Arrays.asList(getGrid()[0]));
     }
 
+    @JsonIgnore
     public TreeSet<Tile> getR_last() {
         return new TreeSet<>(Arrays.asList(getGrid()[Config.CHUNK_SIZE - 1]));
     }
 
+    @JsonIgnore
     public TreeSet<Tile> getC_first() {
-        TreeSet<Tile> out = new TreeSet<>();
-        for (Tile[] row : getGrid())
-            out.add(row[0]);
-        return out;
+        if (columnFirst == null) {
+            columnFirst = new TreeSet<>();
+            for (Tile[] row : getGrid())
+                columnFirst.add(row[0]);
+        }
+        return columnFirst;
     }
 
+    @JsonIgnore
     public TreeSet<Tile> getC_last() {
-        TreeSet<Tile> out = new TreeSet<>();
-        for (Tile[] row : getGrid())
-            out.add(row[Config.CHUNK_SIZE - 1]);
-        return out;
+        if (columnLast == null) {
+            columnLast = new TreeSet<>();
+            for (Tile[] row : getGrid())
+                columnLast.add(row[Config.CHUNK_SIZE - 1]);
+        }
+        return columnLast;
     }
 
+    @JsonIgnore
     public Tile getT_upper_left() {
         return getGrid()[0][0];
     }
 
-
+    @JsonIgnore
     public Tile getT_lower_left() {
         return getGrid()[Config.CHUNK_SIZE - 1][0];
     }
 
+    @JsonIgnore
     public Tile getT_upper_right() {
         return getGrid()[0][Config.CHUNK_SIZE - 1];
     }
 
-
+    @JsonIgnore
     public Tile getT_lower_right() {
         return getGrid()[Config.CHUNK_SIZE - 1][Config.CHUNK_SIZE - 1];
     }
@@ -152,7 +181,9 @@ public class Chunk implements Serializable {
     }
 
     public void setFilled(boolean filled) {
-        this.filled = filled;
+        if (filled && !this.filled) {
+            this.filled = true;
+        }
     }
 
     @Override
@@ -173,5 +204,25 @@ public class Chunk implements Serializable {
         return "Chunk{" +
                 "id=" + id +
                 '}';
+    }
+
+    public boolean isBuffered() {
+        return buffered;
+    }
+
+    public void setBuffered(boolean buffered) {
+        this.buffered = buffered;
+    }
+
+    public void setGrid(Tile[][] grid) {
+        this.grid = grid;
+    }
+
+    public BufferedChunk getBuffer() {
+        return buffer;
+    }
+
+    public void setBuffer(BufferedChunk buffer) {
+        this.buffer = buffer;
     }
 }
