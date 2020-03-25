@@ -15,9 +15,17 @@ export default class Cell {
      *      value: int (0-9),
      *      user: long (player id)
      * }
-     * @param state
+     * @param chunkX x coordinate of the chunk the cell is in
+     * @param chunkY y coordinate of the chunk the cell is in
+     * @param x coordinate of the cell in the chunk
+     * @param y coordinate of the cell in the chunk
+     * @param state of the cell
      */
-    constructor(state) {
+    constructor(chunkX, chunkY, x, y, state) {
+        this.chunkX = chunkX;
+        this.chunkY = chunkY;
+        this.x = x;
+        this.y = y;
         this.sprite = undefined;
         this.setState(state);
     }
@@ -36,9 +44,9 @@ export default class Cell {
      * texture of the cell state.
      */
     updateSprite() {
-        if (this.state.isHidden && !this.state.user) {
+        if (this.state.hidden && !this.state.user) {
             this.sprite = new PIXI.Sprite(textures.closed);
-        } else if (this.state.isHidden && this.state.user) {
+        } else if (this.state.hidden && this.state.user) {
             this.sprite = new PIXI.Sprite(textures.flag);
         } else if (this.state.value === 0) {
             this.sprite = new PIXI.Sprite(textures.open);

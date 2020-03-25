@@ -139,14 +139,16 @@ export default class MinefieldViewer {
                     // loads the next chunks
                     let movedX = context.GLOBAL_POS_X - oldGlobalX;
                     if (movedX !== 0) {
-                        context.minefieldModel.moveX(movedX);
-                        context.updateField();
+                        context.minefieldModel.moveX(movedX).then(function(){
+                            context.updateField();
+                        });
                     }
 
                     let movedY = context.GLOBAL_POS_Y - oldGlobalY;
                     if (movedY !== 0) {
-                        context.minefieldModel.moveY(movedY);
-                        context.updateField();
+                        context.minefieldModel.moveY(movedY).then(function(){
+                            context.updateField();
+                        });
                     }
 
                 }
@@ -173,7 +175,7 @@ export default class MinefieldViewer {
 
             window.addEventListener("contextmenu", function(event){
                 // TODO: add when deploying so user can set flags
-                //event.preventDefault();
+                event.preventDefault();
             });
 
             resolve(app);
@@ -185,8 +187,6 @@ export default class MinefieldViewer {
     }
 
     updateField() {
-
-        console.log("UPDATE");
 
         this.field.removeChildren();
 
