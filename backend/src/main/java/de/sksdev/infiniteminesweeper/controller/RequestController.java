@@ -111,8 +111,8 @@ public class RequestController {
     public void openCell(CellOperationMessage message) {
 
         try {
-            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkY(), message.getChunkX(), false);
-            Tile tile = chunk.getGrid()[message.getY()][message.getX()];
+            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkX(), message.getChunkY(), false);
+            Tile tile = chunk.getGrid()[message.getX()][message.getY()];
 
             if (tile.getUser() != null) {
                 throw new RuntimeException("tile already owned by another user!");
@@ -136,8 +136,8 @@ public class RequestController {
     public void flagCell(CellOperationMessage message) {
 
         try {
-            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkY(), message.getChunkX(), false);
-            Tile tile = chunk.getGrid()[message.getY()][message.getX()];
+            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkX(), message.getChunkY(), false);
+            Tile tile = chunk.getGrid()[message.getX()][message.getY()];
 
             if (tile.getUser() != null) {
                 throw new RuntimeException("tile already owned by another user!");

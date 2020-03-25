@@ -51,7 +51,7 @@ export default class MinefieldModel {
      */
     retrieveChunkFromServer(chunkX, chunkY) {
         let context = this;
-        return this.com.requestChunk(chunkY, chunkX).then(function(response){
+        return this.com.requestChunk(chunkX, chunkY).then(function(response){
             return new Promise(function(resolve, reject){
                 let chunk = response.data.tiles;
                 let c = new CellChunk(chunkX, chunkY);
