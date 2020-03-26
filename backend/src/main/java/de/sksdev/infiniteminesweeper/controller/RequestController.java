@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sksdev.infiniteminesweeper.communication.CellOperationMessage;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
+import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
-import de.sksdev.infiniteminesweeper.db.services.SavingService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -25,19 +25,16 @@ public class RequestController {
     private ChunkService chunkService;
     private ObjectMapper objectMapper;
     private SimpMessagingTemplate template;
-    private SavingService savingService;
     private UserService userService;
 
     @Autowired
     public RequestController(ObjectMapper objectMapper,
                              ChunkService chunkService,
                              SimpMessagingTemplate simpMessagingTemplate,
-                             SavingService savingService,
                              UserService userService) {
         this.objectMapper = objectMapper;
         this.chunkService = chunkService;
         this.template = simpMessagingTemplate;
-        this.savingService = savingService;
         this.userService = userService;
     }
 
@@ -46,7 +43,7 @@ public class RequestController {
     public String getChunk(@RequestParam("x") Long x, @RequestParam("y") Long y) {
         System.out.println("Request for chunk "+x+"/"+y);
         try {
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(x,y,true));
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x,y)));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
@@ -57,12 +54,17 @@ public class RequestController {
     public String getChunkTiles(@RequestParam("x") Long x, @RequestParam("y") Long y){
         System.out.println("Request for chunk tiles "+x+"/"+y);
         try {
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(x,y,true).getTiles());
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x,y)).getTiles());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
         }
 
+    }
+    @RequestMapping(value="/api/flushBuffer")
+    @ResponseBody
+    public String flushBuffer(){
+        return chunkService.flushBuffer()+"";
     }
 
     @RequestMapping(value = "/api/getChunkContent")
