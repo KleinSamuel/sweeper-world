@@ -12,6 +12,8 @@ export default class MinefieldViewer {
 
     constructor() {
 
+        console.log("web gl? "+PIXI.utils.isWebGLSupported());
+
         this.GLOBAL_POS_X = 0;
         this.GLOBAL_POS_Y = 0;
 
@@ -42,7 +44,7 @@ export default class MinefieldViewer {
             let app = new PIXI.Application({
                     width: 256,
                     height: 256,
-                    antialias: true,
+                    antialias: false,
                     transparent: false,
                     resolution: 1
                 }
@@ -191,32 +193,30 @@ export default class MinefieldViewer {
             event.preventDefault();
         });
 
-        context.updateField();
+        context.initField();
     }
 
     logout() {
+        // TODO: this is onyl an ugly fix to destroy all current entities on logout
         location.reload();
-        //this.startscreen.show();
     }
 
-    updateField() {
-
+    initField() {
         let context = this;
 
-        this.field.removeChildren();
+        context.displayed = {};
 
-        for (let chunkX in this.minefieldModel.field) {
-            for (let chunkY in this.minefieldModel.field[chunkX]) {
+        for (let chunkX in context.minefieldModel.field) {
 
-                // does not draw chunks that are outside of the drawing buffer
-                if (Math.abs(this.GLOBAL_POS_X - chunkX) > CONFIG.BUFFER_ADD) {
-                    continue;
-                }
-                if (Math.abs(this.GLOBAL_POS_Y - chunkY) > CONFIG.BUFFER_ADD) {
-                    continue;
-                }
+            if (!(chunkX in context.displayed)) {
+                context.displayed[chunkX] = {};
+            }
 
-                let chunk = this.minefieldModel.getChunk(chunkX, chunkY);
+            for (let chunkY in context.minefieldModel.field[chunkX]) {
+
+                let chunk = context.minefieldModel.field[chunkX][chunkY];
+
+                context.displayed[chunkX][chunkY] = new PIXI.Container();
 
                 for (let x = 0; x < chunk.innerField.length; x++) {
                     for (let y = 0; y < chunk.innerField[x].length; y++) {
@@ -225,22 +225,84 @@ export default class MinefieldViewer {
 
                         let cellSprite = cell.sprite;
                         cellSprite.on("mouseover", function(){
-                            context.cursor.x = context.field.x + this.x;
-                            context.cursor.y = context.field.y + this.y;
+                            context.cursor.x = context.field.x + chunkX * CONFIG.CHUNK_PIXEL_SIZE + this.x;
+                            context.cursor.y = context.field.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + this.y;
                             if (context.ui.is_debug) {
                                 context.cursor.setDebugText(chunkX, chunkY, x, y, cell.state.value, cell.state.hidden, cell.state.user);
                             } else {
                                 context.cursor.disableDebugText();
                             }
                         });
-                        this.field.addChild(cellSprite);
-
+                        cellSprite.position.set(x * CONFIG.CELL_PIXEL_SIZE, y * CONFIG.CELL_PIXEL_SIZE);
                         cellSprite.width = CONFIG.CELL_PIXEL_SIZE;
                         cellSprite.height = CONFIG.CELL_PIXEL_SIZE;
-                        cellSprite.x = chunkX * CONFIG.CHUNK_PIXEL_SIZE + x * CONFIG.CELL_PIXEL_SIZE;
-                        cellSprite.y = chunkY * CONFIG.CHUNK_PIXEL_SIZE + y * CONFIG.CELL_PIXEL_SIZE;
+                        context.displayed[chunkX][chunkY].addChild(cellSprite);
                     }
                 }
+
+                context.displayed[chunkX][chunkY].position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
+                this.field.addChild(context.displayed[""+chunkX][chunkY]);
+            }
+        }
+    }
+
+    updateField() {
+
+        let context = this;
+
+        for (let chunkX in this.minefieldModel.field) {
+
+            // removes all chunks out of view container that are too far away on x axis
+            if (Math.abs(chunkX - context.GLOBAL_POS_X) > CONFIG.BUFFER_ADD) {
+                delete context.displayed[chunkX];
+                continue;
+            }
+
+            // adds a new x layer if not present as all chunks here are in buffer range
+            if (!(chunkX in context.displayed)) {
+                context.displayed[chunkX] = {};
+            }
+
+            for (let chunkY in this.minefieldModel.field[chunkX]) {
+
+                // removes all chunks out of view container that are too far away on y axis
+                if (Math.abs(chunkY - context.GLOBAL_POS_Y) > CONFIG.BUFFER_ADD) {
+                    delete context.displayed[chunkX][chunkY];
+                }
+                // skips as the chunk is already drawn
+                if (chunkX in context.displayed[chunkX]) {
+                    continue;
+                }
+
+                let chunk = this.minefieldModel.field[chunkX][chunkY];
+
+                context.displayed[chunkX][chunkY] = new PIXI.Container();
+
+                for (let x = 0; x < chunk.innerField.length; x++) {
+                    for (let y = 0; y < chunk.innerField[x].length; y++) {
+
+                        let cell = chunk.innerField[x][y];
+
+                        let cellSprite = cell.sprite;
+                        cellSprite.on("mouseover", function(){
+                            context.cursor.x = context.field.x + chunkX * CONFIG.CHUNK_PIXEL_SIZE + this.x;
+                            context.cursor.y = context.field.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + this.y;
+                            if (context.ui.is_debug) {
+                                context.cursor.setDebugText(chunkX, chunkY, x, y, cell.state.value, cell.state.hidden, cell.state.user);
+                            } else {
+                                context.cursor.disableDebugText();
+                            }
+                        });
+                        cellSprite.position.set(x * CONFIG.CELL_PIXEL_SIZE, y * CONFIG.CELL_PIXEL_SIZE);
+                        cellSprite.width = CONFIG.CELL_PIXEL_SIZE;
+                        cellSprite.height = CONFIG.CELL_PIXEL_SIZE;
+                        context.displayed[chunkX][chunkY].addChild(cellSprite);
+
+                    }
+                }
+
+                context.displayed[chunkX][chunkY].position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
+                this.field.addChild(context.displayed[chunkX][chunkY]);
             }
         }
 
