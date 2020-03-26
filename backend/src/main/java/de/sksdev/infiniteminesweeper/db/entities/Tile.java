@@ -3,7 +3,6 @@ package de.sksdev.infiniteminesweeper.db.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
