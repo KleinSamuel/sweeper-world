@@ -2,8 +2,8 @@ package de.sksdev.infiniteminesweeper.communication;
 
 public class CellOperationMessage {
 
-    private long chunkX;
-    private long chunkY;
+    private int chunkX;
+    private int chunkY;
     private int x;
     private int y;
     private long user;
@@ -12,19 +12,19 @@ public class CellOperationMessage {
 
     }
 
-    public long getChunkX() {
+    public int getChunkX() {
         return chunkX;
     }
 
-    public void setChunkX(long chunkX) {
+    public void setChunkX(int chunkX) {
         this.chunkX = chunkX;
     }
 
-    public long getChunkY() {
+    public int getChunkY() {
         return chunkY;
     }
 
-    public void setChunkY(long chunkY) {
+    public void setChunkY(int chunkY) {
         this.chunkY = chunkY;
     }
 

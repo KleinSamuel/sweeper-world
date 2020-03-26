@@ -66,16 +66,11 @@ public class ChunkBuffer {
 
     @Scheduled(fixedRate = Config.CLEANER_INTERVAL)
     public void executeBufferCleaner() {
-        System.out.println("Cleaner:start\tBuffer Size = " + buffer.size());
         if (Config.BUFFERD_CHUNK_CAP <= buffer.size()) {
-            System.out.print("Cleaner:run");
             HashSet<Chunk> chunks = runBufferCleaner();
-            System.out.println(" removing " + chunks.size() + " Chunks");
             removeAndSave(chunks);
-            System.out.println("Cleaner:done\tBuffer Size = " + buffer.size());
-        } else {
-            System.out.println("Cleaner:done -> nothing to remove");
         }
+        System.out.print("\rCleaner:done\tBuffer Size = " + buffer.size());
     }
 
     private void removeAndSave(HashSet<Chunk> chunks) {

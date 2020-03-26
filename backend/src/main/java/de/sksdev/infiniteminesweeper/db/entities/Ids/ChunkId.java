@@ -3,37 +3,38 @@ package de.sksdev.infiniteminesweeper.db.entities.Ids;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 public class ChunkId implements Serializable, Comparable<ChunkId> {
     @NotNull
-    private long x;
+    private int x;
 
     @NotNull
-    private long y;
+    private int y;
 
     public ChunkId() {
 
     }
 
-    public ChunkId(long x, long y) {
+    public ChunkId(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public long getX() {
+    public int getX() {
         return x;
     }
 
-    public void setX(long x) {
+    public void setX(int x) {
         this.x = x;
     }
 
-    public long getY() {
+    public int getY() {
         return y;
     }
 
-    public void setY(long y) {
+    public void setY(int y) {
         this.y = y;
     }
 
@@ -48,9 +49,8 @@ public class ChunkId implements Serializable, Comparable<ChunkId> {
 
     @Override
     public int hashCode() {
-        return (x + "_" + y).hashCode();
+        return Objects.hash(x, y);
     }
-
 
     @Override
     public String toString() {
@@ -62,11 +62,12 @@ public class ChunkId implements Serializable, Comparable<ChunkId> {
 
     @Override
     public int compareTo(ChunkId other) {
-        long x_dist = this.getX() - other.getX();
+        int x_dist = this.getX() - other.getX();
         if (x_dist == 0) {
-            long y_dist = this.getY() - other.getY();
-            return y_dist != 0 ? (y_dist > 0 ? 1 : -1) : 0;
+            int y_dist = this.getY() - other.getY();
+            return y_dist;
+//            return y_dist != 0 ? (y_dist > 0 ? 1 : -1) : 0;
         }
-        return x_dist > 0 ? 1 : -1;
+        return x_dist;// > 0 ? 1 : -1;
     }
 }

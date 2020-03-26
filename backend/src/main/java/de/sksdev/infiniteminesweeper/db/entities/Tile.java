@@ -42,11 +42,11 @@ public class Tile implements Comparable<Tile>, Serializable {
 
     @Id
     @JsonIgnore
-    private long x;
+    private int x;
 
     @Id
     @JsonIgnore
-    private long y;
+    private int y;
 
     @MapsId
     @JoinColumns({
@@ -126,19 +126,19 @@ public class Tile implements Comparable<Tile>, Serializable {
         this.setY(chunk.getY());
     }
 
-    public long getX() {
+    public int getX() {
         return x;
     }
 
-    public void setX(long x) {
+    public void setX(int x) {
         this.x = x;
     }
 
-    public long getY() {
+    public int getY() {
         return y;
     }
 
-    public void setY(long y) {
+    public void setY(int y) {
         this.y = y;
     }
 }

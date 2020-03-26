@@ -23,7 +23,7 @@ public class Chunk implements Serializable {
     public Chunk() {
     }
 
-    public Chunk(long x, long y) {
+    public Chunk(int x, int y) {
         this(new ChunkId(x, y));
     }
 
@@ -63,19 +63,19 @@ public class Chunk implements Serializable {
     @JsonIgnore
     private boolean buffered = false;
 
-    public long getX() {
+    public int getX() {
         return this.id.getX();
     }
 
-    public void setX(long x) {
+    public void setX(int x) {
         this.id.setX(x);
     }
 
-    public long getY() {
+    public int getY() {
         return this.id.getY();
     }
 
-    public void setY(long y) {
+    public void setY(int y) {
         this.id.setY(y);
     }
 

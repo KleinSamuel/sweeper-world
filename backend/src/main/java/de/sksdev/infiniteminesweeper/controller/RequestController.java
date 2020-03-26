@@ -40,7 +40,7 @@ public class RequestController {
 
     @RequestMapping(value = "/api/getChunk")
     @ResponseBody
-    public String getChunk(@RequestParam("x") Long x, @RequestParam("y") Long y) {
+    public String getChunk(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
         System.out.println("Request for chunk "+x+"/"+y);
         try {
             return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x,y)));
@@ -51,7 +51,7 @@ public class RequestController {
     }
 
     @RequestMapping(value="/api/getChunkTiles")
-    public String getChunkTiles(@RequestParam("x") Long x, @RequestParam("y") Long y){
+    public String getChunkTiles(@RequestParam("x") Integer x, @RequestParam("y") Integer y){
         System.out.println("Request for chunk tiles "+x+"/"+y);
         try {
             return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x,y)).getTiles());
@@ -69,7 +69,7 @@ public class RequestController {
 
     @RequestMapping(value = "/api/getChunkContent")
     @ResponseBody
-    public String getChunkContent(@RequestParam("x") Long x, @RequestParam("y") Long y) {
+    public String getChunkContent(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
         try {
             return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(x,y,true));
         } catch (JsonProcessingException e) {
@@ -80,7 +80,7 @@ public class RequestController {
 
     @RequestMapping(value="/api/getTile")
     @ResponseBody
-    public String getTile( @RequestParam("x") Long x, @RequestParam("y") Long y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile){
+    public String getTile( @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile){
         System.out.println("Request for tile "+x+"/"+y + "(" +x_tile+"/"+y_tile+")");
         try {
             return objectMapper.writeValueAsString(chunkService.getTile(x,y,x_tile,y_tile));

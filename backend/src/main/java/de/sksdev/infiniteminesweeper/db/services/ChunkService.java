@@ -43,16 +43,16 @@ public class ChunkService {
     }
 
 
-    public Chunk getOrCreateChunkContent(long x, long y, boolean persist) {
+    public Chunk getOrCreateChunkContent(int x, int y, boolean persist) {
         Chunk c = getOrCreateChunk(new ChunkId(x, y));
         return c.isFilled() ? c : generateContent(c);
     }
 
-    public Tile getTile(long x, long y, int x_tile, int y_tile) {
+    public Tile getTile(int x, int y, int x_tile, int y_tile) {
         return tileRepository.findById(new TileId(x, y, x_tile, y_tile)).get();
     }
 
-    private Chunk newChunk(long x, long y) {
+    private Chunk newChunk(int x, int y) {
         return new Chunk(x, y);
     }
 

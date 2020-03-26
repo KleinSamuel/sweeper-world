@@ -28,7 +28,6 @@ public class AsyncService {
 
     @Async
     public void save(Chunk chunk) {
-        System.out.println("schedule saving " + chunk);
         saveQueue.add(new LinkedList<>(Collections.singletonList(chunk)));
         if (!isSaving)
             saver();
@@ -36,22 +35,18 @@ public class AsyncService {
 
     @Async
     public void saveAll(Iterable<Chunk> chunks) {
-        System.out.println("schedule saving " + chunks);
         saveQueue.add(chunks);
         if (!isSaving)
             saver();
     }
 
     public void saver() {
-        System.out.println("Launch Saver");
         isSaving = true;
         while (!saveQueue.isEmpty()) {
             chunkRepository.saveAll(saveQueue.getFirst());
-            System.out.println("\tsaved " + saveQueue.getFirst());
             saveQueue.removeFirst();
         }
         isSaving = false;
-        System.out.println("Stopping Saver");
         System.gc();
     }
 
