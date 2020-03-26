@@ -3,6 +3,8 @@ package de.sksdev.infiniteminesweeper.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sksdev.infiniteminesweeper.communication.CellOperationMessage;
+import de.sksdev.infiniteminesweeper.communication.LoginResponse;
+import de.sksdev.infiniteminesweeper.communication.RegisterRequest;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
@@ -14,10 +16,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class RequestController {
@@ -88,6 +87,39 @@ public class RequestController {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @PostMapping("/register")
+    public String register(@RequestBody RegisterRequest request) {
+
+        // TODO: create new user in db and send respective hash and id
+
+        LoginResponse response = new LoginResponse();
+        response.setHash("some-test-hash");
+        response.setId(1);
+        try {
+            return objectMapper.writeValueAsString(response);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @GetMapping("/login")
+    public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
+
+        // TODO: check username and password and send respective hash and id
+        // hash is used to verify the id
+
+        LoginResponse response = new LoginResponse();
+        response.setHash("some-test-hash");
+        response.setId(1);
+        try {
+            return objectMapper.writeValueAsString(response);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @GetMapping("/fuckingshit")

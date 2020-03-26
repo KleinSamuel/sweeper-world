@@ -18,16 +18,18 @@ export default class MinefieldModel {
      * @param chunkX
      * @param chunkY
      */
-    constructor(userID, communicator, chunkX, chunkY) {
+    constructor(communicator, chunkX, chunkY) {
 
         this.com = communicator;
-        this.userID = userID;
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.field = {};
     }
 
     init() {
+
+        console.log("[ INFO ] MinefieldModel initialized");
+
         let context = this;
         return new Promise(function(resolve, reject){
             let promiseStack = [];
