@@ -13,12 +13,8 @@ import axios from "axios";
  */
 export default class Communicator {
 
-    constructor(userID) {
+    constructor() {
         this.isConnected = false;
-
-        if (this.userID === undefined) {
-            this.userID = userID;
-        }
 
         if(!this.client) {
             this.initClient();
@@ -55,6 +51,7 @@ export default class Communicator {
             }
         });
         this.client.activate();
+        console.log("[ INFO ] Communicator initialized");
     }
 
     /**
@@ -76,7 +73,7 @@ export default class Communicator {
                 chunkY: cell.chunkY,
                 x: cell.y,
                 y: cell.x,
-                user: this.userID
+                user: CONFIG.getID()
             })
         });
     }
@@ -89,7 +86,7 @@ export default class Communicator {
                 chunkY: cell.chunkY,
                 x: cell.y,
                 y: cell.x,
-                user: this.userID
+                user: CONFIG.getID()
             })
         });
     }

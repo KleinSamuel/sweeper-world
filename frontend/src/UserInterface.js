@@ -4,16 +4,24 @@ import * as CONFIG from "./Config";
 
 export default class UserInterface extends PIXI.Container {
 
-    constructor(width, height) {
+    constructor(main, width, height) {
         super();
+        this.main = main;
+
         this.is_debug = false;
 
         this.addOptionBackground();
         this.addOptionDebug();
 
         this.addInfoBackground();
+        this.addInfoPlayername();
+        this.addLogoutButton();
 
         this.resize(width, height)
+    }
+
+    update() {
+        this.i_name.n.text = "ID: "+CONFIG.getID();
     }
 
     resize(width, height) {
@@ -43,6 +51,35 @@ export default class UserInterface extends PIXI.Container {
         background.y = -2;
         this.infoBackground = background;
         this.addChildAt(this.infoBackground, 0)
+    }
+
+    addInfoPlayername() {
+        this.i_name = new PIXI.Container();
+        this.i_name.x = 15;
+        this.i_name.y = 15;
+
+        this.i_name.n = new PIXI.Text("ID: unknown", {
+            fontSize: 18,
+            fill: 0xd12bea
+        });
+
+        this.i_name.addChild(this.i_name.n);
+        this.infoBackground.addChild(this.i_name);
+    }
+
+    addLogoutButton() {
+        let context = this;
+        this.b_logout = new PIXI.Sprite(textures.button_logout);
+        this.b_logout.width = 60;
+        this.b_logout.height = 30;
+        this.b_logout.x = 15;
+        this.b_logout.y = 50;
+        this.b_logout.interactive = true;
+        this.b_logout.on("mousedown", function() {
+            CONFIG.setID(-1);
+            context.main.logout();
+        });
+        this.infoBackground.addChild(this.b_logout);
     }
 
     updateBoxDebug() {
