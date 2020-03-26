@@ -27,7 +27,8 @@ export default class Cell {
         this.chunkY = chunkY;
         this.x = x;
         this.y = y;
-        this.sprite = undefined;
+        this.sprite = new PIXI.Sprite();
+        this.sprite.interactive = true;
         this.setState(state);
     }
 
@@ -46,15 +47,15 @@ export default class Cell {
      */
     updateSprite() {
         if (this.state.hidden && !this.state.user) {
-            this.sprite = new PIXI.Sprite(textures.closed);
+            this.sprite.texture = textures.closed;
         } else if (this.state.hidden && this.state.user) {
-            this.sprite = new PIXI.Sprite(textures.flag);
+            this.sprite.texture = textures.flag;
         } else if (this.state.value === 0) {
-            this.sprite = new PIXI.Sprite(textures.open);
+            this.sprite.texture = textures.open;
         } else if (this.state.value === 9) {
-            this.sprite = new PIXI.Sprite(textures.mine);
+            this.sprite.texture = textures.mine;
         } else {
-            this.sprite = new PIXI.Sprite(textures["num"+this.state.value]);
+            this.sprite.texture = textures["num"+this.state.value];
         }
     }
 }

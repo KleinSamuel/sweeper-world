@@ -13,6 +13,10 @@ import num5 from "./assets/5.png";
 import num6 from "./assets/6.png";
 import num7 from "./assets/7.png";
 import num8 from "./assets/8.png";
+
+import box_empty from "./assets/box_empty.png";
+import box_checked from "./assets/box_checked.png";
+
 import explosionSound from "./assets/explosion.mp3";
 
 let pipeline;
@@ -36,7 +40,9 @@ export function init() {
                 num6: resources.num6.texture,
                 num7: resources.num7.texture,
                 num8: resources.num7.texture,
-                num9: resources.num7.texture
+                num9: resources.num7.texture,
+                box_empty: resources.box_empty.texture,
+                box_checked: resources.box_checked.texture
             };
             return textures;
         }).catch(function(err){
@@ -62,6 +68,8 @@ function preloadTextures() {
             .add("num6", num6)
             .add("num7", num7)
             .add("num8", num8)
+            .add("box_empty", box_empty)
+            .add("box_checked", box_checked)
             .add("assets/mc.json")
             .add("explosion", explosionSound)
             .load(function(loader, resources){

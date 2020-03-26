@@ -29,6 +29,7 @@ export default class CellChunk {
      * Each x coordinate contains another dictionary whose keys are the y coordinate and
      * the value is the cell state dictionary.
      * @param fieldStates
+     * @param callback function to be executed on cell click
      */
     initFieldMaps(fieldStates) {
         for (let x in fieldStates) {

@@ -51,11 +51,47 @@ export default class MinefieldModel {
      */
     retrieveChunkFromServer(chunkX, chunkY) {
         let context = this;
+
+        let clickWrapper = (function(isLeftclick, chunkX, chunkY, x, y) {
+            if (isLeftclick) {
+                this.clickCell(chunkX, chunkY, x, y);
+            } else {
+                this.flagCell(chunkX, chunkY, x, y);
+            }
+        }).bind(this);
+
         return this.com.requestChunk(chunkX, chunkY).then(function(response){
             return new Promise(function(resolve, reject){
                 let chunk = response.data.tiles;
                 let c = new CellChunk(chunkX, chunkY);
                 c.initFieldMaps(chunk);
+
+                for (let i = 0; i < c.innerField.length; i++) {
+                    for (let j = 0; j < c.innerField[i].length; j++) {
+                        let cell = c.innerField[i][j];
+                        cell.sprite.on("mousedown", function(event) {
+                            this.m_posX = event.data.global.x;
+                            this.m_posY = event.data.global.y;
+                        });
+                        cell.sprite.on("mouseup", function(event) {
+                            if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
+                                Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
+                                clickWrapper(true, cell.chunkX, cell.chunkY, cell.x, cell.y);
+                            }
+                        });
+                        cell.sprite.on("rightdown", function(event) {
+                            this.m_posX = event.data.global.x;
+                            this.m_posY = event.data.global.y;
+                        });
+                        cell.sprite.on("rightup", function(event) {
+                            if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
+                                Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
+                                clickWrapper(false, cell.chunkX, cell.chunkY, cell.x, cell.y);
+                            }
+                        });
+                    }
+                }
+
                 context.addChunk(chunkX, chunkY, c);
                 resolve();
             });
@@ -207,7 +243,6 @@ export default class MinefieldModel {
             }
             // clicked on mine
             else if (cell.state.value === 9) {
-                console.log("opened mine");
                 returnValue = 1;
             }
         }
@@ -253,18 +288,25 @@ export default class MinefieldModel {
      * @param y coordinate of the cell
      */
     openBlock(chunkX, chunkY, x, y) {
+
         let updatedCells = [];
         let stack = this.getAdjacentCells(chunkX, chunkY, x, y);
 
         while (stack.length > 0) {
             let c = stack.pop();
+
             // skips the cell if it already opened
             if (!c.state.hidden) {
                 continue;
             }
             // adds all adjacent cells to the stack if the cell is empty
             if (c.state.value === 0) {
-                stack = stack.concat(this.getAdjacentCells(c.chunkX, c.chunkX, c.x, c.y));
+                let toAdd = this.getAdjacentCells(c.chunkX, c.chunkY, c.x, c.y);
+                for (let cell of toAdd) {
+                    if (cell.state.hidden) {
+                        stack.push(cell);
+                    }
+                }
             }
             // adds the cell to the cell that need to be updated
             updatedCells.push(c);
@@ -285,6 +327,7 @@ export default class MinefieldModel {
                         return [];
                     }
                 } else if (cell.state.value === 0) {
+                    toOpen.push(cell);
                     toOpen = toOpen.concat(this.openBlock(cell.chunkX, cell.chunkY, cell.x, cell.y));
                 } else {
                     toOpen.push(cell);
