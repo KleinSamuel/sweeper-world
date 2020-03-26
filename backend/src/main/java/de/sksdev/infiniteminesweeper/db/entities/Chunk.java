@@ -3,6 +3,7 @@ package de.sksdev.infiniteminesweeper.db.entities;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.sksdev.infiniteminesweeper.Config;
+import de.sksdev.infiniteminesweeper.MineFieldGenerator;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.services.BufferedChunk;
 
@@ -117,13 +118,18 @@ public class Chunk implements Serializable {
     }
 
     private void initTiles() {
-        tiles = new TreeSet<>();
+        tiles = new
+                TreeSet<>();
+        grid = new Tile[Config.CHUNK_SIZE][Config.CHUNK_SIZE];
 
         for (int y = 0; y < Config.CHUNK_SIZE; y++) {
             for (int x = 0; x < Config.CHUNK_SIZE; x++) {
-                tiles.add(new Tile(this, x, y));
+                Tile t = new Tile(this, x, y);
+                tiles.add(t);
+                grid[y][x]=t;
             }
         }
+        MineFieldGenerator.setMines(tiles);
     }
 
     @JsonIgnore
@@ -218,6 +224,7 @@ public class Chunk implements Serializable {
         this.grid = grid;
     }
 
+    @JsonIgnore
     public BufferedChunk getBuffer() {
         return buffer;
     }

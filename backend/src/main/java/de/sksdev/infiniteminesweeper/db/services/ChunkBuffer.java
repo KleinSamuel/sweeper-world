@@ -43,12 +43,10 @@ public class ChunkBuffer {
 
     public void save(Chunk chunk) {
         buffer(chunk.getBuffer());
-//        savingService.save(chunk);
     }
 
     public void saveAll(Iterable<Chunk> chunks) {
         buffer(chunks);
-//        savingService.saveAll(chunks);
     }
 
     private void buffer(Iterable<Chunk> chunks) {
@@ -71,32 +69,41 @@ public class ChunkBuffer {
         System.out.println("Cleaner:start\tBuffer Size = " + buffer.size());
         if (Config.BUFFERD_CHUNK_CAP <= buffer.size()) {
             System.out.print("Cleaner:run");
-            HashSet<Chunk> chunks = runBufferCleaner(stack, buffer);
+            HashSet<Chunk> chunks = runBufferCleaner();
             System.out.println(" removing " + chunks.size() + " Chunks");
-            asyncService.saveAll(chunks);
+            removeAndSave(chunks);
             System.out.println("Cleaner:done\tBuffer Size = " + buffer.size());
         } else {
             System.out.println("Cleaner:done -> nothing to remove");
         }
     }
 
-    public HashSet<Chunk> runBufferCleaner(HashSet<BufferedChunk> stack, HashMap<ChunkId, Chunk> buffer) {
-        TreeSet<BufferedChunk> orderedStack = new TreeSet<>(stack);
-        Iterator<BufferedChunk> it = orderedStack.iterator();
-        HashSet<Chunk> chunks = new HashSet<>();
-        long currentTime =System.currentTimeMillis();
-        while (it.hasNext()) {
-            BufferedChunk bc = it.next();
-            if (currentTime - bc.getTimestamp() > Config.BUFFER_DECAY) {
-                chunks.add(bc.getChunk());
-            }
-            else
-                break;
-        }
+    private void removeAndSave(HashSet<Chunk> chunks) {
         chunks.forEach(c -> {
             buffer.remove(c.getId());
             stack.remove(c.getBuffer());
         });
+        asyncService.saveAll(chunks);
+    }
+
+    public HashSet<Chunk> runBufferCleaner() {
+        TreeSet<BufferedChunk> orderedStack = new TreeSet<>(stack);
+        Iterator<BufferedChunk> it = orderedStack.iterator();
+        HashSet<Chunk> chunks = new HashSet<>();
+        long currentTime = System.currentTimeMillis();
+        while (it.hasNext()) {
+            BufferedChunk bc = it.next();
+            if (currentTime - bc.getTimestamp() > Config.BUFFER_DECAY) {
+                chunks.add(bc.getChunk());
+            } else
+                break;
+        }
         return chunks;
+    }
+
+    public boolean flush() {
+        if (buffer.size() > 0)
+            removeAndSave(new HashSet<>(buffer.values()));
+        return true;
     }
 }
