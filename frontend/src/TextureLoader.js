@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import cursor from "./assets/cursor.png";
 import closed from "./assets/closed.png";
 import open from "./assets/open.png";
-import mine from "./assets/mine.png";
+import mine from "./assets/mine_red.png";
 import flag from "./assets/flag.png";
 import num1 from "./assets/1.png";
 import num2 from "./assets/2.png";
@@ -13,6 +13,7 @@ import num5 from "./assets/5.png";
 import num6 from "./assets/6.png";
 import num7 from "./assets/7.png";
 import num8 from "./assets/8.png";
+import explosionSound from "./assets/explosion.mp3";
 
 let pipeline;
 
@@ -34,7 +35,8 @@ export function init() {
                 num5: resources.num5.texture,
                 num6: resources.num6.texture,
                 num7: resources.num7.texture,
-                num8: resources.num8.texture,
+                num8: resources.num7.texture,
+                num9: resources.num7.texture
             };
             return textures;
         }).catch(function(err){
@@ -46,7 +48,7 @@ export function init() {
 
 function preloadTextures() {
     return new Promise(function(resolve, reject){
-        PIXI.loader
+        PIXI.Loader.shared
             .add("cursor", cursor)
             .add("closed", closed)
             .add("open", open)
@@ -60,6 +62,8 @@ function preloadTextures() {
             .add("num6", num6)
             .add("num7", num7)
             .add("num8", num8)
+            .add("assets/mc.json")
+            .add("explosion", explosionSound)
             .load(function(loader, resources){
                 resolve(resources);
             });

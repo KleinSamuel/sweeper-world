@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const express = require("express");
 
 module.exports = {
     entry: './src/index.js',
@@ -19,7 +20,10 @@ module.exports = {
     devServer: {
         contentBase: "./dist",
         host: 'localhost',
-        port: 8080
+        port: 8080,
+        before: function(app) {
+            app.use("/assets", express.static(__dirname+"/src/assets/"));
+        }
     },
     module: {
         rules: [
@@ -28,7 +32,7 @@ module.exports = {
                 use: [ 'style-loader', 'css-loader' ]
             },
             {
-                test: /\.(png|svg|jpg|gif|ico)$/,
+                test: /\.(png|svg|jpg|gif|ico|mp3)$/,
                 use:[
                     {
                         loader: "file-loader",
