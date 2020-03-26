@@ -29,8 +29,12 @@ public class Chunk implements Serializable {
 
     public Chunk(ChunkId id) {
         setId(id);
-        buffer = new BufferedChunk(this);
+        initBuffer();
         initTiles();
+    }
+
+    private void initBuffer() {
+        buffer = new BufferedChunk(this);
     }
 
     @EmbeddedId
@@ -126,7 +130,7 @@ public class Chunk implements Serializable {
             for (int x = 0; x < Config.CHUNK_SIZE; x++) {
                 Tile t = new Tile(this, x, y);
                 tiles.add(t);
-                grid[y][x]=t;
+                grid[y][x] = t;
             }
         }
         MineFieldGenerator.setMines(tiles);
@@ -226,6 +230,11 @@ public class Chunk implements Serializable {
 
     @JsonIgnore
     public BufferedChunk getBuffer() {
+        try {
+            buffer.getTimestamp();
+        } catch (NullPointerException ignore) {
+            initBuffer();
+        }
         return buffer;
     }
 
