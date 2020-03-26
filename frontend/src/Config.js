@@ -10,13 +10,13 @@ export const URL_API = "http://localhost:8090/backend";
 /* number of cells in a cell chunk */
 export const CHUNK_SIZE = 32;
 /* size of a single cell in pixel */
-export const CELL_PIXEL_SIZE = 30;
+export const CELL_PIXEL_SIZE = 50;
 /* size of a chunk in pixel */
 export const CHUNK_PIXEL_SIZE = CHUNK_SIZE * CELL_PIXEL_SIZE;
 /* amount of chunks that are preloaded around the current position */
-export const BUFFER_ADD = 2;
+export const BUFFER_ADD = 1;
 /* distance of chunks after which they are removed from the buffer */
-export const BUFFER_REMOVE = 3;
+export const BUFFER_REMOVE = 2;
 
 
 let USER_ID = -1;

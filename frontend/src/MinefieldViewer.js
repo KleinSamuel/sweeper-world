@@ -101,7 +101,7 @@ export default class MinefieldViewer {
         });
 
         window.addEventListener("resize", function(){
-            app.renderer.resize(window.innerWidth, window.innerHeight);
+            context.app.renderer.resize(window.innerWidth, window.innerHeight);
             context.ui.resize(window.innerWidth, window.innerHeight);
         });
 
@@ -202,6 +202,9 @@ export default class MinefieldViewer {
     }
 
     initField() {
+
+        console.log("init field!");
+
         let context = this;
 
         context.displayed = {};
@@ -244,9 +247,17 @@ export default class MinefieldViewer {
                 this.field.addChild(context.displayed[""+chunkX][chunkY]);
             }
         }
+
+        let count = 0;
+        for (let chunkX in context.displayed) {
+            count += Object.keys(context.displayed[chunkX]).length;
+        }
+        console.log("size displayed: "+count);
     }
 
     updateField() {
+
+        console.log("update field");
 
         let context = this;
 
@@ -268,6 +279,7 @@ export default class MinefieldViewer {
                 // removes all chunks out of view container that are too far away on y axis
                 if (Math.abs(chunkY - context.GLOBAL_POS_Y) > CONFIG.BUFFER_ADD) {
                     delete context.displayed[chunkX][chunkY];
+                    continue;
                 }
                 // skips as the chunk is already drawn
                 if (chunkX in context.displayed[chunkX]) {
@@ -305,6 +317,17 @@ export default class MinefieldViewer {
                 this.field.addChild(context.displayed[chunkX][chunkY]);
             }
         }
+
+        let count = 0;
+        for (let chunkX in context.displayed) {
+            count += Object.keys(context.displayed[chunkX]).length;
+        }
+        console.log("size displayed: "+count);
+        count = 0;
+        for (let chunkX in context.minefieldModel.field) {
+            count += Object.keys(context.minefieldModel.field[chunkX]).length;
+        }
+        console.log("cached: "+count);
 
     }
 
