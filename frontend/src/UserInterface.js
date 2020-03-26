@@ -4,23 +4,45 @@ import * as CONFIG from "./Config";
 
 export default class UserInterface extends PIXI.Container {
 
-    constructor() {
+    constructor(width, height) {
         super();
         this.is_debug = false;
 
-        this.addBackground();
+        this.addOptionBackground();
         this.addOptionDebug();
+
+        this.addInfoBackground();
+
+        this.resize(width, height)
     }
 
-    addBackground () {
+    resize(width, height) {
+        this.screenWidth = width;
+        this.screenHeight = height;
+        this.infoBackground.x = this.screenWidth - 300;
+    }
+
+    addOptionBackground () {
         let background = new PIXI.Graphics();
         background.beginFill(0x200f21);
         background.lineStyle(2, 0x54123b);
         background.drawRect(0,0,200,50);
         background.interactive = true;
         background.buttonMode = true;
-        this.background = background;
-        this.addChildAt(background, 0)
+        this.optionBackground = background;
+        this.addChildAt(this.optionBackground, 0)
+    }
+
+    addInfoBackground() {
+        let background = new PIXI.Graphics();
+        background.beginFill(0x200f21);
+        background.lineStyle(2, 0x54123b);
+        background.drawRect(0,0, 300, 151);
+        background.interactive = true;
+        background.buttonMode = true;
+        background.y = -2;
+        this.infoBackground = background;
+        this.addChildAt(this.infoBackground, 0)
     }
 
     updateBoxDebug() {
@@ -40,8 +62,6 @@ export default class UserInterface extends PIXI.Container {
         this.o_debug.box.on("mousedown", function(){
             context.is_debug = !context.is_debug;
             context.updateBoxDebug();
-            console.log("update debug");
-            console.log(context.is_debug);
         });
         this.o_debug.addChild(this.o_debug.box);
 

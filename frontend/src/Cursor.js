@@ -9,21 +9,32 @@ export default class Cursor extends PIXI.Container {
         this.initCursor();
     }
 
+    setDebugText(chunkX, chunkY, x, y, value, hidden, user) {
+        this.posText.text = "chunk " + chunkX + ":" + chunkY +
+            "\ncell " + x + ":" + y +
+            "\nvalue: " + value +
+            "\nopen: " + !hidden +
+            "\nplayer: " + user;
+        this.posText.visible = true;
+    }
+
+    disableDebugText() {
+        this.posText.visible = false;
+    }
+
     initCursor() {
         this.sprite = new PIXI.Sprite(textures.cursor);
         this.sprite.width = CONFIG.CELL_PIXEL_SIZE;
         this.sprite.height = CONFIG.CELL_PIXEL_SIZE;
+        this.addChild(this.sprite);
 
-        /*
-        context.posText = new PIXI.Text("", {
+        this.posText = new PIXI.Text("", {
             fontSize: 20,
             fill: 0xffffff,
             align: "center"
         });
-        context.posText.y = cursor.y - 4*CONFIG.CELL_PIXEL_SIZE;
-        context.cursor.addChild(context.posText);
-        */
-
-        this.addChild(this.sprite);
+        this.posText.y = this.y - 4*CONFIG.CELL_PIXEL_SIZE;
+        this.posText.visible = false;
+        this.addChild(this.posText);
     }
 }

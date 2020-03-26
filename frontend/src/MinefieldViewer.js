@@ -26,9 +26,10 @@ export default class MinefieldViewer {
                 }).then(resolve);
             });
         }).then(function(app){
+
             context.app = app;
 
-            context.ui = new UserInterface();
+            context.ui = new UserInterface(window.innerWidth, window.innerHeight);
 
             context.field = new PIXI.Container();
 
@@ -61,30 +62,9 @@ export default class MinefieldViewer {
                 src: "assets/explosion.mp3"
             });
 
-            context.updateField();
-        });
-    }
-
-    initApplication() {
-
-        let context = this;
-
-        return new Promise(function(resolve, reject) {
-            let app = new PIXI.Application({
-                    width: 256,
-                    height: 256,
-                    antialias: true,
-                    transparent: false,
-                    resolution: 1
-                }
-            );
-
-            document.body.appendChild(app.view);
-
-            app.renderer.resize(window.innerWidth, window.innerHeight);
-
             window.addEventListener("resize", function(){
                 app.renderer.resize(window.innerWidth, window.innerHeight);
+                context.ui.resize(window.innerWidth, window.innerHeight);
             });
 
             let fieldX = -1;
@@ -129,9 +109,6 @@ export default class MinefieldViewer {
 
             window.addEventListener("mousemove", function(event){
 
-                let x = event.clientX;
-                let y = event.clientY;
-
                 // true if mouse button is down
                 if (mouseDownX !== -1 && mouseDownY !== -1) {
                     // calculates the distance from the origin when the mouse was pressed
@@ -143,6 +120,7 @@ export default class MinefieldViewer {
                         context.field.y = fieldY - distY;
                         context.cursor.sprite.visible = false;
 
+                        // computes the chunk x and y coordinates of the main chunk in focus
                         let oldGlobalX = context.GLOBAL_POS_X;
                         let oldGlobalY = context.GLOBAL_POS_Y;
 
@@ -154,14 +132,13 @@ export default class MinefieldViewer {
                         context.minefieldModel.chunkX = context.GLOBAL_POS_X;
                         context.minefieldModel.chunkY = context.GLOBAL_POS_Y;
 
-                        // loads the next chunks
+                        // loads the next chunks if player moved out of buffer
                         let movedX = context.GLOBAL_POS_X - oldGlobalX;
                         if (movedX !== 0) {
                             context.minefieldModel.moveX(movedX).then(function(){
                                 context.updateField();
                             });
                         }
-
                         let movedY = context.GLOBAL_POS_Y - oldGlobalY;
                         if (movedY !== 0) {
                             context.minefieldModel.moveY(movedY).then(function(){
@@ -171,38 +148,6 @@ export default class MinefieldViewer {
                     }
                 }
 
-                if (context.ui.is_debug) {
-
-                    // offset of how much of the leftmost chunk is visible
-                    let chunkOffsetX = (context.field.x > 0) ? (context.field.x % CONFIG.CHUNK_PIXEL_SIZE) : CONFIG.CHUNK_PIXEL_SIZE + (context.field.x % CONFIG.CHUNK_PIXEL_SIZE);
-                    let chunkOffsetY = (context.field.y > 0) ? (context.field.y % CONFIG.CHUNK_PIXEL_SIZE) : CONFIG.CHUNK_PIXEL_SIZE + (context.field.y % CONFIG.CHUNK_PIXEL_SIZE);
-
-                    // calculates the chunk relative to the screen
-                    let tmpChunkX = ~~((context.cursor.x + (CONFIG.CHUNK_PIXEL_SIZE - chunkOffsetX)) / CONFIG.CHUNK_PIXEL_SIZE);
-                    let tmpChunkY = ~~((context.cursor.y + (CONFIG.CHUNK_PIXEL_SIZE - chunkOffsetY)) / CONFIG.CHUNK_PIXEL_SIZE);
-                    // calculates the global coordinates of the chunk the mouse is in
-                    let chunkX = context.GLOBAL_POS_X + tmpChunkX;
-                    let chunkY = context.GLOBAL_POS_Y + tmpChunkY;
-
-                    // calculates the cell relative in the respective chunk
-                    let cellOffsetX = ~~(chunkOffsetX / CONFIG.CELL_PIXEL_SIZE) % CONFIG.CHUNK_SIZE;
-                    let cellOffsetY = ~~(chunkOffsetY / CONFIG.CELL_PIXEL_SIZE) % CONFIG.CHUNK_SIZE;
-                    let cellX = (context.cursor.tmpX - cellOffsetX) % CONFIG.CHUNK_SIZE;
-                    cellX = (cellX < 0) ? CONFIG.CHUNK_SIZE + cellX : cellX;
-                    let cellY = (context.cursor.tmpY - cellOffsetY) % CONFIG.CHUNK_SIZE;
-                    cellY = (cellY < 0) ? CONFIG.CHUNK_SIZE + cellY : cellY;
-
-                    let cell = context.minefieldModel.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-                    context.posText.text = "chunk " + chunkX + ":" + chunkY +
-                        "\ncell " + cellX + ":" + cellY +
-                        "\nvalue: " + cell.state.value +
-                        "\nopen: " + !cell.state.hidden +
-                        "\nplayer: " + cell.state.user;
-                    context.posText.visible = true;
-                } else {
-                    //context.posText.visible = false;
-                }
-
             });
 
             window.addEventListener("contextmenu", function(event){
@@ -210,12 +155,30 @@ export default class MinefieldViewer {
                 event.preventDefault();
             });
 
-            resolve(app);
+            context.updateField();
         });
     }
 
-    computeCursorCellCoordinate(screen, offset) {
-        return ~~((screen-offset) / CONFIG.CELL_PIXEL_SIZE);
+    initApplication() {
+
+        let context = this;
+
+        return new Promise(function(resolve, reject) {
+            let app = new PIXI.Application({
+                    width: 256,
+                    height: 256,
+                    antialias: true,
+                    transparent: false,
+                    resolution: 1
+                }
+            );
+
+            document.body.appendChild(app.view);
+
+            app.renderer.resize(window.innerWidth, window.innerHeight);
+
+            resolve(app);
+        });
     }
 
     updateField() {
@@ -246,6 +209,11 @@ export default class MinefieldViewer {
                         cellSprite.on("mouseover", function(){
                             context.cursor.x = context.field.x + this.x;
                             context.cursor.y = context.field.y + this.y;
+                            if (context.ui.is_debug) {
+                                context.cursor.setDebugText(chunkX, chunkY, x, y, cell.state.value, cell.state.hidden, cell.state.user);
+                            } else {
+                                context.cursor.disableDebugText();
+                            }
                         });
                         this.field.addChild(cellSprite);
 
