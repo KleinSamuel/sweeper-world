@@ -71,8 +71,8 @@ export default class Communicator {
             body: JSON.stringify({
                 chunkX: cell.chunkX,
                 chunkY: cell.chunkY,
-                x: cell.y,
-                y: cell.x,
+                x: cell.cellX,
+                y: cell.cellY,
                 user: CONFIG.getID()
             })
         });
@@ -84,8 +84,8 @@ export default class Communicator {
             body: JSON.stringify({
                 chunkX: cell.chunkX,
                 chunkY: cell.chunkY,
-                x: cell.y,
-                y: cell.x,
+                x: cell.cellX,
+                y: cell.cellY,
                 user: CONFIG.getID()
             })
         });

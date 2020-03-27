@@ -1,6 +1,7 @@
 import * as CONFIG from "./Config";
 import * as PIXI from "pixi.js";
 import * as Textures from "./TextureLoader";
+import * as Sounds from "./Sounds";
 import StartScreen from "./StartScreen";
 import Cursor from "./Cursor";
 import UserInterface from "./UserInterface";
@@ -33,6 +34,7 @@ export default class MinefieldViewer {
 
     initialize() {
         Textures.init()
+            .then(Sounds.init)
             .then(this.initApplication.bind(this))
             .then(this.createField.bind(this));
     }
@@ -55,8 +57,7 @@ export default class MinefieldViewer {
             context.app = app;
             context.app.renderer.resize(window.innerWidth, window.innerHeight);
 
-            context.minefieldModel = new MinefieldModel(context.com, context.GLOBAL_POS_X, context.GLOBAL_POS_X);
-
+            context.minefieldModel = new MinefieldModel(context.com, context.GLOBAL_POS_X, context.GLOBAL_POS_Y);
             context.minefieldModel.init().then(resolve);
         });
     }
@@ -68,11 +69,9 @@ export default class MinefieldViewer {
         context.ui = new UserInterface(this, window.innerWidth, window.innerHeight);
         context.ui.update();
 
-        context.field = new PIXI.Container();
-
         context.cursor = new Cursor();
 
-        context.app.stage.addChildAt(context.field, 0);
+        context.app.stage.addChildAt(context.minefieldModel, 0);
         context.app.stage.addChildAt(context.cursor, 1);
         context.app.stage.addChildAt(context.ui, 2);
         context.app.stage.addChildAt(context.startscreen, 3);
@@ -113,8 +112,8 @@ export default class MinefieldViewer {
         window.addEventListener("mousedown", function(event){
             mouseDownX = event.clientX;
             mouseDownY = event.clientY;
-            fieldX = context.field.x;
-            fieldY = context.field.y;
+            fieldX = context.minefieldModel.x;
+            fieldY = context.minefieldModel.y;
         });
 
         window.addEventListener("mouseup", function(event){
@@ -154,17 +153,17 @@ export default class MinefieldViewer {
                 let distY = mouseDownY - event.clientY;
                 // if the distance is greater than one cell move the entire field
                 if (Math.abs(distX) > CONFIG.CELL_PIXEL_SIZE || Math.abs(distY) > CONFIG.CELL_PIXEL_SIZE) {
-                    context.field.x = fieldX - distX;
-                    context.field.y = fieldY - distY;
+                    context.minefieldModel.position.set(fieldX - distX, fieldY - distY);
+
                     context.cursor.sprite.visible = false;
 
                     // computes the chunk x and y coordinates of the main chunk in focus
                     let oldGlobalX = context.GLOBAL_POS_X;
                     let oldGlobalY = context.GLOBAL_POS_Y;
 
-                    let fX = context.field.x * -1;
+                    let fX = context.minefieldModel.x * -1;
                     context.GLOBAL_POS_X = ~~(fX / CONFIG.CHUNK_PIXEL_SIZE) + ((fX < 0) ? -1 : 0);
-                    let fY = context.field.y * -1;
+                    let fY = context.minefieldModel.y * -1;
                     context.GLOBAL_POS_Y = ~~(fY / CONFIG.CHUNK_PIXEL_SIZE) + ((fY < 0) ? -1 : 0);
 
                     context.minefieldModel.chunkX = context.GLOBAL_POS_X;
@@ -174,13 +173,13 @@ export default class MinefieldViewer {
                     let movedX = context.GLOBAL_POS_X - oldGlobalX;
                     if (movedX !== 0) {
                         context.minefieldModel.moveX(movedX).then(function(){
-                            context.updateField();
+                            context.updateVisible();
                         });
                     }
                     let movedY = context.GLOBAL_POS_Y - oldGlobalY;
                     if (movedY !== 0) {
                         context.minefieldModel.moveY(movedY).then(function(){
-                            context.updateField();
+                            context.updateVisible();
                         });
                     }
                 }
@@ -193,7 +192,7 @@ export default class MinefieldViewer {
             event.preventDefault();
         });
 
-        context.initField();
+        context.updateVisible();
     }
 
     logout() {
@@ -201,134 +200,21 @@ export default class MinefieldViewer {
         location.reload();
     }
 
-    initField() {
-
-        console.log("init field!");
-
-        let context = this;
-
-        context.displayed = {};
-
-        for (let chunkX in context.minefieldModel.field) {
-
-            if (!(chunkX in context.displayed)) {
-                context.displayed[chunkX] = {};
-            }
-
-            for (let chunkY in context.minefieldModel.field[chunkX]) {
-
-                let chunk = context.minefieldModel.field[chunkX][chunkY];
-
-                context.displayed[chunkX][chunkY] = new PIXI.Container();
-
-                for (let x = 0; x < chunk.innerField.length; x++) {
-                    for (let y = 0; y < chunk.innerField[x].length; y++) {
-
-                        let cell = chunk.innerField[x][y];
-
-                        let cellSprite = cell.sprite;
-                        cellSprite.on("mouseover", function(){
-                            context.cursor.x = context.field.x + chunkX * CONFIG.CHUNK_PIXEL_SIZE + this.x;
-                            context.cursor.y = context.field.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + this.y;
-                            if (context.ui.is_debug) {
-                                context.cursor.setDebugText(chunkX, chunkY, x, y, cell.state.value, cell.state.hidden, cell.state.user);
-                            } else {
-                                context.cursor.disableDebugText();
-                            }
-                        });
-                        cellSprite.position.set(x * CONFIG.CELL_PIXEL_SIZE, y * CONFIG.CELL_PIXEL_SIZE);
-                        cellSprite.width = CONFIG.CELL_PIXEL_SIZE;
-                        cellSprite.height = CONFIG.CELL_PIXEL_SIZE;
-                        context.displayed[chunkX][chunkY].addChild(cellSprite);
-                    }
-                }
-
-                context.displayed[chunkX][chunkY].position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
-                this.field.addChild(context.displayed[""+chunkX][chunkY]);
-            }
-        }
-
-        let count = 0;
-        for (let chunkX in context.displayed) {
-            count += Object.keys(context.displayed[chunkX]).length;
-        }
-        console.log("size displayed: "+count);
-    }
-
-    updateField() {
-
-        console.log("update field");
-
-        let context = this;
+    updateVisible() {
+        let xMin = this.GLOBAL_POS_X - 1;
+        let xMax = this.GLOBAL_POS_X + ~~((this.GLOBAL_POS_X + window.innerWidth) / CONFIG.CHUNK_PIXEL_SIZE + 1);
+        let yMin = this.GLOBAL_POS_Y - 1;
+        let yMax = this.GLOBAL_POS_Y + ~~((this.GLOBAL_POS_Y + window.innerHeight) / CONFIG.CHUNK_PIXEL_SIZE + 1);
 
         for (let chunkX in this.minefieldModel.field) {
-
-            // removes all chunks out of view container that are too far away on x axis
-            if (Math.abs(chunkX - context.GLOBAL_POS_X) > CONFIG.BUFFER_ADD) {
-                delete context.displayed[chunkX];
-                continue;
-            }
-
-            // adds a new x layer if not present as all chunks here are in buffer range
-            if (!(chunkX in context.displayed)) {
-                context.displayed[chunkX] = {};
-            }
-
             for (let chunkY in this.minefieldModel.field[chunkX]) {
-
-                // removes all chunks out of view container that are too far away on y axis
-                if (Math.abs(chunkY - context.GLOBAL_POS_Y) > CONFIG.BUFFER_ADD) {
-                    delete context.displayed[chunkX][chunkY];
+                if (chunkX < xMin || chunkX > xMax || chunkY < yMin || chunkY > yMax) {
+                    this.minefieldModel.field[chunkX][chunkY].visible = false;
                     continue;
                 }
-                // skips as the chunk is already drawn
-                if (chunkX in context.displayed[chunkX]) {
-                    continue;
-                }
-
-                let chunk = this.minefieldModel.field[chunkX][chunkY];
-
-                context.displayed[chunkX][chunkY] = new PIXI.Container();
-
-                for (let x = 0; x < chunk.innerField.length; x++) {
-                    for (let y = 0; y < chunk.innerField[x].length; y++) {
-
-                        let cell = chunk.innerField[x][y];
-
-                        let cellSprite = cell.sprite;
-                        cellSprite.on("mouseover", function(){
-                            context.cursor.x = context.field.x + chunkX * CONFIG.CHUNK_PIXEL_SIZE + this.x;
-                            context.cursor.y = context.field.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + this.y;
-                            if (context.ui.is_debug) {
-                                context.cursor.setDebugText(chunkX, chunkY, x, y, cell.state.value, cell.state.hidden, cell.state.user);
-                            } else {
-                                context.cursor.disableDebugText();
-                            }
-                        });
-                        cellSprite.position.set(x * CONFIG.CELL_PIXEL_SIZE, y * CONFIG.CELL_PIXEL_SIZE);
-                        cellSprite.width = CONFIG.CELL_PIXEL_SIZE;
-                        cellSprite.height = CONFIG.CELL_PIXEL_SIZE;
-                        context.displayed[chunkX][chunkY].addChild(cellSprite);
-
-                    }
-                }
-
-                context.displayed[chunkX][chunkY].position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
-                this.field.addChild(context.displayed[chunkX][chunkY]);
+                this.minefieldModel.field[chunkX][chunkY].visible = true;
             }
         }
-
-        let count = 0;
-        for (let chunkX in context.displayed) {
-            count += Object.keys(context.displayed[chunkX]).length;
-        }
-        console.log("size displayed: "+count);
-        count = 0;
-        for (let chunkX in context.minefieldModel.field) {
-            count += Object.keys(context.minefieldModel.field[chunkX]).length;
-        }
-        console.log("cached: "+count);
-
     }
 
 }

@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import * as CONFIG from "./Config";
 import { textures } from "./TextureLoader";
 
 /**
@@ -7,7 +8,7 @@ import { textures } from "./TextureLoader";
  *
  * @author Samuel Klein
  */
-export default class Cell {
+export default class Cell extends PIXI.Container {
 
     /**
      * Initializes a cell.
@@ -18,17 +19,25 @@ export default class Cell {
      * }
      * @param chunkX x coordinate of the chunk the cell is in
      * @param chunkY y coordinate of the chunk the cell is in
-     * @param x coordinate of the cell in the chunk
-     * @param y coordinate of the cell in the chunk
+     * @param cellX coordinate of the cell in the chunk
+     * @param cellY coordinate of the cell in the chunk
      * @param state of the cell
      */
-    constructor(chunkX, chunkY, x, y, state) {
+    constructor(chunkX, chunkY, cellX, cellY, state) {
+        super();
+
         this.chunkX = chunkX;
         this.chunkY = chunkY;
-        this.x = x;
-        this.y = y;
+        this.cellX = cellX;
+        this.cellY = cellY;
+
         this.sprite = new PIXI.Sprite();
         this.sprite.interactive = true;
+
+        this.sprite.width = CONFIG.CELL_PIXEL_SIZE;
+        this.sprite.height = CONFIG.CELL_PIXEL_SIZE;
+        this.addChild(this.sprite);
+
         this.setState(state);
     }
 

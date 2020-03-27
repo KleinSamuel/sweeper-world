@@ -1,4 +1,6 @@
 import * as CONFIG from "./Config";
+import * as PIXI from "pixi.js";
+import {sounds} from "./Sounds";
 import CellChunk from "./CellChunk";
 
 /**
@@ -7,7 +9,7 @@ import CellChunk from "./CellChunk";
  *
  * @author Samuel Klein
  */
-export default class MinefieldModel {
+export default class MinefieldModel extends PIXI.Container {
 
     /**
      * Sets the coordinates of the player in the global field and
@@ -19,7 +21,7 @@ export default class MinefieldModel {
      * @param chunkY
      */
     constructor(communicator, chunkX, chunkY) {
-
+        super();
         this.com = communicator;
         this.chunkX = chunkX;
         this.chunkY = chunkY;
@@ -27,7 +29,6 @@ export default class MinefieldModel {
     }
 
     init() {
-
         console.log("[ INFO ] MinefieldModel initialized");
 
         let context = this;
@@ -54,18 +55,21 @@ export default class MinefieldModel {
     retrieveChunkFromServer(chunkX, chunkY) {
         let context = this;
 
-        let clickWrapper = (function(isLeftclick, chunkX, chunkY, x, y) {
+        let clickWrapper = (function(isLeftclick, chunkX, chunkY, cellX, cellY) {
             if (isLeftclick) {
-                this.clickCell(chunkX, chunkY, x, y);
+                this.clickCell(chunkX, chunkY, cellX, cellY);
             } else {
-                this.flagCell(chunkX, chunkY, x, y);
+                this.flagCell(chunkX, chunkY, cellX, cellY);
             }
         }).bind(this);
 
         return this.com.requestChunk(chunkX, chunkY).then(function(response){
             return new Promise(function(resolve, reject){
                 let chunk = response.data.tiles;
+
                 let c = new CellChunk(chunkX, chunkY);
+                c.position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
+
                 c.initFieldMaps(chunk);
 
                 for (let i = 0; i < c.innerField.length; i++) {
@@ -78,7 +82,7 @@ export default class MinefieldModel {
                         cell.sprite.on("mouseup", function(event) {
                             if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
                                 Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
-                                clickWrapper(true, cell.chunkX, cell.chunkY, cell.x, cell.y);
+                                clickWrapper(true, cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
                             }
                         });
                         cell.sprite.on("rightdown", function(event) {
@@ -88,13 +92,14 @@ export default class MinefieldModel {
                         cell.sprite.on("rightup", function(event) {
                             if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
                                 Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
-                                clickWrapper(false, cell.chunkX, cell.chunkY, cell.x, cell.y);
+                                clickWrapper(false, cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
                             }
                         });
                     }
                 }
 
                 context.addChunk(chunkX, chunkY, c);
+                context.addChild(c);
                 resolve();
             });
         });
@@ -187,43 +192,43 @@ export default class MinefieldModel {
 
     }
 
-    addChunk(x, y, chunk) {
-        if(!this.field[""+x]) {
-            this.field[""+x] = {};
+    addChunk(cellX, cellY, chunk) {
+        if(!this.field[""+cellX]) {
+            this.field[""+cellX] = {};
         }
-        this.field[""+x][""+y] = chunk;
+        this.field[""+cellX][""+cellY] = chunk;
     }
 
-    getChunk(x, y) {
-        if (this.field[""+x] && this.field[""+x][""+y]) {
-            return this.field[""+x][""+y];
+    getChunk(cellX, cellY) {
+        if (this.field[""+cellX] && this.field[""+cellX][""+cellY]) {
+            return this.field[""+cellX][""+cellY];
         }
         return undefined;
     }
 
-    removeChunk(x, y) {
+    removeChunk(cellX, cellY) {
         // removes the y coordinate dict
-        if (""+x in this.field && y in this.field[""+x]) {
-            delete this.field[""+x][""+y];
+        if (""+cellX in this.field && ""+cellY in this.field[""+cellX]) {
+            delete this.field[""+cellX][""+cellY];
         }
         // checks if the x coordinate dict is empty and removes it if so
-        if (Object.keys(this.field[""+x]).length === 0) {
-            delete this.field[""+x];
+        if (Object.keys(this.field[""+cellX]).length === 0) {
+            delete this.field[""+cellX];
         }
     }
 
-    clickCell(chunkX, chunkY, x, y) {
+    clickCell(chunkX, chunkY, cellX, cellY) {
 
-        let returnValue = 0;
-
-        let cell = this.getChunk(chunkX, chunkY).getCell(x, y);
+        let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
 
         // do nothing if the cell is flagged
         if (cell.state.hidden && cell.state.user) {
+            sounds.click_no.play();
             return;
         }
         // do nothing if the cell is already opened and a mine or an empty cell
         if (!cell.state.hidden && (cell.state.value === 0 || cell.state.value === 9)) {
+            sounds.click_no.play();
             return;
         }
 
@@ -241,16 +246,20 @@ export default class MinefieldModel {
 
             // clicked on empty cell -> open empty block
             if (cell.state.value === 0) {
-                updatedCells = updatedCells.concat(this.openBlock(chunkX, chunkY, x, y));
+                updatedCells = updatedCells.concat(this.openBlock(chunkX, chunkY, cellX, cellY));
             }
             // clicked on mine
             else if (cell.state.value === 9) {
-                returnValue = 1;
+                sounds.explosion.play();
             }
         }
         // user clicked on an opened cell that contains a number
         else {
-            updatedCells = updatedCells.concat(this.openAdjacent(chunkX, chunkY, x, y));
+            updatedCells = updatedCells.concat(this.openAdjacent(chunkX, chunkY, cellX, cellY));
+            if (updatedCells.length === 0) {
+                sounds.click_no.play();
+                return;
+            }
             for (let c of updatedCells) {
                 c.state.hidden = false;
                 c.updateSprite();
@@ -261,24 +270,27 @@ export default class MinefieldModel {
         for (let uCell of updatedCells) {
             this.com.openCell(uCell);
         }
-
-        return returnValue;
+        sounds.click_cell.play();
     }
 
-    flagCell(chunkX, chunkY, x, y) {
+    flagCell(chunkX, chunkY, cellX, cellY) {
 
-        let cell = this.getChunk(chunkX, chunkY).getCell(x, y);
+        let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
         // returns if the flagged cell is already opened or flagged
         if (!cell.state.hidden || cell.state.hidden && cell.state.user) {
+            sounds.click_no.play();
             return;
         }
         // return if the flagged cell is not a bomb
         if (cell.state.value !== 9) {
+            sounds.click_error.play();
             return;
         }
         cell.state.user = 1;
         cell.updateSprite();
         this.com.flagCell(cell);
+
+        sounds.click_flag.play();
     }
 
     /**
@@ -286,13 +298,13 @@ export default class MinefieldModel {
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      */
-    openBlock(chunkX, chunkY, x, y) {
+    openBlock(chunkX, chunkY, cellX, cellY) {
 
         let updatedCells = [];
-        let stack = this.getAdjacentCells(chunkX, chunkY, x, y);
+        let stack = this.getAdjacentCells(chunkX, chunkY, cellX, cellY);
 
         while (stack.length > 0) {
             let c = stack.pop();
@@ -303,7 +315,7 @@ export default class MinefieldModel {
             }
             // adds all adjacent cells to the stack if the cell is empty
             if (c.state.value === 0) {
-                let toAdd = this.getAdjacentCells(c.chunkX, c.chunkY, c.x, c.y);
+                let toAdd = this.getAdjacentCells(c.chunkX, c.chunkY, c.cellX, c.cellY);
                 for (let cell of toAdd) {
                     if (cell.state.hidden) {
                         stack.push(cell);
@@ -319,8 +331,8 @@ export default class MinefieldModel {
         return updatedCells;
     }
 
-    openAdjacent(chunkX, chunkY, x, y) {
-        let adj = this.getAdjacentCells(chunkX, chunkY, x, y);
+    openAdjacent(chunkX, chunkY, cellX, cellY) {
+        let adj = this.getAdjacentCells(chunkX, chunkY, cellX, cellY);
         let toOpen = [];
         for (let cell of adj) {
             if (cell.state.hidden) {
@@ -330,7 +342,7 @@ export default class MinefieldModel {
                     }
                 } else if (cell.state.value === 0) {
                     toOpen.push(cell);
-                    toOpen = toOpen.concat(this.openBlock(cell.chunkX, cell.chunkY, cell.x, cell.y));
+                    toOpen = toOpen.concat(this.openBlock(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY));
                 } else {
                     toOpen.push(cell);
                 }
@@ -344,24 +356,24 @@ export default class MinefieldModel {
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {[]} list of adjacent cells
      */
-    getAdjacentCells(chunkX, chunkY, x, y) {
+    getAdjacentCells(chunkX, chunkY, cellX, cellY) {
         let adjacentCells = [];
         chunkX = parseInt(chunkX);
         chunkY = parseInt(chunkY);
-        x = parseInt(x);
-        y = parseInt(y);
-        adjacentCells.push(this.getTopCell(chunkX, chunkY, x, y));
-        adjacentCells.push(this.getTopRightCell(chunkX, chunkY, x, y));
-        adjacentCells.push(this.getRightCell(chunkX, chunkY, x, y));
-        adjacentCells.push(this.getBottomRightCell(chunkX, chunkY, x, y));
-        adjacentCells.push(this.getBottomCell(chunkX, chunkY, x, y));
-        adjacentCells.push(this.getBottomLeftCell(chunkX, chunkY, x, y));
-        adjacentCells.push(this.getLeftCell(chunkX, chunkY, x, y));
-        adjacentCells.push(this.getTopLeftCell(chunkX, chunkY, x, y));
+        cellX = parseInt(cellX);
+        cellY = parseInt(cellY);
+        adjacentCells.push(this.getTopCell(chunkX, chunkY, cellX, cellY));
+        adjacentCells.push(this.getTopRightCell(chunkX, chunkY, cellX, cellY));
+        adjacentCells.push(this.getRightCell(chunkX, chunkY, cellX, cellY));
+        adjacentCells.push(this.getBottomRightCell(chunkX, chunkY, cellX, cellY));
+        adjacentCells.push(this.getBottomCell(chunkX, chunkY, cellX, cellY));
+        adjacentCells.push(this.getBottomLeftCell(chunkX, chunkY, cellX, cellY));
+        adjacentCells.push(this.getLeftCell(chunkX, chunkY, cellX, cellY));
+        adjacentCells.push(this.getTopLeftCell(chunkX, chunkY, cellX, cellY));
         return adjacentCells;
     }
 
@@ -370,60 +382,60 @@ export default class MinefieldModel {
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getLeftCell(chunkX, chunkY, x, y) {
-        if (x === 0) {
-            return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, y);
+    getLeftCell(chunkX, chunkY, cellX, cellY) {
+        if (cellX === 0) {
+            return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, cellY);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x - 1, y);
+        return this.getChunk(chunkX, chunkY).getCell(cellX - 1, cellY);
     }
     /**
      * Returns the cell right to the cell of the given coordinates
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getRightCell(chunkX, chunkY, x, y) {
-        if (x === CONFIG.CHUNK_SIZE - 1) {
-            return this.getChunk(chunkX + 1, chunkY).getCell(0, y);
+    getRightCell(chunkX, chunkY, cellX, cellY) {
+        if (cellX === CONFIG.CHUNK_SIZE - 1) {
+            return this.getChunk(chunkX + 1, chunkY).getCell(0, cellY);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x + 1, y);
+        return this.getChunk(chunkX, chunkY).getCell(cellX + 1, cellY);
     }
     /**
      * Returns the cell to the top of the cell of the given coordinates
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getTopCell(chunkX, chunkY, x, y) {
-        if (y === 0) {
-            return this.getChunk(chunkX, chunkY - 1).getCell(x, CONFIG.CHUNK_SIZE - 1);
+    getTopCell(chunkX, chunkY, cellX, cellY) {
+        if (cellY === 0) {
+            return this.getChunk(chunkX, chunkY - 1).getCell(cellX, CONFIG.CHUNK_SIZE - 1);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x, y - 1);
+        return this.getChunk(chunkX, chunkY).getCell(cellX, cellY - 1);
     }
     /**
      * Returns the cell to the bottom of the cell of the given coordinates
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getBottomCell(chunkX, chunkY, x, y) {
-        if (y === CONFIG.CHUNK_SIZE - 1) {
-            return this.getChunk(chunkX, chunkY + 1).getCell(x, 0);
+    getBottomCell(chunkX, chunkY, cellX, cellY) {
+        if (cellY === CONFIG.CHUNK_SIZE - 1) {
+            return this.getChunk(chunkX, chunkY + 1).getCell(cellX, 0);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x, y + 1);
+        return this.getChunk(chunkX, chunkY).getCell(cellX, cellY + 1);
     }
     /**
      * Returns the cell to the top left of the cell of the given coordinates
@@ -431,74 +443,74 @@ export default class MinefieldModel {
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
      * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getTopLeftCell(chunkX, chunkY, x, y) {
-        if (x === 0 && y === 0) {
+    getTopLeftCell(chunkX, chunkY, cellX, cellY) {
+        if (cellX === 0 && cellY === 0) {
             return this.getChunk(chunkX - 1, chunkY - 1).getCell(CONFIG.CHUNK_SIZE - 1, CONFIG.CHUNK_SIZE - 1);
-        } else if(x === 0) {
-            return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, y - 1);
-        } else if(y === 0) {
-            return this.getChunk(chunkX, chunkY - 1).getCell(x - 1, CONFIG.CHUNK_SIZE - 1);
+        } else if(cellX === 0) {
+            return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, cellY - 1);
+        } else if(cellY === 0) {
+            return this.getChunk(chunkX, chunkY - 1).getCell(cellX - 1, CONFIG.CHUNK_SIZE - 1);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x - 1, y - 1);
+        return this.getChunk(chunkX, chunkY).getCell(cellX - 1, cellY - 1);
     }
     /**
      * Returns the cell to the top right of the cell of the given coordinates
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getTopRightCell(chunkX, chunkY, x, y) {
-        if (x === CONFIG.CHUNK_SIZE - 1 && y === 0) {
+    getTopRightCell(chunkX, chunkY, cellX, cellY) {
+        if (cellX === CONFIG.CHUNK_SIZE - 1 && cellY === 0) {
             return this.getChunk(chunkX + 1, chunkY - 1).getCell(0, CONFIG.CHUNK_SIZE - 1);
-        } else if(x === CONFIG.CHUNK_SIZE - 1) {
-            return this.getChunk(chunkX + 1, chunkY).getCell(0, y - 1);
-        } else if(y === 0) {
-            return this.getChunk(chunkX, chunkY - 1).getCell(x + 1, CONFIG.CHUNK_SIZE - 1);
+        } else if(cellX === CONFIG.CHUNK_SIZE - 1) {
+            return this.getChunk(chunkX + 1, chunkY).getCell(0, cellY - 1);
+        } else if(cellY === 0) {
+            return this.getChunk(chunkX, chunkY - 1).getCell(cellX + 1, CONFIG.CHUNK_SIZE - 1);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x + 1, y - 1);
+        return this.getChunk(chunkX, chunkY).getCell(cellX + 1, cellY - 1);
     }
     /**
      * Returns the cell to the bottom left of the cell of the given coordinates
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getBottomLeftCell(chunkX, chunkY, x, y) {
-        if (x === 0 && y === CONFIG.CHUNK_SIZE - 1) {
+    getBottomLeftCell(chunkX, chunkY, cellX, cellY) {
+        if (cellX === 0 && cellY === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX - 1, chunkY + 1).getCell(CONFIG.CHUNK_SIZE - 1, 0);
-        } else if(x === 0) {
-            return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, y + 1);
-        } else if(y === CONFIG.CHUNK_SIZE - 1) {
-            return this.getChunk(chunkX, chunkY + 1).getCell(x - 1, 0);
+        } else if(cellX === 0) {
+            return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, cellY + 1);
+        } else if(cellY === CONFIG.CHUNK_SIZE - 1) {
+            return this.getChunk(chunkX, chunkY + 1).getCell(cellX - 1, 0);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x - 1, y + 1);
+        return this.getChunk(chunkX, chunkY).getCell(cellX - 1, cellY + 1);
     }
     /**
      * Returns the cell to the bottom right of the cell of the given coordinates
      *
      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
-     * @param x coordinate of the cell
-     * @param y coordinate of the cell
+     * @param cellX coordinate of the cell
+     * @param cellY coordinate of the cell
      * @returns {Cell}
      */
-    getBottomRightCell(chunkX, chunkY, x, y) {
-        if (x === CONFIG.CHUNK_SIZE - 1 && y === CONFIG.CHUNK_SIZE - 1) {
+    getBottomRightCell(chunkX, chunkY, cellX, cellY) {
+        if (cellX === CONFIG.CHUNK_SIZE - 1 && cellY === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX + 1, chunkY + 1).getCell(0, 0);
-        } else if(x === CONFIG.CHUNK_SIZE - 1) {
-            return this.getChunk(chunkX + 1, chunkY).getCell(0, y + 1);
-        } else if(y === CONFIG.CHUNK_SIZE - 1) {
-            return this.getChunk(chunkX, chunkY + 1).getCell(x + 1, 0);
+        } else if(cellX === CONFIG.CHUNK_SIZE - 1) {
+            return this.getChunk(chunkX + 1, chunkY).getCell(0, cellY + 1);
+        } else if(cellY === CONFIG.CHUNK_SIZE - 1) {
+            return this.getChunk(chunkX, chunkY + 1).getCell(cellX + 1, 0);
         }
-        return this.getChunk(chunkX, chunkY).getCell(x + 1, y + 1);
+        return this.getChunk(chunkX, chunkY).getCell(cellX + 1, cellY + 1);
     }
 }

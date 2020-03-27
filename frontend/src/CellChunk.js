@@ -1,4 +1,5 @@
 import * as CONFIG from "./Config";
+import * as PIXI from "pixi.js";
 import Cell from "./Cell";
 
 /**
@@ -8,12 +9,13 @@ import Cell from "./Cell";
  *
  * @author Samuel Klein
  */
-export default class CellChunk {
+export default class CellChunk extends PIXI.Container {
 
     /**
      * Initializes the dictionary which contains the cells.
      */
     constructor(chunkX, chunkY) {
+        super();
         this.chunkX = chunkX;
         this.chunkY = chunkY;
 
@@ -21,6 +23,8 @@ export default class CellChunk {
         for (let i = 0; i < CONFIG.CHUNK_SIZE; i++) {
             this.innerField[i] = [];
         }
+
+        this.visible = false;
     }
 
     /**
@@ -32,20 +36,22 @@ export default class CellChunk {
      * @param callback function to be executed on cell click
      */
     initFieldMaps(fieldStates) {
-        for (let x in fieldStates) {
-            for (let y in fieldStates[x]) {
-                this.innerField[x][y] = new Cell(this.chunkX, this.chunkY, x, y, fieldStates[x][y]);
+        for (let cellX in fieldStates) {
+            for (let cellY in fieldStates[cellX]) {
+                this.innerField[cellX][cellY] = new Cell(this.chunkX, this.chunkY, cellX, cellY, fieldStates[cellX][cellY]);
+                this.innerField[cellX][cellY].position.set(cellX * CONFIG.CELL_PIXEL_SIZE, cellY * CONFIG.CELL_PIXEL_SIZE);
+                this.addChild(this.innerField[cellX][cellY]);
             }
         }
     }
 
     /**
      * Returns the cell object of the cell at the given coordinates within this chunk.
-     * @param x coordinate
-     * @param y coordinate
+     * @param cellX coordinate
+     * @param cellY coordinate
      * @returns {Cell}
      */
-    getCell(x, y) {
-        return this.innerField[x][y];
+    getCell(cellX, cellY) {
+        return this.innerField[cellX][cellY];
     }
 }
