@@ -9,11 +9,10 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.repositories.TileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 
 @Service
 public class ChunkService {
@@ -25,21 +24,27 @@ public class ChunkService {
     final
     ChunkBuffer chunkBuffer;
 
-    private HashSet<ChunkId> inGeneration;
+    final
+    UserService userService;
+
+    final
+    AsyncService asyncService;
+
+    final
+    SimpMessagingTemplate template;
 
     @Autowired
-    public ChunkService(TileRepository tileRepository, ChunkBuffer chunkBuffer) {
+    public ChunkService(TileRepository tileRepository, ChunkBuffer chunkBuffer, UserService userService, AsyncService asyncService, SimpMessagingTemplate simpMessagingTemplate) {
         this.tileRepository = tileRepository;
         this.chunkBuffer = chunkBuffer;
-        this.inGeneration = new HashSet<>();
+        this.template = simpMessagingTemplate;
+        this.userService = userService;
+        this.asyncService = asyncService;
     }
 
     //    TODO use objectgetter for cached entries?
     public synchronized Chunk getOrCreateChunk(ChunkId id) {
-        return chunkBuffer.findById(id).orElseGet(() -> {
-            Chunk c = save(newChunk(id));
-            return c;
-        });
+        return chunkBuffer.findById(id).orElseGet(() -> save(newChunk(id)));
     }
 
 
@@ -117,5 +122,24 @@ public class ChunkService {
         return chunkBuffer.flush();
     }
 
+
+    public boolean registerChunkRequest(ChunkId cid, Long userId) {
+        return userService.validateChunkRequest(userId, cid) && userService.registerChunkRequest(cid, userId);
+    }
+
+    public boolean registerTileUpdate(TileId tid, Long userId, boolean flag) {
+        ChunkId cid = tid.getChunkId();
+        if (userService.validateTileRequest(userId, cid)) {
+            Tile t = getOrCreateChunk(cid).getGrid()[tid.getY_tile()][tid.getX_tile()];
+            if (!flag)
+                if (!t.open(userService.getUser(userId)))
+                    return false;
+                else if (!t.setUser(userService.getUser(userId)))
+                    return false;
+            template.convertAndSend("/update/" + cid.getX() + "/" + cid.getY(), t);
+            return true;
+        }
+        return false;
+    }
 
 }

@@ -1,6 +1,8 @@
 package de.sksdev.infiniteminesweeper.db.services;
 
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
+import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
+import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.repositories.ChunkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -49,5 +51,10 @@ public class AsyncService {
         isSaving = false;
         System.gc();
     }
+
+//    @Async
+//    public void sendTileUpdate(ChunkId cid, Tile t){
+//        template.convertAndSend("/topic/test", text);
+//    }
 
 }

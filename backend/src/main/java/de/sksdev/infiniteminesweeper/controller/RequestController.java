@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sksdev.infiniteminesweeper.communication.CellOperationMessage;
 import de.sksdev.infiniteminesweeper.communication.LoginResponse;
 import de.sksdev.infiniteminesweeper.communication.RegisterRequest;
-import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
-import de.sksdev.infiniteminesweeper.db.entities.Tile;
-import de.sksdev.infiniteminesweeper.db.entities.User;
+import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,49 +38,52 @@ public class RequestController {
     @RequestMapping(value = "/api/getChunk")
     @ResponseBody
     public String getChunk(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-        System.out.println("Request for chunk "+x+"/"+y);
+        System.out.println("Request for chunk " + x + "/" + y);
         try {
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x,y)));
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x, y)));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    @RequestMapping(value="/api/getChunkTiles")
-    public String getChunkTiles(@RequestParam("x") Integer x, @RequestParam("y") Integer y){
-        System.out.println("Request for chunk tiles "+x+"/"+y);
+    @RequestMapping(value = "/api/getChunkTiles")
+    public String getChunkTiles(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+        System.out.println("Request for chunk tiles " + x + "/" + y);
         try {
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x,y)).getTiles());
+            ChunkId cid = new ChunkId(x, y);
+            if (!chunkService.registerChunkRequest(cid, userId))
+                return null;
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(cid).getTiles());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
         }
 
     }
-    @RequestMapping(value="/api/flushBuffer")
-    @ResponseBody
-    public String flushBuffer(){
-        return chunkService.flushBuffer()+"";
-    }
+//    @RequestMapping(value="/api/flushBuffer")
+//    @ResponseBody
+//    public String flushBuffer(){
+//        return chunkService.flushBuffer()+"";
+//    }
 
     @RequestMapping(value = "/api/getChunkContent")
     @ResponseBody
     public String getChunkContent(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
         try {
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(x,y,true));
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(x, y, true));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    @RequestMapping(value="/api/getTile")
+    @RequestMapping(value = "/api/getTile")
     @ResponseBody
-    public String getTile( @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile){
-        System.out.println("Request for tile "+x+"/"+y + "(" +x_tile+"/"+y_tile+")");
+    public String getTile(@RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
+        System.out.println("Request for tile " + x + "/" + y + "(" + x_tile + "/" + y_tile + ")");
         try {
-            return objectMapper.writeValueAsString(chunkService.getTile(x,y,x_tile,y_tile));
+            return objectMapper.writeValueAsString(chunkService.getTile(x, y, x_tile, y_tile));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
@@ -137,52 +138,12 @@ public class RequestController {
     }
 
     @MessageMapping("/openCell")
-    public void openCell(CellOperationMessage message) {
-
-        try {
-            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkX(), message.getChunkY(), false);
-            Tile tile = chunk.getGrid()[message.getX()][message.getY()];
-
-            if (tile.getUser() != null) {
-                throw new RuntimeException("tile already owned by another user!");
-            }
-
-            User newUser = userService.getUserById(message.getUser());
-
-            if (newUser == null) {
-                throw new RuntimeException("user id not valid!");
-            }
-
-            tile.setHidden(false);
-            tile.setUser(newUser);
-
-        } catch (Exception e){
-            System.err.println(e.getMessage());
-        }
+    public String openCell(CellOperationMessage message) {
+        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getX(), message.getY()), message.getUser(), false);
     }
 
     @MessageMapping("/flagCell")
-    public void flagCell(CellOperationMessage message) {
-
-        try {
-            Chunk chunk = chunkService.getOrCreateChunkContent(message.getChunkX(), message.getChunkY(), false);
-            Tile tile = chunk.getGrid()[message.getX()][message.getY()];
-
-            if (tile.getUser() != null) {
-                throw new RuntimeException("tile already owned by another user!");
-            }
-
-            User newUser = userService.getUserById(message.getUser());
-
-            if (newUser == null) {
-                throw new RuntimeException("user id not valid!");
-            }
-
-            tile.setHidden(true);
-            tile.setUser(newUser);
-
-        } catch (Exception e){
-            System.err.println(e.getMessage());
-        }
+    public String flagCell(CellOperationMessage message) {
+        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getX(), message.getY()), message.getUser(), true);
     }
 }
