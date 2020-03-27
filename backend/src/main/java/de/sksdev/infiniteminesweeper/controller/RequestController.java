@@ -7,6 +7,7 @@ import de.sksdev.infiniteminesweeper.communication.LoginResponse;
 import de.sksdev.infiniteminesweeper.communication.RegisterRequest;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
+import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Controller
 public class RequestController {
@@ -47,8 +50,8 @@ public class RequestController {
         }
     }
 
-    @RequestMapping(value = "/api/getChunkTiles")
-    public String getChunkTiles(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+    @RequestMapping(value = "/api/getChunkContent")
+    public String getChunkContent(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
         System.out.println("Request for chunk tiles " + x + "/" + y);
         try {
             ChunkId cid = new ChunkId(x, y);
@@ -67,37 +70,39 @@ public class RequestController {
 //        return chunkService.flushBuffer()+"";
 //    }
 
-    @RequestMapping(value = "/api/getChunkContent")
-    @ResponseBody
-    public String getChunkContent(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-        try {
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(x, y, true));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    @RequestMapping(value = "/api/getChunkContent")
+//    @ResponseBody
+//    public String getChunkContent(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+//        try {
+//            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(x, y, true));
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
-    @RequestMapping(value = "/api/getTile")
-    @ResponseBody
-    public String getTile(@RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
-        System.out.println("Request for tile " + x + "/" + y + "(" + x_tile + "/" + y_tile + ")");
-        try {
-            return objectMapper.writeValueAsString(chunkService.getTile(x, y, x_tile, y_tile));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    @RequestMapping(value = "/api/getTile")
+//    @ResponseBody
+//    public String getTile(@RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
+//        System.out.println("Request for tile " + x + "/" + y + "(" + x_tile + "/" + y_tile + ")");
+//        try {
+//            return objectMapper.writeValueAsString(chunkService.getTile(x, y, x_tile, y_tile));
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     @PostMapping("/register")
     public String register(@RequestBody RegisterRequest request) {
 
         // TODO: create new user in db and send respective hash and id
+        User u = userService.getNewUser(request.getUsername());
+        if (u == null)
+            return null;
 
-        LoginResponse response = new LoginResponse();
-        response.setHash("some-test-hash");
-        response.setId(1);
+        LoginResponse response = new LoginResponse(u.getId());
+        userService.logIn(u.getId(), response.getHash());
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
@@ -109,18 +114,35 @@ public class RequestController {
     @GetMapping("/login")
     public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
 
-        // TODO: check username and password and send respective hash and id
-        // hash is used to verify the id
+        User u = userService.getExistingUser(username);
+        //TODO check pw
 
-        LoginResponse response = new LoginResponse();
-        response.setHash("some-test-hash");
-        response.setId(1);
+        LoginResponse response = new LoginResponse(u.getId());
+        userService.logIn(u.getId(), response.getHash());
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @GetMapping("/guest")
+    public String loginGuest() {
+        User g = userService.getNewUser(UUID.randomUUID().toString());
+        LoginResponse response = new LoginResponse(g.getId());
+        userService.logIn(g.getId(), response.getHash());
+        try {
+            return objectMapper.writeValueAsString(response);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @GetMapping("/logout")
+    public String logout(@RequestParam("u") long userId) {
+        return "" + userService.logout(userId);
     }
 
     @GetMapping("/fuckingshit")

@@ -18,36 +18,61 @@ public class UserService {
 
     private HashMap<ChunkId, HashSet<Long>> loadedChunks;
 
-    private HashSet<Long> loggedIn;
+    private HashMap<Long, String> loggedIn;
 
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
         this.loadedChunks = new HashMap<>();
-        this.loggedIn = new HashSet<>();
+        this.loggedIn = new HashMap<>();
     }
 
     private User getUserById(long id) {
         return userRepository.findById(id).orElseGet(null);
     }
 
-    public User getUser(long id){
+    protected User getUser(long id) {
         return getUserById(id);
     }
 
-    public boolean isLoggedIn(long uid) {
-        return loggedIn.contains(uid);
+    private User save(User u) {
+        return userRepository.save(u);
     }
 
-    private User logIn(long uid) {
+    private User getUser(String name) {
+        return userRepository.findByName(name);
+    }
+
+    public User getExistingUser(String name) {
+        User u = getUser(name);
+        return isLoggedIn(u.getId()) ? null : u;
+    }
+
+    private User createUser(String name) {
+        try {
+            return (save(new User(name)));
+        } catch (Exception e) {
+            System.err.println("Shitty name for a User: '" + name + "'");
+        }
+        return null;
+    }
+
+    public User getNewUser(String name) {
+        return getUser(name) != null ? null : createUser(name);
+    }
+
+    public boolean isLoggedIn(long uid) {
+        return loggedIn.containsKey(uid);
+    }
+
+    public void logIn(long uid, String hash) {
         if (isLoggedIn(uid)) {
             System.err.println("User " + uid + " already logged in.");
-            return null;
+            return;
         }
         User u = getUserById(uid);
         if (u != null)
-            loggedIn.add(uid);
-        return u;
+            loggedIn.put(uid, hash);
     }
 
     public boolean validateChunkRequest(long uid, ChunkId cid) {
@@ -72,8 +97,8 @@ public class UserService {
     private void initDummyUser() {
         User u = new User();
         u.setName("Testname");
-        userRepository.save(u);
         System.out.println("saving dummy user");
+        userRepository.save(u);
     }
 
     public boolean registerChunkRequest(ChunkId cid, Long userId) {
@@ -84,5 +109,9 @@ public class UserService {
             loadedChunks.put(cid, new HashSet<>(Collections.singletonList(userId)));
         }
         return true;
+    }
+
+    public boolean logout(long userId) {
+        return loggedIn.remove(userId) != null;
     }
 }
