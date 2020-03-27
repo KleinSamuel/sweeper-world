@@ -52,12 +52,11 @@ public class RequestController {
 
     @RequestMapping(value = "/api/getChunkContent")
     public String getChunkContent(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-        System.out.println("Request for chunk tiles " + x + "/" + y);
         try {
             ChunkId cid = new ChunkId(x, y);
             if (!chunkService.registerChunkRequest(cid, userId))
                 return null;
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(cid).getTiles());
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(cid));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
