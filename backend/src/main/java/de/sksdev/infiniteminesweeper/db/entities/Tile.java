@@ -29,7 +29,6 @@ public class Tile implements Comparable<Tile>, Serializable {
         return y_dist != 0 ? y_dist : this.getX_tile() - other.getX_tile();
     }
 
-
     @Id
     @Column(columnDefinition = "TINYINT(1)")
     @JsonIgnore
@@ -73,8 +72,12 @@ public class Tile implements Comparable<Tile>, Serializable {
         return user;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public boolean setUser(User user) {
+        if (this.user == null) {
+            this.user = user;
+            return true;
+        }
+        return false;
     }
 
     public Integer getValue() {
@@ -89,15 +92,19 @@ public class Tile implements Comparable<Tile>, Serializable {
         return hidden;
     }
 
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
+    public boolean setHidden(boolean hidden) {
+        if (this.hidden & !hidden) {
+            this.hidden = false;
+            return true;
+        }
+        return false;
+
     }
 
 
     public void setValue(Integer value) {
         this.value = value;
     }
-
 
 
     public int getX_tile() {
@@ -140,5 +147,15 @@ public class Tile implements Comparable<Tile>, Serializable {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+
+    public boolean open(User user) {
+        if (this.hidden & this.user == null) {
+            this.hidden = false;
+            this.user = user;
+            return true;
+        }
+        return false;
     }
 }
