@@ -104,6 +104,10 @@ export default class Communicator {
         });
     }
 
+    loginGuest() {
+        return axios.get(CONFIG.URL_API+"/guest");
+    }
+
     /**
      * Requests a cell chunk at given coordinates from the server and returns
      * the promise which contains the response.

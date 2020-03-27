@@ -19,7 +19,7 @@ export default class MinefieldViewer {
 
         context.com = new Communicator();
 
-        context.startscreen = new StartScreen(context.initialize.bind(context));
+        context.startscreen = new StartScreen(context.loginGuest.bind(context));
 
         if (CONFIG.getID() === -1) {
             context.startscreen.show();
@@ -27,6 +27,19 @@ export default class MinefieldViewer {
         }
 
         this.initialize();
+    }
+
+    loginGuest() {
+        let context = this;
+        return context.com.loginGuest()
+        .then(function(response) {
+            CONFIG.setID(response.data.id);
+            CONFIG.setHash(response.data.hash);
+            context.startscreen.hide();
+            context.initialize();
+        }).catch(function(err) {
+            console.log(err);
+        });
     }
 
     initialize() {

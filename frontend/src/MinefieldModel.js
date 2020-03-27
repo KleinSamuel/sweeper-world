@@ -72,6 +72,8 @@ export default class MinefieldModel extends PIXI.Container {
             return new Promise(function(resolve, reject){
                 let chunk = response.data.tiles;
 
+                console.log(response);
+
                 let c = new CellChunk(chunkX, chunkY);
                 c.position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
 
