@@ -6,14 +6,22 @@ import java.io.Serializable;
 import java.util.Set;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 public class User implements Serializable {
 
+
+    public User() {
+    }
+
+    public User(String name) {
+        this.name = name;
+    }
+
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length=36)
     private String name;
 
     @OneToMany(mappedBy = "user")
@@ -34,4 +42,5 @@ public class User implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
 }
