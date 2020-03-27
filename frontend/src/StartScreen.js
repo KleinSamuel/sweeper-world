@@ -3,10 +3,10 @@ import * as CONFIG from "./Config";
 
 export default class StartScreen extends PIXI.Container {
 
-    constructor(onLogin) {
+    constructor(onGuestLogin) {
         super();
         this.visible = false;
-        this.onLogin = onLogin;
+        this.onGuestLogin = onGuestLogin;
         this.init();
     }
 
@@ -40,9 +40,7 @@ export default class StartScreen extends PIXI.Container {
 
         let loginButton = document.getElementById("btn-guest");
         loginButton.addEventListener("click", function(){
-            CONFIG.setID(1);
-            context.hide();
-            context.onLogin();
+            context.onGuestLogin();
         });
 
         let switchToRegister = document.getElementById("btn-other-register");

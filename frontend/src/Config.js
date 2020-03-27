@@ -20,6 +20,7 @@ export const BUFFER_REMOVE = 2;
 
 
 let USER_ID = -1;
+let USER_HASH = "";
 // TODO: implement cookie check
 if (document.cookie) {
     USER_ID = parseInt(document.cookie);
@@ -28,8 +29,13 @@ if (document.cookie) {
 export function getID() {
     return USER_ID;
 }
-
 export function setID(id) {
     USER_ID = id;
     document.cookie = id;
+}
+export function getHash() {
+    return USER_HASH;
+}
+export function setHash(hash) {
+    USER_HASH = hash;
 }

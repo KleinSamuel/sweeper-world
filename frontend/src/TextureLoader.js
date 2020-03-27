@@ -18,10 +18,6 @@ import box_empty from "./assets/box_empty.png";
 import box_checked from "./assets/box_checked.png";
 import button_logout from "./assets/button_logout.png";
 
-import explosionSound from "./assets/explosion.mp3";
-import click_flag from "./assets/click_sound_no.mp3";
-import click_cell from "./assets/click_sound_cell.mp3";
-
 let pipeline;
 
 export let textures = null;
@@ -77,9 +73,6 @@ function preloadTextures() {
             .add("box_checked", box_checked)
             .add("assets/mc.json")
             .add("button_logout", button_logout)
-            .add("explosion", explosionSound)
-            .add("click_flag", click_flag)
-            .add("click_cell", click_cell)
             .load(function(loader, resources){
                 resolve(resources);
             });

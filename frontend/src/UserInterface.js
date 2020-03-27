@@ -16,6 +16,7 @@ export default class UserInterface extends PIXI.Container {
         this.addInfoBackground();
         this.addInfoPlayername();
         this.addLogoutButton();
+        this.addPosition();
 
         this.resize(width, height)
     }
@@ -56,7 +57,7 @@ export default class UserInterface extends PIXI.Container {
     addInfoPlayername() {
         this.i_name = new PIXI.Container();
         this.i_name.x = 15;
-        this.i_name.y = 15;
+        this.i_name.y = 50;
 
         this.i_name.n = new PIXI.Text("ID: unknown", {
             fontSize: 18,
@@ -73,13 +74,30 @@ export default class UserInterface extends PIXI.Container {
         this.b_logout.width = 60;
         this.b_logout.height = 30;
         this.b_logout.x = 15;
-        this.b_logout.y = 50;
+        this.b_logout.y = 110;
         this.b_logout.interactive = true;
         this.b_logout.on("mousedown", function() {
             CONFIG.setID(-1);
             context.main.logout();
         });
         this.infoBackground.addChild(this.b_logout);
+    }
+
+    addPosition() {
+        this.position_x = new PIXI.Text("X: 123123", {
+            fontSize: 18,
+            fill: 0xd12bea
+        });
+        this.position_x.x = 15;
+        this.position_x.y = 15;
+        this.position_y = new PIXI.Text("Y: 0989798", {
+            fontSize: 18,
+            fill: 0xd12bea
+        });
+        this.position_y.x = 15;
+        this.position_y.y = 30;
+        this.infoBackground.addChild(this.position_x);
+        this.infoBackground.addChild(this.position_y);
     }
 
     updateBoxDebug() {

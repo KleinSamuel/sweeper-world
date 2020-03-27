@@ -54,6 +54,19 @@ export default class Communicator {
         console.log("[ INFO ] Communicator initialized");
     }
 
+    unregisterChunk(chunkX, chunkY) {
+        console.log("unregister chunk: "+chunkX+":"+chunkY);
+        this.client.unsubscribe("/updates/"+chunkX+"/"+chunkY);
+    }
+
+    registerChunk(chunkX, chunkY) {
+        console.log("register new chunk: "+chunkX+":"+chunkY);
+        this.client.subscribe("/updates/"+chunkX+"/"+chunkY, function(message) {
+             console.log("got update for chunk: "+chunkX+":"+chunkY);
+             console.log(message);
+        });
+    }
+
     /**
      * Sends a message via the socket connection to the server.
      * @param message
@@ -91,6 +104,10 @@ export default class Communicator {
         });
     }
 
+    loginGuest() {
+        return axios.get(CONFIG.URL_API+"/guest");
+    }
+
     /**
      * Requests a cell chunk at given coordinates from the server and returns
      * the promise which contains the response.
@@ -100,6 +117,6 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        return axios.get(CONFIG.URL_API+"/api/getChunkContent?x="+chunkX+"&y="+chunkY);
+        return axios.get(CONFIG.URL_API+"/api/getChunkContent?u="+CONFIG.getID()+"&x="+chunkX+"&y="+chunkY);
     }
 }

@@ -38,10 +38,9 @@ public class RequestController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/api/getChunk")
+    @RequestMapping(value = "/api/getChunk", method = RequestMethod.GET)
     @ResponseBody
     public String getChunk(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-        System.out.println("Request for chunk " + x + "/" + y);
         try {
             return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x, y)));
         } catch (JsonProcessingException e) {
@@ -50,7 +49,8 @@ public class RequestController {
         }
     }
 
-    @RequestMapping(value = "/api/getChunkContent")
+    @RequestMapping(value = "/api/getChunkContent", method = RequestMethod.GET)
+    @ResponseBody
     public String getChunkContent(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
         try {
             ChunkId cid = new ChunkId(x, y);
@@ -92,7 +92,8 @@ public class RequestController {
 //        }
 //    }
 
-    @PostMapping("/register")
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @ResponseBody
     public String register(@RequestBody RegisterRequest request) {
 
         // TODO: create new user in db and send respective hash and id
@@ -110,7 +111,8 @@ public class RequestController {
         return null;
     }
 
-    @GetMapping("/login")
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    @ResponseBody
     public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
 
         User u = userService.getExistingUser(username);
@@ -126,7 +128,8 @@ public class RequestController {
         return null;
     }
 
-    @GetMapping("/guest")
+    @RequestMapping(value = "/guest", method = RequestMethod.GET)
+    @ResponseBody
     public String loginGuest() {
         User g = userService.getNewUser(UUID.randomUUID().toString());
         LoginResponse response = new LoginResponse(g.getId());
@@ -139,7 +142,8 @@ public class RequestController {
         return null;
     }
 
-    @GetMapping("/logout")
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    @ResponseBody
     public String logout(@RequestParam("u") long userId) {
         return "" + userService.logout(userId);
     }

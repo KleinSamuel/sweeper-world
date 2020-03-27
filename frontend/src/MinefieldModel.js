@@ -20,8 +20,9 @@ export default class MinefieldModel extends PIXI.Container {
      * @param chunkX
      * @param chunkY
      */
-    constructor(communicator, chunkX, chunkY) {
+    constructor(viewer, communicator, chunkX, chunkY) {
         super();
+        this.viewer = viewer;
         this.com = communicator;
         this.chunkX = chunkX;
         this.chunkY = chunkY;
@@ -63,9 +64,15 @@ export default class MinefieldModel extends PIXI.Container {
             }
         }).bind(this);
 
+        let hoverWrapper = (function(chunkX, chunkY, cellX, cellY) {
+            this.hoverCell(chunkX, chunkY, cellX, cellY);
+        }).bind(this);
+
         return this.com.requestChunk(chunkX, chunkY).then(function(response){
             return new Promise(function(resolve, reject){
                 let chunk = response.data.tiles;
+
+                console.log(response);
 
                 let c = new CellChunk(chunkX, chunkY);
                 c.position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
@@ -75,6 +82,7 @@ export default class MinefieldModel extends PIXI.Container {
                 for (let i = 0; i < c.innerField.length; i++) {
                     for (let j = 0; j < c.innerField[i].length; j++) {
                         let cell = c.innerField[i][j];
+
                         cell.sprite.on("mousedown", function(event) {
                             this.m_posX = event.data.global.x;
                             this.m_posY = event.data.global.y;
@@ -95,11 +103,16 @@ export default class MinefieldModel extends PIXI.Container {
                                 clickWrapper(false, cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
                             }
                         });
+                        cell.sprite.on("mouseover", function(event) {
+                            hoverWrapper(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
+                        });
                     }
                 }
 
                 context.addChunk(chunkX, chunkY, c);
                 context.addChild(c);
+
+                context.com.registerChunk(chunkX, chunkY);
                 resolve();
             });
         });
@@ -152,6 +165,7 @@ export default class MinefieldModel extends PIXI.Container {
             // removes the identified chunks
             for (let i in toRemove) {
                 context.removeChunk(toRemove[i][0], toRemove[i][1]);
+                context.com.unregisterChunk(toRemove[i][0], toRemove[i][1]);
             }
         });
     }
@@ -187,6 +201,7 @@ export default class MinefieldModel extends PIXI.Container {
             // removes the identified chunks
             for (let i in toRemove) {
                 context.removeChunk(toRemove[i][0], toRemove[i][1]);
+                context.com.unregisterChunk(toRemove[i][0], toRemove[i][1]);
             }
         });
 
@@ -215,6 +230,13 @@ export default class MinefieldModel extends PIXI.Container {
         if (Object.keys(this.field[""+cellX]).length === 0) {
             delete this.field[""+cellX];
         }
+    }
+
+    hoverCell(chunkX, chunkY, cellX, cellY) {
+        let posX = ~~(chunkX) * CONFIG.CHUNK_SIZE + ~~(cellX);
+        let posY = ~~(chunkY) * CONFIG.CHUNK_SIZE + ~~(cellY);
+        this.viewer.ui.position_x.text = "X: "+posX;
+        this.viewer.ui.position_y.text = "Y: "+posY;
     }
 
     clickCell(chunkX, chunkY, cellX, cellY) {
