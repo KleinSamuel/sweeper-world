@@ -165,11 +165,27 @@ public class RequestController {
     }
 
     @MessageMapping("/openCell")
+    @ResponseBody
     public String openCell(CellOperationMessage message) {
+
+        message.setHidden(false);
+
+        try {
+            //template.convertAndSend("/updates/" + message.getChunkX() + "/" + message.getChunkY(),
+
+            String response = objectMapper.writeValueAsString(message);
+
+            System.out.println("send update for openCell: "+message.getChunkX()+":"+message.getChunkY()+" -- "+message.getX()+":"+message.getY());
+            template.convertAndSend("/updates/" + message.getChunkX() + "/" + message.getChunkY(), "test");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
         return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getX(), message.getY()), message.getUser(), false);
     }
 
     @MessageMapping("/flagCell")
+    @ResponseBody
     public String flagCell(CellOperationMessage message) {
         return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getX(), message.getY()), message.getUser(), true);
     }

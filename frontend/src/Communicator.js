@@ -55,12 +55,10 @@ export default class Communicator {
     }
 
     unregisterChunk(chunkX, chunkY) {
-        console.log("unregister chunk: "+chunkX+":"+chunkY);
         this.client.unsubscribe("/updates/"+chunkX+"/"+chunkY);
     }
 
     registerChunk(chunkX, chunkY) {
-        console.log("register new chunk: "+chunkX+":"+chunkY);
         this.client.subscribe("/updates/"+chunkX+"/"+chunkY, function(message) {
              console.log("got update for chunk: "+chunkX+":"+chunkY);
              console.log(message);

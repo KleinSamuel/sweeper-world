@@ -6,6 +6,8 @@ public class CellOperationMessage {
     private int chunkY;
     private int x;
     private int y;
+    private boolean hidden;
+    private boolean flag;
     private long user;
 
     public CellOperationMessage() {
@@ -50,5 +52,21 @@ public class CellOperationMessage {
 
     public void setUser(long user) {
         this.user = user;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    public boolean isFlag() {
+        return flag;
+    }
+
+    public void setFlag(boolean flag) {
+        this.flag = flag;
     }
 }
