@@ -142,4 +142,8 @@ public class ChunkService {
         return false;
     }
 
+    public Object getOrCreateChunkContent(ChunkId cid) {
+        Chunk c = getOrCreateChunk(cid);
+        return c.isFilled() ? c : generateContent(c);
+    }
 }

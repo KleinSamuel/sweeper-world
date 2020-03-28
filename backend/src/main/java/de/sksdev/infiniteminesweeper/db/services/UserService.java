@@ -85,7 +85,7 @@ public class UserService {
 //        } catch (NullPointerException ignore) {
 //            return true;
 //        }
-        System.err.println("User " + uid + " may already have requested chunk " + cid + " !");
+//        System.err.println("User " + uid + " may already have requested chunk " + cid + " !");
         return false;
     }
 

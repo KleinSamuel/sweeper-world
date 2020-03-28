@@ -58,7 +58,7 @@ public class RequestController {
                 System.err.println("Chunk loading not permitted!");
                 return null;
             }
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(cid));
+            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
