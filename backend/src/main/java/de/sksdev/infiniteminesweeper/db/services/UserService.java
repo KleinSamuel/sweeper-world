@@ -62,7 +62,10 @@ public class UserService {
     }
 
     public boolean isLoggedIn(long uid) {
-        return loggedIn.containsKey(uid);
+        boolean l = loggedIn.containsKey(uid);
+        if (!l)
+            System.err.println("User " + uid + " is not logged in!");
+        return l;
     }
 
     public void logIn(long uid, String hash) {
@@ -76,11 +79,13 @@ public class UserService {
     }
 
     public boolean validateChunkRequest(long uid, ChunkId cid) {
-        try {
-            if (isLoggedIn(uid) & !loadedChunks.get(cid).contains(uid))
-                return true;
-        } catch (NullPointerException ignore) {
-        }
+//        try {
+        if (isLoggedIn(uid)/* & !loadedChunks.get(cid).contains(uid)*/)
+            return true;
+//        } catch (NullPointerException ignore) {
+//            return true;
+//        }
+        System.err.println("User " + uid + " may already have requested chunk " + cid + " !");
         return false;
     }
 

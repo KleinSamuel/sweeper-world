@@ -54,8 +54,10 @@ public class RequestController {
     public String getChunkContent(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
         try {
             ChunkId cid = new ChunkId(x, y);
-            if (!chunkService.registerChunkRequest(cid, userId))
+            if (!chunkService.registerChunkRequest(cid, userId)) {
+                System.err.println("Chunk loading not permitted!");
                 return null;
+            }
             return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(cid));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
