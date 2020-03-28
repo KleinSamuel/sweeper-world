@@ -8,6 +8,10 @@
 export const URL_API = HOST_BACKEND+"/backend";
 export const URL_ASSETS = HOST_ASSETS+"/assets";
 
+export const DESIGNS = [
+    "default", "neon", "template"
+];
+
 /* number of cells in a cell chunk */
 export const CHUNK_SIZE = 32;
 /* size of a single cell in pixel */
@@ -30,9 +34,35 @@ export function switchOptionSoundEnabled() {
 
 let USER_ID = -1;
 let USER_HASH = "";
+let DESIGN = "default";
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
 // TODO: implement cookie check
 if (document.cookie) {
-    USER_ID = parseInt(document.cookie);
+    console.log(document.cookie);
+    USER_ID = parseInt(getCookie("id"));
+    USER_HASH = getCookie("hash");
+    DESIGN = getCookie("design");
+}
+export function logout() {
+    USER_ID = -1;
+    USER_HASH = "";
+    document.cookie = "";
 }
 
 export function getID() {
@@ -40,16 +70,22 @@ export function getID() {
 }
 export function setID(id) {
     USER_ID = id;
-    document.cookie = id;
+    document.cookie = "id="+id;
 }
 export function getHash() {
     return USER_HASH;
 }
 export function setHash(hash) {
     USER_HASH = hash;
+    document.cookie = "hash="+hash;
 }
-export function logout() {
-    USER_ID = -1;
-    USER_HASH = "";
-    document.cookie = "";
+export function getDesign() {
+    return DESIGN;
+}
+export function setDesign(name) {
+    if (!name in DESIGNS) {
+        return;
+    }
+    DESIGN = name;
+    document.cookie = "design="+name;
 }

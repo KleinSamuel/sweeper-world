@@ -14,6 +14,7 @@ export default class MinefieldViewer {
 
         this.GLOBAL_POS_X = 0;
         this.GLOBAL_POS_Y = 0;
+        this.LOADER = undefined;
 
         let context = this;
 
@@ -187,6 +188,11 @@ export default class MinefieldViewer {
         });
 
         context.updateVisible();
+    }
+
+    updateTextures(name) {
+        CONFIG.setDesign(name);
+        location.reload();
     }
 
     denyInteractions() {

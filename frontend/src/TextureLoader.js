@@ -1,49 +1,45 @@
 import * as PIXI from "pixi.js";
 import * as CONFIG from "./Config";
 
-let pipeline;
+export let loader = undefined;
 
 export let textures = null;
 
 export function init() {
-    if(!pipeline) {
-        pipeline = preloadTextures().then(function(resources){
-            textures = {
-                cursor: resources.cursor.texture,
-                box_empty: resources.box_empty.texture,
-                box_checked: resources.box_checked.texture,
-                button_logout: resources.button_logout.texture,
-            };
-            return textures;
-        }).then(function(textures) {
-            return updateCellDesign("default");
-        }).catch(function(err){
-            console.log(err);
-        });
-    }
     console.log("[ INFO ] TextureLoader initialized");
-    return pipeline;
+    return preloadTextures().then(function(resources){
+        textures = {
+            cursor: resources.cursor.texture,
+            box_empty: resources.box_empty.texture,
+            box_checked: resources.box_checked.texture,
+            button_logout: resources.button_logout.texture,
+        };
+    }).then(function() {
+        return updateCellDesign(CONFIG.getDesign());
+    }).catch(function(err){
+        console.log(err);
+    });
 }
 
 export function updateCellDesign(designname) {
     return setCellDesign(designname).then(function(resources) {
-        textures["closed"] = resources.closed.texture;
-        textures["open"] = resources.open.texture;
-        textures["flag"] = resources.flag.texture;
-        textures["mine"] = resources.mine.texture;
-        textures["num1"] = resources.num1.texture;
-        textures["num2"] = resources.num2.texture;
-        textures["num3"] = resources.num3.texture;
-        textures["num4"] = resources.num4.texture;
-        textures["num5"] = resources.num5.texture;
-        textures["num6"] = resources.num6.texture;
-        textures["num7"] = resources.num7.texture;
-        textures["num8"] = resources.num8.texture;
+        textures["closed"] = resources["closed"].texture;
+        textures["open"] = resources["open"].texture;
+        textures["flag"] = resources["flag"].texture;
+        textures["mine"] = resources["mine"].texture;
+        textures["num1"] = resources["num1"].texture;
+        textures["num2"] = resources["num2"].texture;
+        textures["num3"] = resources["num3"].texture;
+        textures["num4"] = resources["num4"].texture;
+        textures["num5"] = resources["num5"].texture;
+        textures["num6"] = resources["num6"].texture;
+        textures["num7"] = resources["num7"].texture;
+        textures["num8"] = resources["num8"].texture;
         return textures;
     });
 }
 
-export function setCellDesign(designname) {
+function setCellDesign(designname) {
 
     let closed = CONFIG.URL_ASSETS+"/designs/"+designname+"/closed.png";
     let open = CONFIG.URL_ASSETS+"/designs/"+designname+"/open.png";
@@ -59,7 +55,7 @@ export function setCellDesign(designname) {
     let num8 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num8.png";
 
     return new Promise(function(resolve, reject) {
-        PIXI.Loader.shared
+        loader
             .add("closed", closed)
             .add("open", open)
             .add("flag", flag)
@@ -80,7 +76,8 @@ export function setCellDesign(designname) {
 
 function preloadTextures() {
     return new Promise(function(resolve, reject){
-        PIXI.Loader.shared
+        loader = new PIXI.Loader();
+        loader.reset()
             .add("cursor", CONFIG.URL_ASSETS+"/images/cursor.png")
             .add("box_empty", CONFIG.URL_ASSETS+"/images/box_empty.png")
             .add("box_checked", CONFIG.URL_ASSETS+"/images/box_checked.png")

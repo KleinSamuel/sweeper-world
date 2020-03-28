@@ -4,9 +4,9 @@ import * as CONFIG from "./Config";
 
 export default class UserInterface extends PIXI.Container {
 
-    constructor(main, width, height) {
+    constructor(viewer, width, height) {
         super();
-        this.main = main;
+        this.viewer = viewer;
 
         this.addOptionDebug();
 
@@ -14,6 +14,8 @@ export default class UserInterface extends PIXI.Container {
         this.addInfoPlayername();
         this.addOptionsButton();
         this.addPosition();
+
+        this.addDesignOptions();
 
         this.resize(width, height)
     }
@@ -27,6 +29,7 @@ export default class UserInterface extends PIXI.Container {
         this.screenHeight = height;
         this.infoBackground.x = this.screenWidth - 300;
         this.options.position.set(window.innerWidth / 2 - this.options.width / 2, 200);
+        this.design.position.set(window.innerWidth / 2 - this.design.width / 2, 200);
     }
 
     openOptions() {
@@ -111,8 +114,6 @@ export default class UserInterface extends PIXI.Container {
         this.options.background.beginFill(0x200f21);
         this.options.background.lineStyle(2, 0x54123b);
         this.options.background.drawRect(0,0, width, height);
-        this.options.background.interactive = true;
-        this.options.background.buttonMode = true;
         this.options.addChildAt(this.options.background, 0);
 
         this.options.close = new PIXI.Sprite(textures.box_empty);
@@ -170,7 +171,7 @@ export default class UserInterface extends PIXI.Container {
         this.options.design.y = 150;
         this.options.design.interactive = true;
         this.options.design.on("mousedown", function() {
-
+            context.design.visible = true;
         });
         this.options.addChild(this.options.design);
 
@@ -182,10 +183,80 @@ export default class UserInterface extends PIXI.Container {
         this.options.logout.y = height - 40;
         this.options.logout.interactive = true;
         this.options.logout.on("mousedown", function() {
-            context.main.logout();
+            context.viewer.logout();
         });
         this.options.addChild(this.options.logout);
 
         this.addChild(this.options);
+    }
+
+    addDesignOptions() {
+
+        let context = this;
+        let width = 500;
+        let height = 500;
+
+        // CONTAINER
+        this.design = new PIXI.Container();
+        this.design.visible = true;
+        this.design.width = width;
+        this.design.height = height;
+        this.design.interactive = true;
+        this.design.position.set(window.innerWidth / 2 - this.design.width / 2, 200);
+
+        // BACKGROUND
+        this.design.background = new PIXI.Graphics();
+        this.design.background.beginFill(0x200f21);
+        this.design.background.lineStyle(2, 0x54123b);
+        this.design.background.drawRect(0,0, width, height);
+        this.design.addChildAt(this.design.background, 0);
+
+        // CLOSE BUTTON
+        this.design.close = new PIXI.Sprite(textures.box_empty);
+        this.design.close.width = 20;
+        this.design.close.height = 20;
+        this.design.close.x = width - this.design.close.width - 5;
+        this.design.close.y = 5;
+        this.design.close.interactive = true;
+        this.design.close.on("mousedown", function() {
+            context.design.visible = false;
+        });
+        this.design.addChild(this.design.close);
+
+        // DESIGN OPTIONS
+        for (let i = 0; i < CONFIG.DESIGNS.length; i++) {
+            let d = CONFIG.DESIGNS[i];
+            this.design[d] = new PIXI.Container();
+            this.design[d].x = 0;
+            this.design[d].y = i*50 + 100;
+
+            let texture = d === CONFIG.getDesign() ? textures.box_checked : textures.box_empty;
+
+            this.design[d].button = new PIXI.Sprite(texture);
+            this.design[d].button.width = 20;
+            this.design[d].button.height = 20;
+            this.design[d].button.x = 100;
+            this.design[d].button.interactive = true;
+            this.design[d].button.on("mousedown", function() {
+                for (let e of CONFIG.DESIGNS) {
+                    context.design[e].button.texture = textures.box_empty;
+                }
+                CONFIG.setDesign(d);
+                context.design[d].button.texture = textures.box_checked;
+                context.viewer.updateTextures(d);
+            });
+            this.design[d].addChild(this.design[d].button);
+
+            this.design[d].text = new PIXI.Text(d, {
+                fontSize: 18,
+                fill: 0xd12bea
+            });
+            this.design[d].text.x = width / 2 - 100;
+            this.design[d].addChild(this.design[d].text);
+
+            this.design.addChild(this.design[d]);
+        }
+
+        this.addChild(this.design);
     }
 }
