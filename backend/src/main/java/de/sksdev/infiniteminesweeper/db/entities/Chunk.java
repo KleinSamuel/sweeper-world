@@ -87,18 +87,28 @@ public class Chunk implements Serializable {
         getTiles().forEach(t -> t.setValue(values[t.getY_tile()][t.getX_tile()]));
     }
 
-    @JsonGetter("tiles")
-    public Object getTilesJson() {
-        HashMap<Integer, HashMap<Integer, Tile>> out = new HashMap<>();
-        for (int i = 0; i < Config.CHUNK_SIZE; i++)
-            out.put(i, new HashMap<>());
-
-        tiles.forEach(t -> out.get(t.getX_tile()).put(t.getY_tile(), t));
-        return out;
-    }
+//    @JsonGetter("tiles")
+//    public Object getTilesJson() {
+//        HashMap<Integer, HashMap<Integer, Tile>> out = new HashMap<>();
+//        for (int i = 0; i < Config.CHUNK_SIZE; i++)
+//            out.put(i, new HashMap<>());
+//
+//        tiles.forEach(t -> out.get(t.getX_tile()).put(t.getY_tile(), t));
+//        return out;
+//    }
 
     public Set<Tile> getTiles() {
         return tiles;
+    }
+
+    @JsonGetter("tiles")
+    public Set<Tile> getJsonTiles() {
+        TreeSet<Tile> ts = new TreeSet<>(tiles);
+        tiles.forEach(t -> {
+            if (t.isHidden() | t.getUser() != null)
+                ts.remove(t);
+        });
+        return ts;
     }
 
     public Tile[][] getGrid() {
