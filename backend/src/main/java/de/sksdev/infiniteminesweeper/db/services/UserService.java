@@ -109,7 +109,8 @@ public class UserService {
     public boolean registerChunkRequest(ChunkId cid, Long userId) {
         try {
             if (!loadedChunks.get(cid).add(userId))
-                return false;
+//                return false;
+                return true;
         } catch (NullPointerException e) {
             loadedChunks.put(cid, new HashSet<>(Collections.singletonList(userId)));
         }
