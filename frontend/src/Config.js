@@ -23,6 +23,9 @@ export const BUFFER_ADD = 1;
 /* distance of chunks after which they are removed from the buffer */
 export const BUFFER_REMOVE = 2;
 
+export const MENU_INFO_WIDTH = 300;
+export const MENU_INFO_HEIGHT = 151;
+
 let ENABLED_SOUND = true;
 export function getOptionSoundEnabled() {
     return ENABLED_SOUND;
@@ -54,7 +57,6 @@ function getCookie(cname) {
 
 // TODO: implement cookie check
 if (document.cookie) {
-    console.log(document.cookie);
     USER_ID = parseInt(getCookie("id"));
     USER_HASH = getCookie("hash");
     DESIGN = getCookie("design");
