@@ -1,6 +1,6 @@
 import * as CONFIG from "./Config";
 import * as PIXI from "pixi.js";
-import {sounds} from "./Sounds";
+import {sounds, play} from "./Sounds";
 import CellChunk from "./CellChunk";
 
 /**
@@ -15,8 +15,8 @@ export default class MinefieldModel extends PIXI.Container {
      * Sets the coordinates of the player in the global field and
      * gets an instance of the Communicator object to be able to
      * talk to the server and send or receive field updates.
+     * @param viewer
      * @param communicator
-     * @param userID
      * @param chunkX
      * @param chunkY
      */
@@ -250,6 +250,8 @@ export default class MinefieldModel extends PIXI.Container {
         let posY = ~~(chunkY) * CONFIG.CHUNK_SIZE + ~~(cellY);
         this.viewer.ui.position_x.text = "X: "+posX;
         this.viewer.ui.position_y.text = "Y: "+posY;
+        this.viewer.cursor.x = this.x + chunkX * CONFIG.CHUNK_PIXEL_SIZE + cellX * CONFIG.CELL_PIXEL_SIZE;
+        this.viewer.cursor.y = this.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + cellY * CONFIG.CELL_PIXEL_SIZE;
     }
 
     clickCell(chunkX, chunkY, cellX, cellY) {
@@ -258,12 +260,12 @@ export default class MinefieldModel extends PIXI.Container {
 
         // do nothing if the cell is flagged
         if (cell.state.hidden && cell.state.user) {
-            sounds.click_no.play();
+            play("click_no");
             return;
         }
         // do nothing if the cell is already opened and a mine or an empty cell
         if (!cell.state.hidden && (cell.state.value === 0 || cell.state.value === 9)) {
-            sounds.click_no.play();
+            play("click_no");
             return;
         }
 
@@ -285,14 +287,15 @@ export default class MinefieldModel extends PIXI.Container {
             }
             // clicked on mine
             else if (cell.state.value === 9) {
-                sounds.explosion.play();
+                play("explosion");
+                return;
             }
         }
         // user clicked on an opened cell that contains a number
         else {
             updatedCells = updatedCells.concat(this.openAdjacent(chunkX, chunkY, cellX, cellY));
             if (updatedCells.length === 0) {
-                sounds.click_no.play();
+                play("click_no");
                 return;
             }
             for (let c of updatedCells) {
@@ -305,7 +308,7 @@ export default class MinefieldModel extends PIXI.Container {
         for (let uCell of updatedCells) {
             this.com.openCell(uCell);
         }
-        sounds.click_cell.play();
+        play("click_cell");
     }
 
     flagCell(chunkX, chunkY, cellX, cellY) {
@@ -313,19 +316,18 @@ export default class MinefieldModel extends PIXI.Container {
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
         // returns if the flagged cell is already opened or flagged
         if (!cell.state.hidden || cell.state.hidden && cell.state.user) {
-            sounds.click_no.play();
+            play("click_no");
             return;
         }
         // return if the flagged cell is not a bomb
         if (cell.state.value !== 9) {
-            sounds.click_error.play();
+            play("click_error");
             return;
         }
         cell.state.user = 1;
         cell.updateSprite();
         this.com.flagCell(cell);
-
-        sounds.click_flag.play();
+        play("click_flag");
     }
 
     /**

@@ -8,14 +8,11 @@ export default class UserInterface extends PIXI.Container {
         super();
         this.main = main;
 
-        this.is_debug = false;
-
-        this.addOptionBackground();
         this.addOptionDebug();
 
         this.addInfoBackground();
         this.addInfoPlayername();
-        this.addLogoutButton();
+        this.addOptionsButton();
         this.addPosition();
 
         this.resize(width, height)
@@ -29,17 +26,14 @@ export default class UserInterface extends PIXI.Container {
         this.screenWidth = width;
         this.screenHeight = height;
         this.infoBackground.x = this.screenWidth - 300;
+        this.options.position.set(window.innerWidth / 2 - this.options.width / 2, 200);
     }
 
-    addOptionBackground () {
-        let background = new PIXI.Graphics();
-        background.beginFill(0x200f21);
-        background.lineStyle(2, 0x54123b);
-        background.drawRect(0,0,200,50);
-        background.interactive = true;
-        background.buttonMode = true;
-        this.optionBackground = background;
-        this.addChildAt(this.optionBackground, 0)
+    openOptions() {
+        this.options.visible = true;
+    }
+    closeOptions() {
+        this.options.visible = false;
     }
 
     addInfoBackground() {
@@ -57,10 +51,10 @@ export default class UserInterface extends PIXI.Container {
     addInfoPlayername() {
         this.i_name = new PIXI.Container();
         this.i_name.x = 15;
-        this.i_name.y = 50;
+        this.i_name.y = 15;
 
         this.i_name.n = new PIXI.Text("ID: unknown", {
-            fontSize: 18,
+            fontSize: 28,
             fill: 0xd12bea
         });
 
@@ -68,7 +62,7 @@ export default class UserInterface extends PIXI.Container {
         this.infoBackground.addChild(this.i_name);
     }
 
-    addLogoutButton() {
+    addOptionsButton() {
         let context = this;
         this.b_logout = new PIXI.Sprite(textures.button_logout);
         this.b_logout.width = 60;
@@ -77,57 +71,108 @@ export default class UserInterface extends PIXI.Container {
         this.b_logout.y = 110;
         this.b_logout.interactive = true;
         this.b_logout.on("mousedown", function() {
-            CONFIG.setID(-1);
-            context.main.logout();
+            context.openOptions();
         });
         this.infoBackground.addChild(this.b_logout);
     }
 
     addPosition() {
-        this.position_x = new PIXI.Text("X: 123123", {
-            fontSize: 18,
+        this.position_x = new PIXI.Text("X:", {
+            fontSize: 28,
             fill: 0xd12bea
         });
         this.position_x.x = 15;
-        this.position_x.y = 15;
-        this.position_y = new PIXI.Text("Y: 0989798", {
-            fontSize: 18,
+        this.position_x.y = 45;
+        this.position_y = new PIXI.Text("Y:", {
+            fontSize: 28,
             fill: 0xd12bea
         });
         this.position_y.x = 15;
-        this.position_y.y = 30;
+        this.position_y.y = 70;
         this.infoBackground.addChild(this.position_x);
         this.infoBackground.addChild(this.position_y);
     }
 
-    updateBoxDebug() {
-        this.o_debug.box.texture = this.is_debug ? textures.box_checked : textures.box_empty;
-    }
-
     addOptionDebug() {
+
         let context = this;
-        this.o_debug = new PIXI.Container();
-        this.o_debug.x = 15;
-        this.o_debug.y = 15;
 
-        this.o_debug.box = new PIXI.Sprite();
-        this.o_debug.box.width = CONFIG.CELL_PIXEL_SIZE * 0.75;
-        this.o_debug.box.height = CONFIG.CELL_PIXEL_SIZE * 0.75;
-        this.o_debug.box.interactive = true;
-        this.o_debug.box.on("mousedown", function(){
-            context.is_debug = !context.is_debug;
-            context.updateBoxDebug();
+        let width = 500;
+        let height = 500;
+
+        // options container
+        this.options = new PIXI.Container();
+        this.options.visible = false;
+        this.options.width = width;
+        this.options.height = height;
+        this.options.position.set(window.innerWidth / 2 - this.options.width / 2, 200);
+        // options background
+        this.options.background = new PIXI.Graphics();
+        this.options.background.beginFill(0x200f21);
+        this.options.background.lineStyle(2, 0x54123b);
+        this.options.background.drawRect(0,0, width, height);
+        this.options.background.interactive = true;
+        this.options.background.buttonMode = true;
+        this.options.addChildAt(this.options.background, 0);
+
+        this.options.close = new PIXI.Sprite(textures.box_empty);
+        this.options.close.width = 20;
+        this.options.close.height = 20;
+        this.options.close.x = width - this.options.close.width - 5;
+        this.options.close.y = 5;
+        this.options.close.interactive = true;
+        this.options.close.on("mousedown", function() {
+            context.closeOptions();
         });
-        this.o_debug.addChild(this.o_debug.box);
+        this.options.addChild(this.options.close);
 
-        this.o_debug.text = new PIXI.Text("debug mode", {
+        this.options.header = new PIXI.Text("OPTIONS", {
+            fontSize: 28,
+            fill: 0xd12bea,
+            align: "center"
+        });
+        this.options.header.x = width / 2 - this.options.header.width / 2;
+        this.options.header.y = 15;
+        this.options.addChildAt(this.options.header, 1);
+
+        let left = 100;
+
+        this.options.sound = new PIXI.Container();
+        this.options.sound.width = width;
+        this.options.sound.height = 100;
+        this.options.sound.y = 100;
+
+        this.options.sound.button = new PIXI.Sprite(textures.box_checked);
+        this.options.sound.button.width = 20;
+        this.options.sound.button.height = 20;
+        this.options.sound.button.x = left;
+        this.options.sound.button.interactive = true;
+        this.options.sound.button.on("mousedown", function() {
+            CONFIG.switchOptionSoundEnabled();
+            context.options.sound.button.texture = CONFIG.getOptionSoundEnabled() ? textures.box_checked : textures.box_empty;
+        });
+        this.options.sound.addChild(this.options.sound.button);
+
+        this.options.sound.text = new PIXI.Text("enable sound", {
             fontSize: 18,
             fill: 0xd12bea
         });
-        this.o_debug.text.x = CONFIG.CELL_PIXEL_SIZE * 1.5;
-        this.o_debug.addChild(this.o_debug.text);
+        this.options.sound.text.x = width / 2 - left;
+        this.options.sound.addChild(this.options.sound.text);
 
-        this.updateBoxDebug();
-        this.addChild(this.o_debug);
+        this.options.addChildAt(this.options.sound, 2);
+
+        this.options.logout = new PIXI.Sprite(textures.button_logout);
+        this.options.logout.width = 60;
+        this.options.logout.height = 30;
+        this.options.logout.x = width / 2 - this.options.logout.width / 2;
+        this.options.logout.y = height - 40;
+        this.options.logout.interactive = true;
+        this.options.logout.on("mousedown", function() {
+            context.main.logout();
+        });
+        this.options.addChild(this.options.logout);
+
+        this.addChild(this.options);
     }
 }
