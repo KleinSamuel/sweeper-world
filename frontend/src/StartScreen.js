@@ -13,6 +13,8 @@ export default class StartScreen extends PIXI.Container {
     init() {
         let context = this;
 
+        document.body.style.backgroundImage = "url("+CONFIG.URL_ASSETS+"/images/bomb_wallpaper.jpg)";
+
         let background = new PIXI.Graphics();
         background.beginFill(0x000000, 0.5);
         background.lineStyle(2, 0x000000);
