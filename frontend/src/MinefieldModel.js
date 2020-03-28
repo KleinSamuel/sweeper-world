@@ -15,8 +15,8 @@ export default class MinefieldModel extends PIXI.Container {
      * Sets the coordinates of the player in the global field and
      * gets an instance of the Communicator object to be able to
      * talk to the server and send or receive field updates.
+     * @param viewer
      * @param communicator
-     * @param userID
      * @param chunkX
      * @param chunkY
      */
@@ -250,6 +250,8 @@ export default class MinefieldModel extends PIXI.Container {
         let posY = ~~(chunkY) * CONFIG.CHUNK_SIZE + ~~(cellY);
         this.viewer.ui.position_x.text = "X: "+posX;
         this.viewer.ui.position_y.text = "Y: "+posY;
+        this.viewer.cursor.x = this.x + chunkX * CONFIG.CHUNK_PIXEL_SIZE + cellX * CONFIG.CELL_PIXEL_SIZE;
+        this.viewer.cursor.y = this.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + cellY * CONFIG.CELL_PIXEL_SIZE;
     }
 
     clickCell(chunkX, chunkY, cellX, cellY) {
