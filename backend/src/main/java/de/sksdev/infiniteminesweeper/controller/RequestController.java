@@ -153,34 +153,39 @@ public class RequestController {
     @MessageMapping("/openCell")
     @ResponseBody
     public String openCell(CellOperationMessage message) {
+        TileId tid = new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY());
+        boolean isValid = chunkService.registerTileUpdate(tid, message.getUser(), false);
+        if (isValid) {
+            try {
+                message.setHidden(false);
+                String response = objectMapper.writeValueAsString(message);
+                template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        } else
+            System.err.println("Update of Tile " + tid + " by User " + message.getUser() + " was not permitted!");
 
-        message.setHidden(false);
-
-        try {
-            String response = objectMapper.writeValueAsString(message);
-            template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()), message.getUser(), false);
+        return "" + isValid;
     }
 
     @MessageMapping("/flagCell")
     @ResponseBody
     public String flagCell(CellOperationMessage message) {
+        TileId tid = new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY());
+        boolean isValid = chunkService.registerTileUpdate(tid, message.getUser(), true);
 
-        System.out.println(message.getUser());
+        if (isValid) {
+            try {
+                message.setHidden(true);
+                String response = objectMapper.writeValueAsString(message);
+                template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        } else
+            System.err.println("Update of Tile " + tid + " by User " + message.getUser() + " was not permitted!");
 
-        message.setHidden(true);
-
-        try {
-            String response = objectMapper.writeValueAsString(message);
-            template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()), message.getUser(), true);
+        return "" + isValid;
     }
 }

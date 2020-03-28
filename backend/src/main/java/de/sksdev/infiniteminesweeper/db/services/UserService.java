@@ -98,18 +98,19 @@ public class UserService {
         return false;
     }
 
-    @PostConstruct
-    private void initDummyUser() {
-        User u = new User();
-        u.setName("Testname");
-        System.out.println("saving dummy user");
-        userRepository.save(u);
-    }
+//    @PostConstruct
+//    private void initDummyUser() {
+//        User u = new User();
+//        u.setName("Testname");
+//        System.out.println("saving dummy user");
+//        userRepository.save(u);
+//    }
 
     public boolean registerChunkRequest(ChunkId cid, Long userId) {
         try {
             if (!loadedChunks.get(cid).add(userId))
-                return false;
+//                return false;
+                return true;
         } catch (NullPointerException e) {
             loadedChunks.put(cid, new HashSet<>(Collections.singletonList(userId)));
         }

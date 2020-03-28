@@ -130,11 +130,11 @@ public class ChunkService {
         ChunkId cid = tid.getChunkId();
         if (userService.validateTileRequest(userId, cid)) {
             Tile t = getOrCreateChunk(cid).getGrid()[tid.getY_tile()][tid.getX_tile()];
-            if (!flag)
+            if (!flag) {
                 if (!t.open(userService.getUser(userId)))
                     return false;
-                else
-                    return t.setUser(userService.getUser(userId));
+            } else
+                return t.setUser(userService.getUser(userId));
             return true;
         }
         return false;
