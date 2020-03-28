@@ -5,8 +5,8 @@
  */
 
 /* URL of the server */
-export const URL_API = "http://localhost:8090/backend";
-export const URL_ASSETS = "http://localhost:8080/assets";
+export const URL_API = HOST_BACKEND+"/backend";
+export const URL_ASSETS = HOST_ASSETS+"/assets";
 
 /* number of cells in a cell chunk */
 export const CHUNK_SIZE = 32;
