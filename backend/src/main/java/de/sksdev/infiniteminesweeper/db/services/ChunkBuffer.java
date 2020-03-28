@@ -101,4 +101,8 @@ public class ChunkBuffer {
             removeAndSave(new HashSet<>(buffer.values()));
         return true;
     }
+
+    public Chunk saveNow(Chunk c) {
+        return chunkRepository.save(c);
+    }
 }

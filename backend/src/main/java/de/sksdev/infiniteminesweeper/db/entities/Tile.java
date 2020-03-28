@@ -6,6 +6,7 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 
 @Entity
@@ -62,7 +63,6 @@ public class Tile implements Comparable<Tile>, Serializable {
     @Column(name = "hidden")
     private boolean hidden = true;
 
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -79,6 +79,12 @@ public class Tile implements Comparable<Tile>, Serializable {
         }
         return false;
     }
+
+    @JsonIgnore
+    public TileId getId() {
+        return new TileId(x, y, x_tile, y_tile);
+    }
+
 
     public Integer getValue() {
         return value;

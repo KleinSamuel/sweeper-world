@@ -1,15 +1,18 @@
 package de.sksdev.infiniteminesweeper.db.services;
 
+import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
+import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
+import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 
 @Service
 public class UserService {
@@ -48,17 +51,22 @@ public class UserService {
         return isLoggedIn(u.getId()) ? null : u;
     }
 
-    private User createUser(String name) {
+    private User createUser(String name, TileId start) {
         try {
-            return (save(new User(name)));
+            if(name.length()>32)
+                name= name.replaceAll("-","").substring(0,31);
+            return (save(new User(name, start)));
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Shitty name for a User: '" + name + "'");
         }
         return null;
     }
 
-    public User getNewUser(String name) {
-        return getUser(name) != null ? null : createUser(name);
+
+    public User getNewUser(String name, TileId start) {
+        User u = getUser(name);
+        return u != null ? u : createUser(name, start);
     }
 
     public boolean isLoggedIn(long uid) {

@@ -12,7 +12,6 @@ import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -63,47 +62,34 @@ public class RequestController {
             e.printStackTrace();
             return null;
         }
-
     }
-//    @RequestMapping(value="/api/flushBuffer")
-//    @ResponseBody
-//    public String flushBuffer(){
-//        return chunkService.flushBuffer()+"";
-//    }
 
-//    @RequestMapping(value = "/api/getChunkContent")
-//    @ResponseBody
-//    public String getChunkContent(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-//        try {
-//            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(x, y, true));
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
+    @RequestMapping(value = "/api/getTileContent")
+    @ResponseBody
+    public String getTileContent(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
+        try {
+            ChunkId cid = new ChunkId(x, y);
+            if (userService.validateTileRequest(userId, cid))
+                return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid).getGrid()[y_tile][x_tile]);
+            else
+                return null;
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-//    @RequestMapping(value = "/api/getTile")
-//    @ResponseBody
-//    public String getTile(@RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
-//        System.out.println("Request for tile " + x + "/" + y + "(" + x_tile + "/" + y_tile + ")");
-//        try {
-//            return objectMapper.writeValueAsString(chunkService.getTile(x, y, x_tile, y_tile));
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public String register(@RequestBody RegisterRequest request) {
 
         // TODO: create new user in db and send respective hash and id
-        User u = userService.getNewUser(request.getUsername());
+        User u = userService.getNewUser(request.getUsername(), chunkService.getRandomTileId());
         if (u == null)
             return null;
 
-        LoginResponse response = new LoginResponse(u.getId());
+        LoginResponse response = new LoginResponse(u);
         userService.logIn(u.getId(), response.getHash());
         try {
             return objectMapper.writeValueAsString(response);
@@ -120,7 +106,7 @@ public class RequestController {
         User u = userService.getExistingUser(username);
         //TODO check pw
 
-        LoginResponse response = new LoginResponse(u.getId());
+        LoginResponse response = new LoginResponse(u);
         userService.logIn(u.getId(), response.getHash());
         try {
             return objectMapper.writeValueAsString(response);
@@ -130,11 +116,12 @@ public class RequestController {
         return null;
     }
 
+
     @RequestMapping(value = "/guest", method = RequestMethod.GET)
     @ResponseBody
     public String loginGuest() {
-        User g = userService.getNewUser(UUID.randomUUID().toString());
-        LoginResponse response = new LoginResponse(g.getId());
+        User g = userService.getNewUser(UUID.randomUUID().toString(), chunkService.getRandomTileId());
+        LoginResponse response = new LoginResponse(g);
         userService.logIn(g.getId(), response.getHash());
         try {
             return objectMapper.writeValueAsString(response);

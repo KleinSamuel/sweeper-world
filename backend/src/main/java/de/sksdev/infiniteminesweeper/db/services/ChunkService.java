@@ -30,6 +30,9 @@ public class ChunkService {
     final
     AsyncService asyncService;
 
+
+    private Random random;
+
     @Autowired
     public ChunkService(TileRepository tileRepository,
                         ChunkBuffer chunkBuffer,
@@ -39,6 +42,7 @@ public class ChunkService {
         this.chunkBuffer = chunkBuffer;
         this.userService = userService;
         this.asyncService = asyncService;
+        this.random = new Random(System.currentTimeMillis());
     }
 
     //    TODO use objectgetter for cached entries?
@@ -53,7 +57,11 @@ public class ChunkService {
     }
 
     public Tile getTile(int x, int y, int x_tile, int y_tile) {
-        return tileRepository.findById(new TileId(x, y, x_tile, y_tile)).get();
+        return getTile(new TileId(x, y, x_tile, y_tile));
+    }
+
+    public Tile getTile(TileId tid) {
+        return tileRepository.findById(tid).orElseGet(() -> getOrCreateChunk(new ChunkId(tid.getX(), tid.getY())).getGrid()[tid.getY_tile()][tid.getX_tile()]);
     }
 
     private Chunk newChunk(int x, int y) {
@@ -111,6 +119,10 @@ public class ChunkService {
         chunkBuffer.saveAll(cs);
     }
 
+    private Chunk saveNow(Chunk c) {
+        return chunkBuffer.saveNow(c);
+    }
+
 
     public Chunk save(Chunk c) {
         chunkBuffer.save(c);
@@ -131,17 +143,25 @@ public class ChunkService {
         if (userService.validateTileRequest(userId, cid)) {
             Tile t = getOrCreateChunk(cid).getGrid()[tid.getY_tile()][tid.getX_tile()];
             if (!flag) {
-                if (!t.open(userService.getUser(userId)))
-                    return false;
+                return t.open(userService.getUser(userId));
             } else
                 return t.setUser(userService.getUser(userId));
-            return true;
         }
         return false;
     }
 
-    public Object getOrCreateChunkContent(ChunkId cid) {
+    public Chunk getOrCreateChunkContent(ChunkId cid) {
         Chunk c = getOrCreateChunk(cid);
         return c.isFilled() ? c : generateContent(c);
     }
+
+    public TileId getRandomTileId() {
+        return new TileId(random.nextInt(), random.nextInt(), random.nextInt(Config.CHUNK_SIZE), random.nextInt(Config.CHUNK_SIZE));
+    }
+
+//    private Tile save(Tile tile) {
+//        return save(tile.getChunk()).getGrid()[tile.getY_tile()][tile.getX_tile()];
+////        tileRepository.save(tile);
+////        return tile;
+//    }
 }
