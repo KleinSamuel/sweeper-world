@@ -162,6 +162,19 @@ export default class UserInterface extends PIXI.Container {
 
         this.options.addChildAt(this.options.sound, 2);
 
+        // DESIGN
+        this.options.design = new PIXI.Sprite(textures.button_logout);
+        this.options.design.width = 60;
+        this.options.design.height = 30;
+        this.options.design.x = width / 2 - this.options.design.width / 2;
+        this.options.design.y = 150;
+        this.options.design.interactive = true;
+        this.options.design.on("mousedown", function() {
+
+        });
+        this.options.addChild(this.options.design);
+
+        // LOGOUT BUTTON
         this.options.logout = new PIXI.Sprite(textures.button_logout);
         this.options.logout.width = 60;
         this.options.logout.height = 30;

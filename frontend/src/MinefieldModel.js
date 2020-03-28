@@ -57,6 +57,10 @@ export default class MinefieldModel extends PIXI.Container {
         let context = this;
 
         let clickWrapper = (function(isLeftclick, chunkX, chunkY, cellX, cellY) {
+            // disables mouse clicks when menu is open
+            if (this.viewer.denyInteractions()) {
+                return;
+            }
             if (isLeftclick) {
                 this.clickCell(chunkX, chunkY, cellX, cellY);
             } else {
@@ -65,6 +69,10 @@ export default class MinefieldModel extends PIXI.Container {
         }).bind(this);
 
         let hoverWrapper = (function(chunkX, chunkY, cellX, cellY) {
+            // disables mouse interactions when menu is open
+            if (this.viewer.denyInteractions()) {
+                return;
+            }
             this.hoverCell(chunkX, chunkY, cellX, cellY);
         }).bind(this);
 

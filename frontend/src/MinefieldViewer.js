@@ -135,6 +135,11 @@ export default class MinefieldViewer {
 
         window.addEventListener("mousemove", function(event){
 
+            // disables field dragging
+            if (context.denyInteractions()) {
+                return;
+            }
+
             // true if mouse button is down
             if (mouseDownX !== -1 && mouseDownY !== -1) {
                 // calculates the distance from the origin when the mouse was pressed
@@ -182,6 +187,13 @@ export default class MinefieldViewer {
         });
 
         context.updateVisible();
+    }
+
+    denyInteractions() {
+        if (this.ui.options.visible) {
+            return true;
+        }
+        return false;
     }
 
     logout() {
