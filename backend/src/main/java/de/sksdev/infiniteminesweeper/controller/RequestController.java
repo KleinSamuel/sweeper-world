@@ -150,20 +150,6 @@ public class RequestController {
         return "" + userService.logout(userId);
     }
 
-    @GetMapping("/fuckingshit")
-    @ResponseBody
-    public String teset() {
-        //String text = "FICKEN ARSCH SAU HURENSOHN";
-        //template.convertAndSend("/topic/test", text);
-        return "FICKEN";
-    }
-
-    @MessageMapping("/hello")
-    @SendTo("/topic/test")
-    public String test() {
-        return "Hello World!";
-    }
-
     @MessageMapping("/openCell")
     @ResponseBody
     public String openCell(CellOperationMessage message) {
@@ -171,22 +157,30 @@ public class RequestController {
         message.setHidden(false);
 
         try {
-            //template.convertAndSend("/updates/" + message.getChunkX() + "/" + message.getChunkY(),
-
             String response = objectMapper.writeValueAsString(message);
-
-            System.out.println("send update for openCell: "+message.getChunkX()+":"+message.getChunkY()+" -- "+message.getX()+":"+message.getY());
-            template.convertAndSend("/updates/" + message.getChunkX() + "/" + message.getChunkY(), "test");
+            template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
-        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getX(), message.getY()), message.getUser(), false);
+        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()), message.getUser(), false);
     }
 
     @MessageMapping("/flagCell")
     @ResponseBody
     public String flagCell(CellOperationMessage message) {
-        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getX(), message.getY()), message.getUser(), true);
+
+        System.out.println(message.getUser());
+
+        message.setHidden(true);
+
+        try {
+            String response = objectMapper.writeValueAsString(message);
+            template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return "" + chunkService.registerTileUpdate(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()), message.getUser(), true);
     }
 }

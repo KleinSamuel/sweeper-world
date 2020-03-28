@@ -39,3 +39,8 @@ export function getHash() {
 export function setHash(hash) {
     USER_HASH = hash;
 }
+export function logout() {
+    USER_ID = -1;
+    USER_HASH = "";
+    document.cookie = "";
+}

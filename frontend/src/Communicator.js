@@ -26,6 +26,7 @@ export default class Communicator {
      */
     initClient() {
         this.client = new Client();
+        this.subsriptions = {};
 
         let context = this;
         this.client.configure({
@@ -36,10 +37,6 @@ export default class Communicator {
             onConnect: function(frame) {
                 console.log("connected!");
                 context.isConnected = true;
-                /* subscribes to the channel where field updates are released */
-                context.client.subscribe("/info/test", function(message){
-                    console.log(message);
-                });
             },
             onDisconnect: function(frame) {
                 console.log("disconnected!");
@@ -55,13 +52,15 @@ export default class Communicator {
     }
 
     unregisterChunk(chunkX, chunkY) {
-        this.client.unsubscribe("/updates/"+chunkX+"/"+chunkY);
+        this.subsriptions[chunkX+"_"+chunkY].unsubscribe();
     }
 
-    registerChunk(chunkX, chunkY) {
-        this.client.subscribe("/updates/"+chunkX+"/"+chunkY, function(message) {
-             console.log("got update for chunk: "+chunkX+":"+chunkY);
-             console.log(message);
+    registerChunk(chunkX, chunkY, callback) {
+        this.subsriptions[chunkX+"_"+chunkY] = this.client.subscribe("/updates/"+chunkX+"_"+chunkY, function(message) {
+             let body = JSON.parse(message.body);
+             if (body.user !== CONFIG.getID()) {
+                 callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user);
+             }
         });
     }
 
@@ -82,8 +81,8 @@ export default class Communicator {
             body: JSON.stringify({
                 chunkX: cell.chunkX,
                 chunkY: cell.chunkY,
-                x: cell.cellX,
-                y: cell.cellY,
+                cellX: cell.cellX,
+                cellY: cell.cellY,
                 user: CONFIG.getID()
             })
         });
@@ -95,8 +94,8 @@ export default class Communicator {
             body: JSON.stringify({
                 chunkX: cell.chunkX,
                 chunkY: cell.chunkY,
-                x: cell.cellX,
-                y: cell.cellY,
+                cellX: cell.cellX,
+                cellY: cell.cellY,
                 user: CONFIG.getID()
             })
         });

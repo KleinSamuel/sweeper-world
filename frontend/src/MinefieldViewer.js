@@ -184,7 +184,8 @@ export default class MinefieldViewer {
     }
 
     logout() {
-        // TODO: this is onyl an ugly fix to destroy all current entities on logout
+        // TODO: this is only an ugly fix to destroy all current entities on logout
+        CONFIG.logout();
         location.reload();
     }
 

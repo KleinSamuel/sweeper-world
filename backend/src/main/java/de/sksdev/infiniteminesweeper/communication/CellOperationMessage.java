@@ -4,10 +4,9 @@ public class CellOperationMessage {
 
     private int chunkX;
     private int chunkY;
-    private int x;
-    private int y;
+    private int cellX;
+    private int cellY;
     private boolean hidden;
-    private boolean flag;
     private long user;
 
     public CellOperationMessage() {
@@ -30,20 +29,20 @@ public class CellOperationMessage {
         this.chunkY = chunkY;
     }
 
-    public int getX() {
-        return x;
+    public int getCellX() {
+        return cellX;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public void setCellX(int cellX) {
+        this.cellX = cellX;
     }
 
-    public int getY() {
-        return y;
+    public int getCellY() {
+        return cellY;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public void setCellY(int cellY) {
+        this.cellY = cellY;
     }
 
     public long getUser() {
@@ -60,13 +59,5 @@ public class CellOperationMessage {
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
-    }
-
-    public boolean isFlag() {
-        return flag;
-    }
-
-    public void setFlag(boolean flag) {
-        this.flag = flag;
     }
 }

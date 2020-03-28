@@ -30,14 +30,13 @@ public class ChunkService {
     final
     AsyncService asyncService;
 
-    final
-    SimpMessagingTemplate template;
-
     @Autowired
-    public ChunkService(TileRepository tileRepository, ChunkBuffer chunkBuffer, UserService userService, AsyncService asyncService, SimpMessagingTemplate simpMessagingTemplate) {
+    public ChunkService(TileRepository tileRepository,
+                        ChunkBuffer chunkBuffer,
+                        UserService userService,
+                        AsyncService asyncService) {
         this.tileRepository = tileRepository;
         this.chunkBuffer = chunkBuffer;
-        this.template = simpMessagingTemplate;
         this.userService = userService;
         this.asyncService = asyncService;
     }
@@ -134,9 +133,8 @@ public class ChunkService {
             if (!flag)
                 if (!t.open(userService.getUser(userId)))
                     return false;
-                else if (!t.setUser(userService.getUser(userId)))
-                    return false;
-            template.convertAndSend("/update/" + cid.getX() + "/" + cid.getY(), t);
+                else
+                    return t.setUser(userService.getUser(userId));
             return true;
         }
         return false;
