@@ -98,13 +98,13 @@ public class UserService {
         return false;
     }
 
-    @PostConstruct
-    private void initDummyUser() {
-        User u = new User();
-        u.setName("Testname");
-        System.out.println("saving dummy user");
-        userRepository.save(u);
-    }
+//    @PostConstruct
+//    private void initDummyUser() {
+//        User u = new User();
+//        u.setName("Testname");
+//        System.out.println("saving dummy user");
+//        userRepository.save(u);
+//    }
 
     public boolean registerChunkRequest(ChunkId cid, Long userId) {
         try {
