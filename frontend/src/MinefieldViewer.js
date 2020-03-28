@@ -58,7 +58,8 @@ export default class MinefieldViewer {
                     height: 256,
                     antialias: false,
                     transparent: false,
-                    resolution: 1
+                    resolution: 1,
+                    backgroundColor:0x1e1e22
                 }
             );
             document.body.appendChild(app.view);
