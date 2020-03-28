@@ -18,6 +18,14 @@ export const BUFFER_ADD = 1;
 /* distance of chunks after which they are removed from the buffer */
 export const BUFFER_REMOVE = 2;
 
+let ENABLED_SOUND = true;
+export function getOptionSoundEnabled() {
+    return ENABLED_SOUND;
+}
+export function switchOptionSoundEnabled() {
+    ENABLED_SOUND = !ENABLED_SOUND;
+}
+
 
 let USER_ID = -1;
 let USER_HASH = "";

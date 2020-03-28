@@ -1,4 +1,5 @@
 import { Howl } from "howler";
+import * as CONFIG from "./Config";
 
 let pipeline;
 
@@ -10,6 +11,12 @@ export function init() {
         pipeline = preloadTextures();
     }
     return pipeline;
+}
+
+export function play(name) {
+    if (CONFIG.getOptionSoundEnabled()) {
+        sounds[name].play(undefined, false);
+    }
 }
 
 function preloadTextures() {
