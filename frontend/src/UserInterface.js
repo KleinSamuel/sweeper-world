@@ -198,7 +198,7 @@ export default class UserInterface extends PIXI.Container {
 
         // CONTAINER
         this.design = new PIXI.Container();
-        this.design.visible = true;
+        this.design.visible = false;
         this.design.width = width;
         this.design.height = height;
         this.design.interactive = true;
