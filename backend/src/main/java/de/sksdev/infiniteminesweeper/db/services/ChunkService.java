@@ -161,19 +161,18 @@ public class ChunkService {
 
 
     public Object openTiles(ChunkId cid , int x_tile, int y_tile, long userId) {
-        System.out.println("Started opening tiles from "+cid + " tile="+x_tile+"/"+y_tile);
         Chunk chunk= getOrCreateChunkContent(cid);
         Tile t = chunk.getGrid()[y_tile][x_tile];
         HashMap<ChunkId, TreeSet<Tile>> openedTiles = new HashMap<>();
         recOpenTiles(chunk,t, openedTiles);
-        HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashSet<Tile>>>>> tileMap = new HashMap<>();
+        HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Tile>>>> tileMap = new HashMap<>();
         openedTiles.forEach((c, ts) -> {
             userService.registerChunkRequest(c, userId);
             if (!tileMap.containsKey(c.getX()))
                 tileMap.put(c.getX(), new HashMap<>());
             if (!tileMap.get(c.getX()).containsKey(c.getY()))
                 tileMap.get(c.getX()).put(c.getY(), new HashMap<>());
-            HashMap<Integer, HashMap<Integer, Tile>> openedChunk = new HashMap<>();
+            HashMap<Integer, HashMap<Integer, Tile>> openedChunk = tileMap.get(c.getX()).get(c.getY());
             ts.forEach(open -> {
                 if (!openedChunk.containsKey(open.getX_tile()))
                     openedChunk.put(open.getX_tile(), new HashMap<>());
@@ -188,7 +187,6 @@ public class ChunkService {
     }
 
     public void recOpenTiles(Chunk startChunk, Tile t, HashMap<ChunkId, TreeSet<Tile>> opened) {
-        System.out.println("Checking "+t.getId());
         boolean alreadyOpened = false;
         ChunkId cid = t.getChunk().getId();
         try {
@@ -198,8 +196,7 @@ public class ChunkService {
         }
 
         if (!alreadyOpened) {
-            System.out.println("\tAdded "+t.getId());
-            if (t.getValue() <= 1) {
+            if (t.getValue() < 1) {
                 Chunk c;
                 for (int yo = -1; yo < 2; yo++) {
                     c = startChunk;

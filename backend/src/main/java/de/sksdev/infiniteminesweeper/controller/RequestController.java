@@ -59,10 +59,10 @@ public class RequestController {
         try {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
-                if (userService.validateTileRequest(userId, cid))
+//                if (userService.validateTileRequest(userId, cid))
                     return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
-                else
-                    return null;
+//                else
+//                    return null;
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
