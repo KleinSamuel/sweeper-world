@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import * as CONFIG from "./Config";
+import "particles.js";
 
 export default class StartScreen extends PIXI.Container {
 
@@ -10,32 +11,41 @@ export default class StartScreen extends PIXI.Container {
         this.onRegister = onRegister;
         this.onGuestLogin = onGuestLogin;
         this.init();
+        this.interactive = false;
+        this.buttonMode = false;
     }
 
     init() {
         let context = this;
 
-        let background = new PIXI.Graphics();
-        background.beginFill(0x000000, 0.5);
-        background.lineStyle(2, 0x000000);
-        background.drawRect(0,0,window.innerWidth,window.innerHeight);
-        background.interactive = true;
-        background.buttonMode = true;
-        this.background = background;
-        this.addChildAt(this.background, 0);
+        particlesJS.load("particles-js", CONFIG.URL_ASSETS+"/particles.json", function() {
+            console.log("particles loaded");
+        });
 
-        let win = new PIXI.Graphics();
-        win.x = window.innerWidth / 2 - 350;
-        win.y = window.innerHeight / 2 - 250;
-        win.beginFill(0xffffff, 1);
-        win.lineStyle(2, 0x000000);
-        win.drawRect(0,0, 700, 500);
-        background.interactive = true;
-        background.buttonMode = true;
-        this.window = win;
-        this.addChildAt(this.window, 1);
+        // sets the favicon
+        let favicon = document.createElement("link");
+        favicon.type = "image/x-icon";
+        favicon.rel = "shortcut icon";
+        favicon.href = CONFIG.URL_ASSETS+"/favicon.ico";
+        document.head.appendChild(favicon);
+        let favicon2 = document.createElement("link");
+        favicon2.type = "image/x-icon";
+        favicon2.rel = "icon";
+        favicon2.href = CONFIG.URL_ASSETS+"/favicon.ico";
+        document.head.appendChild(favicon2);
+
+        // sets the pixel font
+        let newStyle = document.createElement("style");
+        newStyle.appendChild(document.createTextNode("\
+            @font-face {\
+                font-family: PixelFont;\
+                src: url('" + CONFIG.URL_ASSETS + "/fonts/PixelFont.ttf');\
+            }\
+        "));
+        document.head.appendChild(newStyle);
 
         this.loginContainer = document.getElementById("login-container");
+        this.loginContainer.style.fontFamily = "PixelFont";
 
         let loginCon = document.getElementById("login-con");
         let registerCon = document.getElementById("register-con");
@@ -89,13 +99,15 @@ export default class StartScreen extends PIXI.Container {
     show() {
         this.visible = true;
         this.loginContainer.style.display = "block";
-        document.body.style.backgroundImage = "url("+CONFIG.URL_ASSETS+"/images/bomb_wallpaper.jpg)";
+        document.body.style.backgroundImage = "url("+CONFIG.URL_ASSETS+"/images/sweeper-background.png)";
+        document.getElementById("partcles-js").style.display = "block";
     }
 
     hide() {
         this.visible = false;
         this.loginContainer.style.display = "none";
         document.body.style.backgroundImage = "none";
+        document.getElementById("particles-js").style.display = "none";
     }
 
 }

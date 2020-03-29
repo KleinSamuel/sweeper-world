@@ -10,7 +10,7 @@ body {
 #login-container {
     position: fixed;
     width: 700px;
-    height: 300px;
+    height: 350px;
     background-color: white;
     margin-left: calc(50% - 350px);
     margin-top: 200px;
@@ -18,6 +18,36 @@ body {
     display: none;
 }
 
+input {
+    background-color: #22272c;
+    color: white;
+    border: none;
+    height: 40px;
+    padding-top: 10px;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    font-family: "PixelFont";
+    font-size: 24px;
+}
+
+button {
+    height: 30px;
+    border: 1px solid white;
+    background-color: #22272c;
+    color: white;
+    margin-bottom: 50px;
+    font-family: "PixelFont";
+    padding-top: 5px;
+}
+
 #register-con {
     display: none;
+}
+
+.background {
+    position:  absolute;
+    display:  block;
+    top: 0;
+    left: 0;
+    z-index: 0;
 }
