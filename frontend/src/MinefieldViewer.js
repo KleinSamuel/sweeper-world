@@ -14,13 +14,15 @@ export default class MinefieldViewer {
 
         this.GLOBAL_POS_X = 0;
         this.GLOBAL_POS_Y = 0;
-        this.LOADER = undefined;
 
         let context = this;
 
         context.com = new Communicator();
 
-        context.startscreen = new StartScreen(context.loginGuest.bind(context));
+        context.startscreen = new StartScreen(
+            context.loginUser.bind(context),
+            context.registerUser.bind(context),
+            context.loginGuest.bind(context));
 
         if (CONFIG.getID() === -1) {
             context.startscreen.show();
@@ -30,19 +32,47 @@ export default class MinefieldViewer {
         this.initialize();
     }
 
+    loginUser(username, password) {
+        let context = this;
+        return context.com.loginUser(username, password)
+            .then(function(response) {
+                CONFIG.setID(response.data.id);
+                CONFIG.setHash(response.data.hash);
+                // TODO: get player config
+                CONFIG.setDesign("default");
+                context.startscreen.hide();
+                context.initialize();
+            }).catch(function(err) {
+                console.log("error while loggin in user");
+                console.log(err);
+            });
+    }
+
+    registerUser(username, password, email) {
+        let context = this;
+        return context.com.registerUser(username, password, email)
+            .then(function(response) {
+                console.log("got register response");
+                console.log(response);
+            }).catch(function(err) {
+                console.log("error while registering user");
+                console.log(err);
+            });
+    }
+
     loginGuest() {
         let context = this;
         return context.com.loginGuest()
-        .then(function(response) {
-            CONFIG.setID(response.data.id);
-            CONFIG.setHash(response.data.hash);
-            // TODO: get player config
-            CONFIG.setDesign("default");
-            context.startscreen.hide();
-            context.initialize();
-        }).catch(function(err) {
-            console.log(err);
-        });
+            .then(function(response) {
+                CONFIG.setID(response.data.id);
+                CONFIG.setHash(response.data.hash);
+                // TODO: get player config
+                CONFIG.setDesign("default");
+                context.startscreen.hide();
+                context.initialize();
+            }).catch(function(err) {
+                console.log(err);
+            });
     }
 
     initialize() {
@@ -194,10 +224,13 @@ export default class MinefieldViewer {
 
     updateTextures(name) {
         CONFIG.setDesign(name);
-        //location.reload();
+        this.com.updateSettings(CONFIG.getDesign(), CONFIG.getOptionSoundEnabled()).then(function() {
+            location.reload();
+        });
     }
 
     denyInteractions() {
+        // TODO: add more options that should disable user interactions
         if (this.ui.options.visible) {
             return true;
         }
@@ -205,10 +238,11 @@ export default class MinefieldViewer {
     }
 
     logout() {
-        console.log("logout");
-        // TODO: this is only an ugly fix to destroy all current entities on logout
-        CONFIG.logout();
-        //location.reload();
+        this.com.logout().then(function() {
+            CONFIG.logout();
+            // TODO: this is only an ugly fix to destroy all current entities on logout
+            location.reload();
+        });
     }
 
     updateVisible() {

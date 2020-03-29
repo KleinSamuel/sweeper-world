@@ -101,8 +101,27 @@ export default class Communicator {
         });
     }
 
+    loginUser(username, password) {
+        return axios.post(CONFIG.URL_API+"/login", {
+            username: username,
+            password: password
+        });
+    }
+
+    registerUser(username, password, email) {
+        return axios.post(CONFIG.URL_API+"/register", {
+            username: username,
+            password: password,
+            email: email
+        });
+    }
+
     loginGuest() {
         return axios.get(CONFIG.URL_API+"/guest");
+    }
+
+    logout() {
+        return axios.get(CONFIG.URL_API+"/logout?u="+CONFIG.getID());
     }
 
     /**
@@ -114,7 +133,15 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        console.log("User "+CONFIG.getID());
         return axios.get(CONFIG.URL_API+"/api/getChunkContent?u="+CONFIG.getID()+"&x="+chunkX+"&y="+chunkY);
+    }
+
+    updateSettings(design, soundsEnabled) {
+        return axios.post(CONFIG.URL_API+"/updateSettings", {
+            id: CONFIG.getID(),
+            hash: CONFIG.getHash(),
+            design: design,
+            soundsEnabled: soundsEnabled
+        });
     }
 }
