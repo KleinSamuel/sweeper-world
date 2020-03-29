@@ -100,7 +100,7 @@ export default class StartScreen extends PIXI.Container {
         this.visible = true;
         this.loginContainer.style.display = "block";
         document.body.style.backgroundImage = "url("+CONFIG.URL_ASSETS+"/images/sweeper-background.png)";
-        document.getElementById("partcles-js").style.display = "block";
+        document.getElementById("particles-js").style.display = "block";
     }
 
     hide() {
