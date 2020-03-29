@@ -136,12 +136,7 @@ export default class Communicator {
         return axios.get(CONFIG.URL_API+"/api/getChunkContent?u="+CONFIG.getID()+"&h="+CONFIG.getHash()+"&x="+chunkX+"&y="+chunkY);
     }
 
-<<<<<<< HEAD
-
-    requestCells(chunkX, chunkY, cellX, cellY){
-=======
     requestCell(chunkX, chunkY, cellX, cellY){
->>>>>>> 1be2759a81b403faa4a0df8736d36e031b17e3fb
         return axios.get(CONFIG.URL_API+"/api/getTileContent?u="+CONFIG.getID()+"&h="+CONFIG.getHash()+"&x="+chunkX+"&y="+chunkY+"&x_tile="+cellX+"&y_tile="+cellY);
     }
 
