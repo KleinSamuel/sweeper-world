@@ -181,4 +181,9 @@ public class UserService {
         }
         return true;
     }
+
+    public boolean validateUser(Long userId, String hash) {
+        //TODO implement full validate
+        return true;
+    }
 }

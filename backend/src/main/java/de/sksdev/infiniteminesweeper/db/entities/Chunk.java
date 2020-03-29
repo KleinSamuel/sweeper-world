@@ -6,13 +6,11 @@ import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.MineFieldGenerator;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.services.BufferedChunk;
+import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 
 @Entity
@@ -89,12 +87,12 @@ public class Chunk implements Serializable {
 
     @JsonGetter("tiles")
     public Object getTilesJson() {
-        HashMap<Integer, HashMap<Integer, Tile>> out = new HashMap<>();
-        for (int i = 0; i < Config.CHUNK_SIZE; i++)
-            out.put(i, new HashMap<>());
-
-        tiles.forEach(t -> out.get(t.getX_tile()).put(t.getY_tile(), t));
-        return out;
+//        HashMap<Integer, HashMap<Integer, Tile>> out = new HashMap<>();
+//        for (int i = 0; i < Config.CHUNK_SIZE; i++)
+//            out.put(i, new HashMap<>());
+//
+//        tiles.forEach(t -> out.get(t.getX_tile()).put(t.getY_tile(), t));
+        return tilesToMap(tiles);
     }
 
     public Set<Tile> getTiles() {
@@ -102,13 +100,13 @@ public class Chunk implements Serializable {
     }
 
 //    @JsonGetter("tiles")
-//    public Set<Tile> getJsonTiles() {
+//    public Object getJsonTiles() {
 //        TreeSet<Tile> ts = new TreeSet<>(tiles);
 //        tiles.forEach(t -> {
 //            if (t.isHidden() | t.getUser() != null)
 //                ts.remove(t);
 //        });
-//        return ts;
+//        return tilesToMap(ts);
 //    }
 
     public Tile[][] getGrid() {
@@ -250,5 +248,18 @@ public class Chunk implements Serializable {
 
     public void setBuffer(BufferedChunk buffer) {
         this.buffer = buffer;
+    }
+
+    public static HashMap<Integer, HashMap<Integer, Tile>> tilesToMap(Collection<Tile> ts) {
+        HashMap<Integer, HashMap<Integer, Tile>> out = new HashMap<>();
+        ts.forEach(t -> {
+            try {
+                out.get(t.getX_tile()).put(t.getY_tile(), t);
+            } catch (NullPointerException e) {
+                out.put(t.getX_tile(), new HashMap<>());
+                out.get(t.getX_tile()).put(t.getY_tile(), t);
+            }
+        });
+        return out;
     }
 }

@@ -59,10 +59,10 @@ public class RequestController {
         try {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
-                if (userService.validateTileRequest(userId, cid))
-                    return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid).getGrid()[y_tile][x_tile]);
-                else
-                    return null;
+//                if (userService.validateTileRequest(userId, cid))
+                    return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
+//                else
+//                    return null;
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -187,4 +187,5 @@ public class RequestController {
 
         return "" + isValid;
     }
+
 }
