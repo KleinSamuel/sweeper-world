@@ -11,7 +11,7 @@ export const URL_API = HOST_BACKEND+"/backend";
 export const URL_ASSETS = HOST_ASSETS+"/assets";
 
 export const DESIGNS = [
-    "default", "neon", "template"
+    "default", "neon", "template", "blackwhite"
 ];
 
 /* number of cells in a cell chunk */
