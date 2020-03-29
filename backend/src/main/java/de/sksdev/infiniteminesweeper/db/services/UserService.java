@@ -1,10 +1,10 @@
 package de.sksdev.infiniteminesweeper.db.services;
 
-import de.sksdev.infiniteminesweeper.Config;
+import de.sksdev.infiniteminesweeper.communication.SettingsRequest;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
-import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
+import de.sksdev.infiniteminesweeper.db.entities.UserSettings;
 import de.sksdev.infiniteminesweeper.db.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Random;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -21,69 +21,131 @@ public class UserService {
 
     private HashMap<ChunkId, HashSet<Long>> loadedChunks;
 
-    private HashMap<Long, String> loggedIn;
+    private HashMap<Long, User> buffer;
 
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
         this.loadedChunks = new HashMap<>();
-        this.loggedIn = new HashMap<>();
+        this.buffer = new HashMap<>();
     }
 
-    private User getUserById(long id) {
-        return userRepository.findById(id).orElseGet(null);
+    public User createNewUser(String username, String password, TileId id) {
+        // TODO: check if username and password is malformed
+        User user = new User(username, password, false, id);
+        userRepository.save(user);
+        return user;
     }
 
-    protected User getUser(long id) {
-        return getUserById(id);
-    }
-
-    private User save(User u) {
-        return userRepository.save(u);
-    }
-
-    private User getUser(String name) {
-        return userRepository.findByName(name);
-    }
-
-    public User getExistingUser(String name) {
-        User u = getUser(name);
-        return isLoggedIn(u.getId()) ? null : u;
-    }
-
-    private User createUser(String name, TileId start) {
+    /**
+     * Creates and returns a new guest user object which contains a random name,
+     * @param name
+     * @param tileId
+     * @return
+     */
+    public User getGuestUser(String name, TileId tileId) {
         try {
-            if (name.length() > 32)
+            if (name.length() > 32) {
                 name = name.replaceAll("-", "").substring(0, 31);
-            return (save(new User(name, start)));
+            }
+            User user = userRepository.save(new User(name, "guestpassword", true, tileId));
+            this.buffer.put(user.getId(), user);
+            return user;
         } catch (Exception e) {
+            System.err.println("Could not create new guest user.");
             e.printStackTrace();
-            System.err.println("Shitty name for a User: '" + name + "'");
         }
         return null;
     }
 
-
-    public User getNewUser(String name, TileId start) {
-        User u = getUser(name);
-        return u != null ? u : createUser(name, start);
-    }
-
-    public boolean isLoggedIn(long uid) {
-        boolean l = loggedIn.containsKey(uid);
-        if (!l)
-            System.err.println("User " + uid + " is not logged in!");
-        return l;
-    }
-
-    public void logIn(long uid, String hash) {
-        if (isLoggedIn(uid)) {
-            System.err.println("User " + uid + " already logged in.");
-            return;
+    /**
+     * Fetches a user object by username and password from the database, puts it into the
+     * user buffer and returns the object. Returns null if the provided userdata
+     * is wrong or if the the user is already logged in.
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    public User loginUser(String username, String password) {
+        Optional<User> userOpt = userRepository.findByNameAndPassword(username, password);
+        if (userOpt.isEmpty() || isLoggedIn(userOpt.get().getId())) {
+            return null;
         }
-        User u = getUserById(uid);
-        if (u != null)
-            loggedIn.put(uid, hash);
+        User user = userOpt.get();
+        putIntoBuffer(user);
+        return user;
+    }
+
+    /**
+     * Returns true if the user with the given id is currently logged in (in buffer)
+     * @param id
+     * @return
+     */
+    public boolean isLoggedIn(long id) {
+        return this.buffer.containsKey(id);
+    }
+
+    /**
+     * Removes the user with the given user id from the buffer and stores
+     * it into the database.
+     * @param id
+     */
+    public void logoutUser(long id) {
+        User user = this.buffer.remove(id);
+        if (user != null) {
+            userRepository.save(user);
+        }
+    }
+
+    /**
+     * Returns the user object for a given user id.
+     * @param id
+     * @return
+     */
+    public User getUser(long id) {
+        return loadUserIntoBuffer(id);
+    }
+
+    /**
+     * Checks if the requested user is already in the buffer, if no it will be loaded
+     * from the database and put into the buffer, and returns the user object.
+     * @param id
+     * @return
+     */
+    private User loadUserIntoBuffer(long id) {
+
+        if (this.buffer.containsKey(id)) {
+            return this.buffer.get(id);
+        }
+
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            System.err.println("UserBuffer could not load user with id: "+id);
+            return null;
+        }
+        User user = userOpt.get();
+        putIntoBuffer(user);
+        return user;
+    }
+
+    /**
+     * Stores the provided user object in the buffer for currently logged in users
+     * @param user
+     */
+    private void putIntoBuffer(User user) {
+        this.buffer.put(user.getId(), user);
+    }
+
+    public boolean updateSettings(SettingsRequest settingsRequest) {
+        User user = getUser(settingsRequest.getId());
+        if (user == null) {
+            return false;
+        }
+        UserSettings userSettings = user.getSettings();
+        userSettings.setDesign(settingsRequest.getDesign());
+        userSettings.setSoundsEnabled(settingsRequest.isSoundsEnabled());
+        return true;
     }
 
     public boolean validateChunkRequest(long uid, ChunkId cid) {
@@ -99,20 +161,14 @@ public class UserService {
 
     public boolean validateTileRequest(long uid, ChunkId cid) {
         try {
-            if (isLoggedIn(uid) & loadedChunks.get(cid).contains(uid))
+            if (isLoggedIn(uid) & loadedChunks.get(cid).contains(uid)) {
                 return true;
+            }
         } catch (NullPointerException ignore) {
+            // do nothing
         }
         return false;
     }
-
-//    @PostConstruct
-//    private void initDummyUser() {
-//        User u = new User();
-//        u.setName("Testname");
-//        System.out.println("saving dummy user");
-//        userRepository.save(u);
-//    }
 
     public boolean registerChunkRequest(ChunkId cid, Long userId) {
         try {
@@ -126,18 +182,8 @@ public class UserService {
         return true;
     }
 
-    public boolean logout(long userId) {
-        return loggedIn.remove(userId) != null;
-    }
-
-    public boolean validateUser(Long user, String hash) {
-        try {
-            if (loggedIn.get(user).equals(hash))
-                return true;
-        } catch (NullPointerException ignore) {
-        }
-        System.err.println("Hash of User " + user + " could not be verified: expected '" + loggedIn.get(user) + "', got '" + hash + "'");
+    public boolean validateUser(Long userId, String hash) {
+        //TODO implement full validate
         return true;
-        //TODO set to false in production
     }
 }

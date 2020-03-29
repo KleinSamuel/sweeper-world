@@ -2,13 +2,9 @@ package de.sksdev.infiniteminesweeper.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.sksdev.infiniteminesweeper.communication.CellOperationMessage;
-import de.sksdev.infiniteminesweeper.communication.LoginResponse;
-import de.sksdev.infiniteminesweeper.communication.RegisterRequest;
-import de.sksdev.infiniteminesweeper.db.entities.Chunk;
+import de.sksdev.infiniteminesweeper.communication.*;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
-import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
@@ -18,8 +14,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.UUID;
 
 @Controller
@@ -81,13 +75,14 @@ public class RequestController {
     @ResponseBody
     public String register(@RequestBody RegisterRequest request) {
 
-        // TODO: create new user in db and send respective hash and id
-        User u = userService.getNewUser(request.getUsername(), chunkService.getRandomTileId());
-        if (u == null)
-            return null;
+        // TODO: check if credentials are valid but maybe check in user service
+        User user = userService.createNewUser(request.getUsername(), request.getPassword(), chunkService.getRandomTileId());
 
-        LoginResponse response = new LoginResponse(u);
-        userService.logIn(u.getId(), response.getHash());
+        if (user == null) {
+            return null;
+        }
+
+        LoginResponse response = new LoginResponse(user);
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
@@ -96,15 +91,13 @@ public class RequestController {
         return null;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public String login(@RequestBody LoginRequest loginRequest) {
 
-        User u = userService.getExistingUser(username);
-        //TODO check pw
-
-        LoginResponse response = new LoginResponse(u);
-        userService.logIn(u.getId(), response.getHash());
+        // TODO: check request for validity
+        User user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
+        LoginResponse response = new LoginResponse(user);
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
@@ -117,9 +110,10 @@ public class RequestController {
     @RequestMapping(value = "/guest", method = RequestMethod.GET)
     @ResponseBody
     public String loginGuest() {
-        User g = userService.getNewUser(UUID.randomUUID().toString(), chunkService.getRandomTileId());
-        LoginResponse response = new LoginResponse(g);
-        userService.logIn(g.getId(), response.getHash());
+
+        User user = userService.getGuestUser(UUID.randomUUID().toString(), chunkService.getRandomTileId());
+        LoginResponse response = new LoginResponse(user);
+
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
@@ -131,7 +125,28 @@ public class RequestController {
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     @ResponseBody
     public String logout(@RequestParam("u") long userId) {
-        return "" + userService.logout(userId);
+        userService.logoutUser(userId);
+        return "ok";
+    }
+
+    @RequestMapping(value = "/updateSettings", method = RequestMethod.POST)
+    @ResponseBody
+    public String updateSettings(@RequestBody SettingsRequest settingsRequest){
+
+        // TODO: check id and hash for validity
+
+        System.out.println("update settings request");
+        System.out.println(settingsRequest.getDesign());
+
+        // TODO: only update such requests for non guest users
+
+        boolean wasUpdateable = userService.updateSettings(settingsRequest);
+
+        if (wasUpdateable) {
+            return "ok";
+        } else {
+            return "error";
+        }
     }
 
     @MessageMapping("/openCell")

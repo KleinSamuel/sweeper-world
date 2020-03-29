@@ -3,9 +3,11 @@ import * as CONFIG from "./Config";
 
 export default class StartScreen extends PIXI.Container {
 
-    constructor(onGuestLogin) {
+    constructor(onLogin, onRegister, onGuestLogin) {
         super();
         this.visible = false;
+        this.onLogin = onLogin;
+        this.onRegister = onRegister;
         this.onGuestLogin = onGuestLogin;
         this.init();
     }
@@ -38,8 +40,36 @@ export default class StartScreen extends PIXI.Container {
         let loginCon = document.getElementById("login-con");
         let registerCon = document.getElementById("register-con");
 
-        let loginButton = document.getElementById("btn-guest");
-        loginButton.addEventListener("click", function(){
+        let loginButton = document.getElementById("btn-login");
+        loginButton.addEventListener("click", function() {
+            let username = document.getElementById("input-name").value;
+            let password = document.getElementById("input-password").value;
+
+            if (!username || !password) {
+                return;
+            }
+
+            context.onLogin(username, password);
+        });
+
+        let registerButton = document.getElementById("btn-register");
+        registerButton.addEventListener("click", function() {
+            let username = document.getElementById("input-register-username").value;
+            let password1 = document.getElementById("input-register-password1").value;
+            let password2 = document.getElementById("input-register-password2").value;
+            let email = document.getElementById("input-register-email").value;
+
+            // TODO: create better check for validity of input
+            if (!username || !password1 || !password2 || !email || password1 !== password2) {
+                console.log("error while registering new user");
+                return;
+            }
+
+            context.onRegister(username, password1, email);
+        });
+
+        let loginGuestButton = document.getElementById("btn-guest");
+        loginGuestButton.addEventListener("click", function(){
             context.onGuestLogin();
         });
 
