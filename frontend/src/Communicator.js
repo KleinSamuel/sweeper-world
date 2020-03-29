@@ -133,7 +133,11 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        return axios.get(CONFIG.URL_API+"/api/getChunkContent?u="+CONFIG.getID()+"&x="+chunkX+"&y="+chunkY);
+        return axios.get(CONFIG.URL_API+"/api/getChunkContent?u="+CONFIG.getID()+"&h="+CONFIG.getHash()+"&x="+chunkX+"&y="+chunkY);
+    }
+
+    requestCell(chunkX, chunkY, cellX, cellY){
+        return axios.get(CONFIG.URL_API+"/api/getTileContent?u="+CONFIG.getID()+"&h="+CONFIG.getHash()+"&x="+chunkX+"&y="+chunkY+"&x_tile="+cellX+"&y_tile="+cellY);
     }
 
     updateSettings(design, soundsEnabled) {

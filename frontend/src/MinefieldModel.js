@@ -264,7 +264,10 @@ export default class MinefieldModel extends PIXI.Container {
 
     clickCell(chunkX, chunkY, cellX, cellY) {
 
-        let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+
+        // let cell = this.com.requestCell(chunkX,chunkY,cellX,cellY);
+        // this.getChunk(chunkX, chunkY).setCell(cell);
+        let cell = this.getChunk(chunkX,chunkY).getCell(cellX,cellY);
 
         // do nothing if the cell is flagged
         if (cell.state.hidden && cell.state.user) {
@@ -281,7 +284,7 @@ export default class MinefieldModel extends PIXI.Container {
         let updatedCells = [];
 
         // user clicked on a hidden cell
-        if (cell.state.hidden) {
+        if ( cell.state.hidden) {
 
             // adds the clicked cell
             updatedCells.push(cell);
