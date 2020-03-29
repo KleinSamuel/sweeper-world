@@ -121,6 +121,7 @@ public class UserService {
                 return true;
         } catch (NullPointerException e) {
             loadedChunks.put(cid, new HashSet<>(Collections.singletonList(userId)));
+//            return false;
         }
         return true;
     }

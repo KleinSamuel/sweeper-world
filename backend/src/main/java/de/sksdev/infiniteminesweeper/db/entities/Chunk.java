@@ -104,10 +104,10 @@ public class Chunk implements Serializable {
     @JsonGetter("tiles")
     public Set<Tile> getJsonTiles() {
         TreeSet<Tile> ts = new TreeSet<>(tiles);
-        tiles.forEach(t -> {
-            if (t.isHidden() | t.getUser() != null)
-                ts.remove(t);
-        });
+//        tiles.forEach(t -> {
+//            if (t.isHidden() | t.getUser() != null)
+//                ts.remove(t);
+//        });
         return ts;
     }
 
