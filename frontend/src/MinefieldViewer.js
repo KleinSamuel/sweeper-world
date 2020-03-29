@@ -192,7 +192,7 @@ export default class MinefieldViewer {
 
     updateTextures(name) {
         CONFIG.setDesign(name);
-        location.reload();
+        //location.reload();
     }
 
     denyInteractions() {
@@ -205,7 +205,7 @@ export default class MinefieldViewer {
     logout() {
         // TODO: this is only an ugly fix to destroy all current entities on logout
         CONFIG.logout();
-        location.reload();
+        //location.reload();
     }
 
     updateVisible() {
