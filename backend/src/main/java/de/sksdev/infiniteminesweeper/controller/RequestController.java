@@ -50,7 +50,9 @@ public class RequestController {
 
     @RequestMapping(value = "/api/getChunkContent", method = RequestMethod.GET)
     @ResponseBody
-    public String getChunkContent(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+    public String getChunkContent(@RequestParam("u") String user, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+        System.out.println("Request for "+user+" on x="+x+" y="+y);
+        Long userId = Long.parseLong(user);
         try {
             ChunkId cid = new ChunkId(x, y);
             if (!chunkService.registerChunkRequest(cid, userId)) {

@@ -114,6 +114,7 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
+        console.log("User "+CONFIG.getID());
         return axios.get(CONFIG.URL_API+"/api/getChunkContent?u="+CONFIG.getID()+"&x="+chunkX+"&y="+chunkY);
     }
 }
