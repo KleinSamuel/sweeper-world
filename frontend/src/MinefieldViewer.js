@@ -36,6 +36,8 @@ export default class MinefieldViewer {
         .then(function(response) {
             CONFIG.setID(response.data.id);
             CONFIG.setHash(response.data.hash);
+            // TODO: get player config
+            CONFIG.setDesign("default");
             context.startscreen.hide();
             context.initialize();
         }).catch(function(err) {
@@ -203,6 +205,7 @@ export default class MinefieldViewer {
     }
 
     logout() {
+        console.log("logout");
         // TODO: this is only an ugly fix to destroy all current entities on logout
         CONFIG.logout();
         //location.reload();
