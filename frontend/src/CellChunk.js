@@ -54,4 +54,8 @@ export default class CellChunk extends PIXI.Container {
     getCell(cellX, cellY) {
         return this.innerField[cellX][cellY];
     }
+
+    setCell(cell) {
+        this.innerField[cell.cellY][cell.cellX] = cell;
+    }
 }

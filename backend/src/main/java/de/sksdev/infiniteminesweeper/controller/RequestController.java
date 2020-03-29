@@ -37,22 +37,9 @@ public class RequestController {
         this.userService = userService;
     }
 
-//    @RequestMapping(value = "/api/getChunk", method = RequestMethod.GET)
-//    @ResponseBody
-//    public String getChunk(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-//        try {
-//            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x, y)));
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
-
     @RequestMapping(value = "/api/getChunkContent", method = RequestMethod.GET)
     @ResponseBody
     public String getChunkContent(@RequestParam("u") Long userId, @RequestParam(value = "h", required = false) String hash, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-
-
         try {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
