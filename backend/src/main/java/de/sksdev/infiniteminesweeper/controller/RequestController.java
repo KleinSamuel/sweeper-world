@@ -37,48 +37,52 @@ public class RequestController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/api/getChunk", method = RequestMethod.GET)
-    @ResponseBody
-    public String getChunk(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-        try {
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x, y)));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    @RequestMapping(value = "/api/getChunk", method = RequestMethod.GET)
+//    @ResponseBody
+//    public String getChunk(@RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+//        try {
+//            return objectMapper.writeValueAsString(chunkService.getOrCreateChunk(new ChunkId(x, y)));
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     @RequestMapping(value = "/api/getChunkContent", method = RequestMethod.GET)
     @ResponseBody
-    public String getChunkContent(@RequestParam("u") Long user, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
-        System.out.println("Request for "+user+" on x="+x+" y="+y);
-//        Long userId = Long.parseLong(user);
+    public String getChunkContent(@RequestParam("u") Long userId, @RequestParam(value = "h", required = false) String hash, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+
+
         try {
-            ChunkId cid = new ChunkId(x, y);
-            if (!chunkService.registerChunkRequest(cid, user)) {
-                System.err.println("Chunk loading not permitted!");
-                return null;
+            if (userService.validateUser(userId, hash)) {
+                ChunkId cid = new ChunkId(x, y);
+                if (!chunkService.registerChunkRequest(cid, userId)) {
+                    System.err.println("Chunk loading not permitted!");
+                    return null;
+                }
+                return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid));
             }
-            return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     @RequestMapping(value = "/api/getTileContent")
     @ResponseBody
-    public String getTileContent(@RequestParam("u") Long userId, @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
+    public String getTileContent(@RequestParam("u") Long userId, @RequestParam(value = "h", required = false) String hash, @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
         try {
-            ChunkId cid = new ChunkId(x, y);
-            if (userService.validateTileRequest(userId, cid))
-                return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid).getGrid()[y_tile][x_tile]);
-            else
-                return null;
+            if (userService.validateUser(userId, hash)) {
+                ChunkId cid = new ChunkId(x, y);
+                if (userService.validateTileRequest(userId, cid))
+                    return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid).getGrid()[y_tile][x_tile]);
+                else
+                    return null;
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
 

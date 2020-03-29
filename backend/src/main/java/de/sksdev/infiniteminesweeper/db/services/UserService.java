@@ -53,8 +53,8 @@ public class UserService {
 
     private User createUser(String name, TileId start) {
         try {
-            if(name.length()>32)
-                name= name.replaceAll("-","").substring(0,31);
+            if (name.length() > 32)
+                name = name.replaceAll("-", "").substring(0, 31);
             return (save(new User(name, start)));
         } catch (Exception e) {
             e.printStackTrace();
@@ -128,5 +128,16 @@ public class UserService {
 
     public boolean logout(long userId) {
         return loggedIn.remove(userId) != null;
+    }
+
+    public boolean validateUser(Long user, String hash) {
+        try {
+            if (loggedIn.get(user).equals(hash))
+                return true;
+        } catch (NullPointerException ignore) {
+        }
+        System.err.println("Hash of User " + user + " could not be verified: expected '" + loggedIn.get(user) + "', got '" + hash + "'");
+        return true;
+        //TODO set to false in production
     }
 }
