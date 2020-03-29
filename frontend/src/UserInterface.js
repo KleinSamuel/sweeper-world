@@ -29,6 +29,11 @@ export default class UserInterface extends PIXI.Container {
     resize(width, height) {
         this.screenWidth = width;
         this.screenHeight = height;
+
+        this.bottompanel.position.set(-5, height - this.bottompanel.height + 5);
+        this.bottompanel.b.width = width + 10;
+        this.bottompanel.c_info.x = width / 2 - 300 / 2 * 3;
+
         this.infoBackground.x = this.screenWidth - 300;
         this.options.position.set(window.innerWidth / 2 - this.options.width / 2, 200);
         this.design.position.set(window.innerWidth / 2 - this.design.width / 2, 200);
@@ -306,6 +311,7 @@ export default class UserInterface extends PIXI.Container {
         b.beginFill(0x000000);
         b.lineStyle(1, 0xffffff);
         b.drawRect(0,0, width+1, height);
+        this.bottompanel.b = b;
         this.bottompanel.addChild(b);
 
         let c_info = new PIXI.Container();
@@ -321,6 +327,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.addChild(c_info.h1);
         c_info.h1.t = new PIXI.Text("PLAYER INFO", {fontSize: 10, fill: 0xffffff, align: "center"});
         c_info.h1.t.position.set(5, 2);
+        c_info.h1.t.x = boxWidth / 2 - c_info.h1.t.width / 2;
         c_info.h1.addChild(c_info.h1.t);
 
         c_info.b1 = new PIXI.Graphics();
@@ -362,8 +369,18 @@ export default class UserInterface extends PIXI.Container {
         c_info.b3.v.x = boxWidth - c_info.b3.v.width - 5;
         c_info.b3.addChild(c_info.b3.v);
 
+        c_info.h2 = new PIXI.Graphics();
+        c_info.h2.position.set(boxWidth + 5, 10);
+        c_info.h2.beginFill(0x22272c);
+        c_info.h2.drawRect(0,0, boxWidth + 5, boxHeight/2);
+        c_info.addChild(c_info.h2);
+        c_info.h2.t = new PIXI.Text("CURRENT SEASON STATS", {fontSize: 10, fill: 0xffffff, align: "center"});
+        c_info.h2.t.position.set(5, 2);
+        c_info.h2.t.x = boxWidth / 2 - c_info.h2.t.width / 2;
+        c_info.h2.addChild(c_info.h2.t);
+
         c_info.b4 = new PIXI.Graphics();
-        c_info.b4.position.set(boxWidth + 5, 10);
+        c_info.b4.position.set(boxWidth + 5, 30);
         c_info.b4.beginFill(0x22272c);
         c_info.b4.drawRect(0,0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b4);
@@ -376,7 +393,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b4.addChild(c_info.b4.v);
 
         c_info.b5 = new PIXI.Graphics();
-        c_info.b5.position.set(boxWidth + 5, 10 + boxHeight + 5);
+        c_info.b5.position.set(boxWidth + 5, 30 + boxHeight + 5);
         c_info.b5.beginFill(0x22272c);
         c_info.b5.drawRect(0,0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b5);
@@ -389,7 +406,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b5.addChild(c_info.b5.v);
 
         c_info.b6 = new PIXI.Graphics();
-        c_info.b6.position.set(boxWidth + 10 + boxWidth / 2, 10);
+        c_info.b6.position.set(boxWidth + 10 + boxWidth / 2, 30);
         c_info.b6.beginFill(0x22272c);
         c_info.b6.drawRect(0,0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b6);
@@ -402,11 +419,11 @@ export default class UserInterface extends PIXI.Container {
         c_info.b6.addChild(c_info.b6.v);
 
         c_info.b7 = new PIXI.Graphics();
-        c_info.b7.position.set(boxWidth + 10 + boxWidth / 2, 10 + boxHeight + 5);
+        c_info.b7.position.set(boxWidth + 10 + boxWidth / 2, 30 + boxHeight + 5);
         c_info.b7.beginFill(0x22272c);
         c_info.b7.drawRect(0,0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b7);
-        c_info.b7.t = new PIXI.Text("WRONG", {fontSize: 18, fill: 0xffffff});
+        c_info.b7.t = new PIXI.Text("STREAK", {fontSize: 18, fill: 0xffffff});
         c_info.b7.t.position.set(5, 5);
         c_info.b7.addChild(c_info.b7.t);
         c_info.b7.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
@@ -415,7 +432,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b7.addChild(c_info.b7.v);
 
         c_info.b8 = new PIXI.Graphics();
-        c_info.b8.position.set(boxWidth + 5, 10 + boxHeight * 2 + 10);
+        c_info.b8.position.set(boxWidth + 5, 30 + boxHeight * 2 + 10);
         c_info.b8.beginFill(0x22272c);
         c_info.b8.drawRect(0,0, boxWidth + 5, boxHeight);
         c_info.addChild(c_info.b8);
@@ -427,6 +444,82 @@ export default class UserInterface extends PIXI.Container {
         c_info.b8.v.x = boxWidth - c_info.b8.v.width;
         c_info.b8.addChild(c_info.b8.v);
 
+        c_info.h3 = new PIXI.Graphics();
+        c_info.h3.position.set(boxWidth * 2 + 15, 10);
+        c_info.h3.beginFill(0x22272c);
+        c_info.h3.drawRect(0,0, boxWidth + 5, boxHeight/2);
+        c_info.addChild(c_info.h3);
+        c_info.h3.t = new PIXI.Text("TOTAL STATS", {fontSize: 10, fill: 0xffffff, align: "center"});
+        c_info.h3.t.position.set(5, 2);
+        c_info.h3.t.x = boxWidth / 2 - c_info.h3.t.width / 2;
+        c_info.h3.addChild(c_info.h3.t);
+
+        c_info.b9 = new PIXI.Graphics();
+        c_info.b9.position.set(boxWidth * 2 + 15, 30);
+        c_info.b9.beginFill(0x22272c);
+        c_info.b9.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.addChild(c_info.b9);
+        c_info.b9.t = new PIXI.Text("CELLS", {fontSize: 18, fill: 0xffffff});
+        c_info.b9.t.position.set(5, 5);
+        c_info.b9.addChild(c_info.b9.t);
+        c_info.b9.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b9.v.position.set(5, 5);
+        c_info.b9.v.x = boxWidth / 2 - c_info.b9.v.width - 5;
+        c_info.b9.addChild(c_info.b9.v);
+
+        c_info.b10 = new PIXI.Graphics();
+        c_info.b10.position.set(boxWidth * 2 + 15, 30 + boxHeight + 5);
+        c_info.b10.beginFill(0x22272c);
+        c_info.b10.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.addChild(c_info.b10);
+        c_info.b10.t = new PIXI.Text("BOMBS", {fontSize: 18, fill: 0xffffff});
+        c_info.b10.t.position.set(5, 5);
+        c_info.b10.addChild(c_info.b10.t);
+        c_info.b10.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b10.v.position.set(5, 5);
+        c_info.b10.v.x = boxWidth / 2 - c_info.b10.v.width - 5;
+        c_info.b10.addChild(c_info.b10.v);
+
+        c_info.b11 = new PIXI.Graphics();
+        c_info.b11.position.set(boxWidth * 2 + 20 + boxWidth / 2, 30);
+        c_info.b11.beginFill(0x22272c);
+        c_info.b11.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.addChild(c_info.b11);
+        c_info.b11.t = new PIXI.Text("FLAGS", {fontSize: 18, fill: 0xffffff});
+        c_info.b11.t.position.set(5, 5);
+        c_info.b11.addChild(c_info.b11.t);
+        c_info.b11.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b11.v.position.set(5, 5);
+        c_info.b11.v.x = boxWidth / 2 - c_info.b11.v.width - 5;
+        c_info.b11.addChild(c_info.b11.v);
+
+        c_info.b12 = new PIXI.Graphics();
+        c_info.b12.position.set(boxWidth * 2 + 20 + boxWidth / 2, 30 + boxHeight + 5);
+        c_info.b12.beginFill(0x22272c);
+        c_info.b12.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.addChild(c_info.b12);
+        c_info.b12.t = new PIXI.Text("STREAK", {fontSize: 18, fill: 0xffffff});
+        c_info.b12.t.position.set(5, 5);
+        c_info.b12.addChild(c_info.b12.t);
+        c_info.b12.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b12.v.position.set(5, 5);
+        c_info.b12.v.x = boxWidth / 2 - c_info.b12.v.width - 5;
+        c_info.b12.addChild(c_info.b12.v);
+
+        c_info.b13 = new PIXI.Graphics();
+        c_info.b13.position.set(boxWidth * 2 + 15, 30 + boxHeight * 2 + 10);
+        c_info.b13.beginFill(0x22272c);
+        c_info.b13.drawRect(0,0, boxWidth + 5, boxHeight);
+        c_info.addChild(c_info.b13);
+        c_info.b13.t = new PIXI.Text("SCORE", {fontSize: 18, fill: 0xffffff});
+        c_info.b13.t.position.set(5, 5);
+        c_info.b13.addChild(c_info.b13.t);
+        c_info.b13.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b13.v.position.set(5, 5);
+        c_info.b13.v.x = boxWidth - c_info.b13.v.width;
+        c_info.b13.addChild(c_info.b13.v);
+
+        this.bottompanel.c_info = c_info;
         this.bottompanel.addChild(c_info);
 
         this.addChild(this.bottompanel);
