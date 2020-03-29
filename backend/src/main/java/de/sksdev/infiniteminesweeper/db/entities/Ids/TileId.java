@@ -53,4 +53,14 @@ public class TileId implements Serializable {
     public ChunkId getChunkId() {
         return new ChunkId(getX(), getY());
     }
+
+    @Override
+    public String toString() {
+        return "TileId{" +
+                "x=" + x +
+                ", y=" + y +
+                ", x_tile=" + x_tile +
+                ", y_tile=" + y_tile +
+                '}';
+    }
 }

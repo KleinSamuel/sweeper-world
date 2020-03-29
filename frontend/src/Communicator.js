@@ -118,7 +118,7 @@ export default class Communicator {
     }
 
 
-    requestCell(chunkX, chunkY, cellX, cellY){
+    requestCells(chunkX, chunkY, cellX, cellY){
         return axios.get(CONFIG.URL_API+"/api/getTileContent?u="+CONFIG.getID()+"&h="+CONFIG.getHash()+"&x="+chunkX+"&y="+chunkY+"&x_tile="+cellX+"&y_tile="+cellY);
     }
 }

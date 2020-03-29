@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sksdev.infiniteminesweeper.communication.CellOperationMessage;
 import de.sksdev.infiniteminesweeper.communication.LoginResponse;
 import de.sksdev.infiniteminesweeper.communication.RegisterRequest;
+import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
+import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
@@ -16,6 +18,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.UUID;
 
 @Controller
@@ -62,7 +66,7 @@ public class RequestController {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
                 if (userService.validateTileRequest(userId, cid))
-                    return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid).getGrid()[y_tile][x_tile]);
+                    return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
                 else
                     return null;
             }
@@ -168,4 +172,5 @@ public class RequestController {
 
         return "" + isValid;
     }
+
 }
