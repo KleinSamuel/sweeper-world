@@ -183,7 +183,7 @@ public class ChunkService {
 //                tileMap.get(c.getX()).put(c.getY(), new HashMap<>());
 //            HashMap<Integer, HashMap<Integer, Tile>> openedChunk = tileMap.get(c.getX()).get(c.getY());
             ts.forEach(open -> {
-                template.convertAndSend("/updates/" + c.getX() + "_" + c.getY(), new CellOperationResponse(c.getX(), c.getY(), open.getX(), open.getY(), u.getId(), false, open.getValue()));
+                template.convertAndSend("/updates/" + c.getX() + "_" + c.getY(), new CellOperationResponse(c.getX(), c.getY(), open.getX_tile(), open.getY_tile(), u.getId(), false, open.getValue()));
                 System.out.println("Sending tile update request for " + open.getId());
 //                  if (!openedChunk.containsKey(open.getX_tile()))
 //                    openedChunk.put(open.getX_tile(), new HashMap<>());
