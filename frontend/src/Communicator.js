@@ -1,6 +1,6 @@
 import * as CONFIG from "./Config";
 import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import {Client} from "@stomp/stompjs";
 import axios from "axios";
 
 /**
@@ -16,7 +16,7 @@ export default class Communicator {
     constructor() {
         this.isConnected = false;
 
-        if(!this.client) {
+        if (!this.client) {
             this.initClient();
         }
     }
@@ -31,18 +31,18 @@ export default class Communicator {
         let context = this;
         this.client.configure({
             /* uses SockJS as websocket */
-            webSocketFactory: function() {
-                return new SockJS(CONFIG.URL_API+"/minesweeper");
+            webSocketFactory: function () {
+                return new SockJS(CONFIG.URL_API + "/minesweeper");
             },
-            onConnect: function(frame) {
+            onConnect: function (frame) {
                 console.log("connected!");
                 context.isConnected = true;
             },
-            onDisconnect: function(frame) {
+            onDisconnect: function (frame) {
                 console.log("disconnected!");
                 context.isConnected = false;
             },
-            onStompError: function(frame) {
+            onStompError: function (frame) {
                 console.log("ERROR!");
                 console.log(frame);
             }
@@ -52,16 +52,13 @@ export default class Communicator {
     }
 
     unregisterChunk(chunkX, chunkY) {
-        this.subsriptions[chunkX+"_"+chunkY].unsubscribe();
+        this.subsriptions[chunkX + "_" + chunkY].unsubscribe();
     }
 
     registerChunk(chunkX, chunkY, callback) {
-        this.subsriptions[chunkX+"_"+chunkY] = this.client.subscribe("/updates/"+chunkX+"_"+chunkY, function(message) {
-             let body = JSON.parse(message.body);
-             console.log(body);
-             //if (body.user !== CONFIG.getID()) {
-             callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user, body.value);
-             //}
+        this.subsriptions[chunkX + "_" + chunkY] = this.client.subscribe("/updates/" + chunkX + "_" + chunkY, function (message) {
+            let body = JSON.parse(message.body);
+            callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user, body.value);
         });
     }
 
@@ -103,14 +100,14 @@ export default class Communicator {
     }
 
     loginUser(username, password) {
-        return axios.post(CONFIG.URL_API+"/login", {
+        return axios.post(CONFIG.URL_API + "/login", {
             username: username,
             password: password
         });
     }
 
     registerUser(username, password, email) {
-        return axios.post(CONFIG.URL_API+"/register", {
+        return axios.post(CONFIG.URL_API + "/register", {
             username: username,
             password: password,
             email: email
@@ -118,11 +115,11 @@ export default class Communicator {
     }
 
     loginGuest() {
-        return axios.get(CONFIG.URL_API+"/guest");
+        return axios.get(CONFIG.URL_API + "/guest");
     }
 
     logout() {
-        return axios.get(CONFIG.URL_API+"/logout?u="+CONFIG.getID());
+        return axios.get(CONFIG.URL_API + "/logout?u=" + CONFIG.getID());
     }
 
     /**
@@ -134,15 +131,15 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        return axios.get(CONFIG.URL_API+"/api/getChunkContent?u="+CONFIG.getID()+"&h="+CONFIG.getHash()+"&x="+chunkX+"&y="+chunkY);
+        return axios.get(CONFIG.URL_API + "/api/getChunkContent?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash() + "&x=" + chunkX + "&y=" + chunkY);
     }
 
-    requestCell(chunkX, chunkY, cellX, cellY){
-        return axios.get(CONFIG.URL_API+"/api/getTileContent?u="+CONFIG.getID()+"&h="+CONFIG.getHash()+"&x="+chunkX+"&y="+chunkY+"&x_tile="+cellX+"&y_tile="+cellY);
+    requestCell(chunkX, chunkY, cellX, cellY) {
+        return axios.get(CONFIG.URL_API + "/api/getTileContent?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash() + "&x=" + chunkX + "&y=" + chunkY + "&x_tile=" + cellX + "&y_tile=" + cellY);
     }
 
     updateSettings(design, soundsEnabled) {
-        return axios.post(CONFIG.URL_API+"/updateSettings", {
+        return axios.post(CONFIG.URL_API + "/updateSettings", {
             id: CONFIG.getID(),
             hash: CONFIG.getHash(),
             design: design,
