@@ -226,7 +226,7 @@ export default class MinefieldModel extends PIXI.Container {
     //execute incoming cell updates
     updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value) {
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-        cell.setState({hidden:hidden, user:user, value:value});
+        cell.setState({hidden: hidden, user: user, value: value});
     }
 
     addChunk(cellX, cellY, chunk) {
@@ -271,8 +271,6 @@ export default class MinefieldModel extends PIXI.Container {
 
     clickCell(chunkX, chunkY, cellX, cellY) {
 
-        // let cell = this.com.requestCell(chunkX,chunkY,cellX,cellY);
-        // this.getChunk(chunkX, chunkY).setCell(cell);
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
         // do nothing if the cell is flagged
         if (cell.state.hidden && cell.state.user) {
@@ -286,55 +284,32 @@ export default class MinefieldModel extends PIXI.Container {
         }
 
         // contains all cells that need to be updates because of the click
-        let updatedCells = [];
+        let isFree = checkFreedom(cell);
 
         // user clicked on a hidden cell
-        if (cell.state.hidden) {
-            // this.loadCells(chunkX,chunkY,cellX,cellY);
-            // adds the clicked cell
-            // opens the clicked cell
-            // cell.state.hidden = false;
-            // cell.updateSprite();
-
-            // clicked on empty cell -> open empty block
+        if (cell.state.hidden | isFree) {
             this.loadCells(chunkX, chunkY, cellX, cellY).then(function (response) {
                 let fullCell = response.data;
-                console.log(fullCell);
-                console.log("user="+fullCell.user+", value="+fullCell.value);
-                cell.setState({"hidden": fullCell.hidden, "user": fullCell.user, "value": fullCell.value});
-                updatedCells.push(cell);
-            });
-            // let cell = context.getChunk(cX,cY).getCell(tX,tY);
-
-            // cell.updateSprite();
-            // cells.push(cell);
-            // if (cell.state.value === 0) {
-            //     updatedCells = updatedCells.push(cell);
-            // }
-            // clicked on mine
-            if (cell.state.value === 9) {
-                play("explosion");
-                return;
-            }
-        }
-        // user clicked on an opened cell that contains a number
-        else {
-            updatedCells = updatedCells.concat(this.openAdjacent(chunkX, chunkY, cellX, cellY));
-            if (updatedCells.length === 0) {
-                play("click_no");
-                return;
-            }
-            for (let c of updatedCells) {
-                c.state.hidden = false;
-                c.updateSprite();
-            }
-        }
-
-        // sends all updates to the server
-        for (let uCell of updatedCells) {
-            this.com.openCell(uCell);
+                if (fullCell.length > 0) {
+                    cell.setState({"hidden": fullCell.hidden, "user": fullCell.user, "value": fullCell.value});
+                    updatedCells.push(cell);
+                }
+                return fullCell;
+            }).then(function (response) {
+                if (cell.state.value === 9) {
+                    play("explosion");
+                }
+                if (response.length === 0) {
+                    play("click_no");
+                    return;
+                }
+            })
         }
         play("click_cell");
+    }
+
+    checkFreedom(cell){
+
     }
 
     flagCell(chunkX, chunkY, cellX, cellY) {
