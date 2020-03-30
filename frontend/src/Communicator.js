@@ -58,10 +58,10 @@ export default class Communicator {
     registerChunk(chunkX, chunkY, callback) {
         this.subsriptions[chunkX+"_"+chunkY] = this.client.subscribe("/updates/"+chunkX+"_"+chunkY, function(message) {
              let body = JSON.parse(message.body);
-             console.log(body)
-             if (body.user !== CONFIG.getID()) {
-                 callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user, body.value);
-             }
+             console.log(body);
+             //if (body.user !== CONFIG.getID()) {
+             callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user, body.value);
+             //}
         });
     }
 
