@@ -36,11 +36,18 @@ export default class CellChunk extends PIXI.Container {
      * @param callback function to be executed on cell click
      */
     initFieldMaps(fieldStates) {
-        console.log(fieldStates);
-        //TODO initialize non sent tiles
-        for (let cellX in fieldStates[cellY]) {
-            for (let cellY in fieldStates[cellX]) {
-                this.innerField[cellX][cellY] = new Cell(this.chunkX, this.chunkY, cellX, cellY, fieldStates[cellX][cellY]);
+
+        for (let cellX = 0; cellX < CONFIG.CHUNK_SIZE; cellX++) {
+            for (let cellY = 0; cellY < CONFIG.CHUNK_SIZE; cellY++) {
+                let tmpState = {
+                    hidden: true,
+                    value: null,
+                    user: null
+                };
+                if (cellX in fieldStates && cellY in fieldStates[cellX]) {
+                    tmpState = fieldStates[cellX][cellY];
+                }
+                this.innerField[cellX][cellY] = new Cell(this.chunkX, this.chunkY, cellX, cellY, tmpState);
                 this.innerField[cellX][cellY].position.set(cellX * CONFIG.CELL_PIXEL_SIZE, cellY * CONFIG.CELL_PIXEL_SIZE);
                 this.addChild(this.innerField[cellX][cellY]);
             }
