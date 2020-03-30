@@ -38,6 +38,7 @@ export default class CellChunk extends PIXI.Container {
     initFieldMaps(fieldStates) {
         for (let cellX in fieldStates) {
             for (let cellY in fieldStates[cellX]) {
+                console.log(fieldStates[cellX][cellY]);
                 this.innerField[cellX][cellY] = new Cell(this.chunkX, this.chunkY, cellX, cellY, fieldStates[cellX][cellY]);
                 this.innerField[cellX][cellY].position.set(cellX * CONFIG.CELL_PIXEL_SIZE, cellY * CONFIG.CELL_PIXEL_SIZE);
                 this.addChild(this.innerField[cellX][cellY]);
@@ -55,7 +56,7 @@ export default class CellChunk extends PIXI.Container {
         return this.innerField[cellX][cellY];
     }
 
-    setCell(cell) {
-        this.innerField[cell.cellY][cell.cellX] = cell;
+    setCell(cellX,cellY,cell) {
+        this.innerField[cellY][cellX] = cell;
     }
 }

@@ -1,12 +1,12 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Set;
 
 
 @Entity
@@ -67,6 +67,14 @@ public class Tile implements Comparable<Tile>, Serializable {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonGetter("user")
+    public Object getJsonUser() {
+        try {
+            return user.getId();
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
 
     public User getUser() {
         return user;
@@ -85,6 +93,10 @@ public class Tile implements Comparable<Tile>, Serializable {
         return new TileId(x, y, x_tile, y_tile);
     }
 
+    @JsonGetter("value")
+    public Integer getJsonValue() {
+        return user != null ? value : null;
+    }
 
     public Integer getValue() {
         return value;

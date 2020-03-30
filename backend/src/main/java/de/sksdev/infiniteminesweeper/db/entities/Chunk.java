@@ -87,11 +87,6 @@ public class Chunk implements Serializable {
 
     @JsonGetter("tiles")
     public Object getTilesJson() {
-//        HashMap<Integer, HashMap<Integer, Tile>> out = new HashMap<>();
-//        for (int i = 0; i < Config.CHUNK_SIZE; i++)
-//            out.put(i, new HashMap<>());
-//
-//        tiles.forEach(t -> out.get(t.getX_tile()).put(t.getY_tile(), t));
         return tilesToMap(tiles);
     }
 
