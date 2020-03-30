@@ -43,7 +43,7 @@ public class RequestController {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
                 if (!chunkService.registerChunkRequest(cid, userId)) {
-                    System.err.println("Chunk loading not permitted!");
+                    System.err.println("Chunk loading not permitted! chunk: "+x+":"+y+" for user "+userId);
                     return null;
                 }
                 return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid));

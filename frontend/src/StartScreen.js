@@ -18,6 +18,7 @@ export default class StartScreen extends PIXI.Container {
     init() {
         let context = this;
 
+        document.getElementById("particles-js").style.display = "none";
         particlesJS.load("particles-js", CONFIG.URL_ASSETS+"/particles.json", function() {
             console.log("particles loaded");
         });
