@@ -320,28 +320,7 @@ export default class MinefieldModel extends PIXI.Container {
         let count = 0;
         let hidden = 0;
 
-        let cells= this.getAdjacentCells(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
-        // for (let y = -1; y < 2; y++) {
-        //     let cellY = cell.cellY + y;
-        //     let chunkY = cell.chunkY;
-        //     if (cellY < 0) {
-        //         chunkY--;
-        //         cellY += CONFIG.CHUNK_SIZE;
-        //     } else if (cellY >= CONFIG.CHUNK_SIZE) {
-        //         chunkY++;
-        //         cellY -= CONFIG.CHUNK_SIZE;
-        //     }
-        //     for (let x = -1; x < 2; x++) {
-        //         let cellX = cell.cellX + x;
-        //         let chunkX = cell.chunkX;
-        //         if (cellX < 0) {
-        //             chunkX--;
-        //             cellX += CONFIG.CHUNK_SIZE;
-        //         } else if (cellY >= CONFIG.CHUNK_SIZE) {
-        //             chunkX++;
-        //             cellX -= CONFIG.CHUNK_SIZE;
-        //         }
-        //         let adjCell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+        let cells = this.getAdjacentCells(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
         for (let adjCell of cells) {
             if (adjCell.state.hidden) {
                 if (adjCell.state.user !== null)
@@ -352,7 +331,6 @@ export default class MinefieldModel extends PIXI.Container {
                 if (adjCell.state.value === 9 && !adjCell.state.hidden)
                     count++;
             }
-            // }
         }
         return (count === cell.state.value && hidden > 0)
     }
