@@ -76,8 +76,8 @@ export default class MinefieldModel extends PIXI.Container {
             this.hoverCell(chunkX, chunkY, cellX, cellY);
         }).bind(this);
 
-        let updateCellWrapper = (function (chunkX, chunkY, cellX, cellY, hidden, user) {
-            this.updateCell(chunkX, chunkY, cellX, cellY, hidden, user);
+        let updateCellWrapper = (function (chunkX, chunkY, cellX, cellY, hidden, user, value) {
+            this.updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value);
         }).bind(this);
 
         return this.com.requestChunk(chunkX, chunkY).then(function (response) {
@@ -223,11 +223,14 @@ export default class MinefieldModel extends PIXI.Container {
         });
     }
 
-    updateCell(chunkX, chunkY, cellX, cellY, hidden, user) {
+    updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value) {
+        console.log("update cell "+chunkX+"/"+chunkY+" "+cellX+"/"+cellY+" h="+hidden+" u="+user+" v="+value);
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-        cell.state.hidden = hidden;
-        cell.state.user = user;
-        cell.updateSprite();
+        // cell.state.hidden = hidden;
+        // cell.state.user = user;
+        // cell.state.value = value;
+        cell.setState({hidden:hidden, user:user, value:value});
+        // cell.updateSprite();
     }
 
     addChunk(cellX, cellY, chunk) {
