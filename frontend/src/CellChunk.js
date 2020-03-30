@@ -36,6 +36,7 @@ export default class CellChunk extends PIXI.Container {
      * @param callback function to be executed on cell click
      */
     initFieldMaps(fieldStates) {
+        console.log(fieldStates);
         //TODO initialize non sent tiles
         for (let cellX in fieldStates[cellY]) {
             for (let cellY in fieldStates[cellX]) {
