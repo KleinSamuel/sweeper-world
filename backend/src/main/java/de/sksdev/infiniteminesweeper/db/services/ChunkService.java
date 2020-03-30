@@ -3,6 +3,8 @@ package de.sksdev.infiniteminesweeper.db.services;
 
 import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.MineFieldGenerator;
+import de.sksdev.infiniteminesweeper.communication.CellOperationRequest;
+import de.sksdev.infiniteminesweeper.communication.CellOperationResponse;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
@@ -31,6 +33,9 @@ public class ChunkService {
     final
     AsyncService asyncService;
 
+    final
+    SimpMessagingTemplate template;
+
 
     private Random random;
 
@@ -38,11 +43,12 @@ public class ChunkService {
     public ChunkService(TileRepository tileRepository,
                         ChunkBuffer chunkBuffer,
                         UserService userService,
-                        AsyncService asyncService) {
+                        AsyncService asyncService, SimpMessagingTemplate template) {
         this.tileRepository = tileRepository;
         this.chunkBuffer = chunkBuffer;
         this.userService = userService;
         this.asyncService = asyncService;
+        this.template=template;
         this.random = new Random(System.currentTimeMillis());
     }
 
@@ -139,16 +145,16 @@ public class ChunkService {
         return userService.validateChunkRequest(userId, cid) && userService.registerChunkRequest(cid, userId);
     }
 
-    public boolean registerTileUpdate(TileId tid, Long userId, boolean flag) {
+    public Tile registerTileUpdate(TileId tid, Long userId, boolean flag) {
         ChunkId cid = tid.getChunkId();
         if (userService.validateTileRequest(userId, cid)) {
             Tile t = getOrCreateChunk(cid).getGrid()[tid.getY_tile()][tid.getX_tile()];
-            if (!flag) {
-                return t.open(userService.getUser(userId));
-            } else
-                return t.setUser(userService.getUser(userId));
+            if (!flag && t.open(userService.getUser(userId))) {
+                return t;
+            } else if(t.setUser(userService.getUser(userId)))
+                return t;
         }
-        return false;
+        return null;
     }
 
     public Chunk getOrCreateChunkContent(ChunkId cid) {
@@ -165,25 +171,27 @@ public class ChunkService {
         User u =userService.getUser(userId);
         Chunk chunk= getOrCreateChunkContent(cid);
         Tile t = chunk.getGrid()[y_tile][x_tile];
+//        asyncService.openTiles(chunk,t, u);
         HashMap<ChunkId, TreeSet<Tile>> openedTiles = new HashMap<>();
         recOpenTiles(chunk,t, openedTiles);
-        HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Tile>>>> tileMap = new HashMap<>();
+//        HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Tile>>>> tileMap = new HashMap<>();
         openedTiles.forEach((c, ts) -> {
             userService.registerChunkRequest(c, userId);
-            if (!tileMap.containsKey(c.getX()))
-                tileMap.put(c.getX(), new HashMap<>());
-            if (!tileMap.get(c.getX()).containsKey(c.getY()))
-                tileMap.get(c.getX()).put(c.getY(), new HashMap<>());
-            HashMap<Integer, HashMap<Integer, Tile>> openedChunk = tileMap.get(c.getX()).get(c.getY());
+//            if (!tileMap.containsKey(c.getX()))
+//                tileMap.put(c.getX(), new HashMap<>());
+//            if (!tileMap.get(c.getX()).containsKey(c.getY()))
+//                tileMap.get(c.getX()).put(c.getY(), new HashMap<>());
+//            HashMap<Integer, HashMap<Integer, Tile>> openedChunk = tileMap.get(c.getX()).get(c.getY());
             ts.forEach(open -> {
-                if (!openedChunk.containsKey(open.getX_tile()))
-                    openedChunk.put(open.getX_tile(), new HashMap<>());
-                openedChunk.get(open.getX_tile()).put(open.getY_tile(), open);
+                template.convertAndSend("/updates/" + c.getX() + "_" +c.getY(), new CellOperationResponse(c.getX(),c.getY(),open.getX(),open.getY(),u.getId(),false,open.getValue()));
+//                if (!openedChunk.containsKey(open.getX_tile()))
+//                    openedChunk.put(open.getX_tile(), new HashMap<>());
+//                openedChunk.get(open.getX_tile()).put(open.getY_tile(), open);
                 open.setHidden(false);
                 open.setUser(u);
             });
         });
-        return tileMap;
+        return t;
     }
 
     public void recOpenTiles(Chunk c, int x_tile, int y_tile, HashMap<ChunkId, TreeSet<Tile>> opened) {

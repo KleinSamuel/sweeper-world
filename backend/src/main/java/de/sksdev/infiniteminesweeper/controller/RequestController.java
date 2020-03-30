@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sksdev.infiniteminesweeper.communication.*;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
+import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
@@ -60,7 +61,7 @@ public class RequestController {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
 //                if (userService.validateTileRequest(userId, cid))
-                    return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
+                return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
 //                else
 //                    return null;
             }
@@ -131,7 +132,7 @@ public class RequestController {
 
     @RequestMapping(value = "/updateSettings", method = RequestMethod.POST)
     @ResponseBody
-    public String updateSettings(@RequestBody SettingsRequest settingsRequest){
+    public String updateSettings(@RequestBody SettingsRequest settingsRequest) {
 
         // TODO: check id and hash for validity
 
@@ -151,33 +152,31 @@ public class RequestController {
 
     @MessageMapping("/openCell")
     @ResponseBody
-    public String openCell(CellOperationMessage message) {
+    public String openCell(CellOperationRequest message) {
         TileId tid = new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY());
-        boolean isValid = chunkService.registerTileUpdate(tid, message.getUser(), false);
-        if (isValid) {
+        Tile tile = chunkService.registerTileUpdate(tid, message.getUser(), false);
+        if (tile != null) {
             try {
-                message.setHidden(false);
-                String response = objectMapper.writeValueAsString(message);
-                template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
+                String response = objectMapper.writeValueAsString(new CellOperationResponse(message, false, tile.getValue()));
+                template.convertAndSend("/updates/" + tile.getX() + "_" + tile.getY(), response);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
         } else
             System.err.println("Update of Tile " + tid + " by User " + message.getUser() + " was not permitted!");
 
-        return "" + isValid;
+        return "" + (tile != null);
     }
 
     @MessageMapping("/flagCell")
     @ResponseBody
-    public String flagCell(CellOperationMessage message) {
+    public String flagCell(CellOperationRequest message) {
         TileId tid = new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY());
-        boolean isValid = chunkService.registerTileUpdate(tid, message.getUser(), true);
+        Tile tile = chunkService.registerTileUpdate(tid, message.getUser(), true);
 
-        if (isValid) {
+        if (tile!=null) {
             try {
-                message.setHidden(true);
-                String response = objectMapper.writeValueAsString(message);
+                String response = objectMapper.writeValueAsString(new CellOperationResponse(message, true, tile.getValue()));
                 template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
@@ -185,7 +184,7 @@ public class RequestController {
         } else
             System.err.println("Update of Tile " + tid + " by User " + message.getUser() + " was not permitted!");
 
-        return "" + isValid;
+        return "" + (tile!=null);
     }
 
 }

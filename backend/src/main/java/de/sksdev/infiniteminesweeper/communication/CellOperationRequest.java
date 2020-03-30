@@ -1,6 +1,6 @@
 package de.sksdev.infiniteminesweeper.communication;
 
-public class CellOperationMessage {
+public class CellOperationRequest {
 
     private int chunkX;
     private int chunkY;
@@ -9,7 +9,17 @@ public class CellOperationMessage {
     private boolean hidden;
     private long user;
 
-    public CellOperationMessage() {
+    public CellOperationRequest() {
+
+    }
+
+    public CellOperationRequest(int chunkX, int chunkY, int cellX, int cellY, long user, boolean hidden){
+        this.chunkX=chunkX;
+        this.chunkY=chunkY;
+        this.cellX=cellX;
+        this.cellY=cellY;
+        this.user=user;
+        this.hidden=hidden;
 
     }
 
