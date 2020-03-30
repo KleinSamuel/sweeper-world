@@ -457,7 +457,7 @@ export default class MinefieldModel extends PIXI.Container {
     /**
      * Returns the cell right to the cell of the given coordinates
      *
-     * @param chunkX x coordinate of the chunk
+      * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
      * @param cellX coordinate of the cell
      * @param cellY coordinate of the cell
