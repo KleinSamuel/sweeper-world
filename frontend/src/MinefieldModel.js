@@ -268,7 +268,7 @@ export default class MinefieldModel extends PIXI.Container {
         let context = this;
         let cells = [];
         return context.com.requestCell(chunkX, chunkY, cellX, cellY).then(function (response) {
-            return response.data;
+            return response;
             // let tiles = response.data;
             // console.log(tiles);
             // for(let cX in tiles){
@@ -324,10 +324,15 @@ export default class MinefieldModel extends PIXI.Container {
             // cell.updateSprite();
 
             // clicked on empty cell -> open empty block
-            let fullCell = this.loadCells(chunkX, chunkY, cellX, cellY);
+            this.loadCells(chunkX, chunkY, cellX, cellY).then(function (response) {
+                let fullCell = response.data;
+                console.log(fullCell);
+                console.log("user="+fullCell.user+", value="+fullCell.value);
+                cell.setState({"hidden": fullCell.hidden, "user": fullCell.user, "value": fullCell.value});
+                updatedCells.push(cell);
+            });
             // let cell = context.getChunk(cX,cY).getCell(tX,tY);
-            cell.setState({"hidden": fullCell.hidden, "user": fullCell.user, "value": fullCell.value});
-            updatedCells.push(cell);
+
             // cell.updateSprite();
             // cells.push(cell);
             // if (cell.state.value === 0) {

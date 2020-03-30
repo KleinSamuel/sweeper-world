@@ -47,8 +47,6 @@ export default class Cell extends PIXI.Container {
      */
     setState(state) {
         this.state = state;
-        console.log("Setting state:");
-        console.log(state);
         this.updateSprite();
     }
 
