@@ -11,7 +11,6 @@ public class CellOperationResponse {
     private int value;
 
     public CellOperationResponse() {
-
     }
 
     public CellOperationResponse(CellOperationRequest message, boolean hidden, int value) {

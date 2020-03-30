@@ -48,7 +48,7 @@ public class ChunkService {
         this.chunkBuffer = chunkBuffer;
         this.userService = userService;
         this.asyncService = asyncService;
-        this.template=template;
+        this.template = template;
         this.random = new Random(System.currentTimeMillis());
     }
 
@@ -151,7 +151,7 @@ public class ChunkService {
             Tile t = getOrCreateChunk(cid).getGrid()[tid.getY_tile()][tid.getX_tile()];
             if (!flag && t.open(userService.getUser(userId))) {
                 return t;
-            } else if(t.setUser(userService.getUser(userId)))
+            } else if (t.setUser(userService.getUser(userId)))
                 return t;
         }
         return null;
@@ -167,13 +167,13 @@ public class ChunkService {
     }
 
 
-    public Object openTiles(ChunkId cid , int x_tile, int y_tile, long userId) {
-        User u =userService.getUser(userId);
-        Chunk chunk= getOrCreateChunkContent(cid);
+    public Object openTiles(ChunkId cid, int x_tile, int y_tile, long userId) {
+        User u = userService.getUser(userId);
+        Chunk chunk = getOrCreateChunkContent(cid);
         Tile t = chunk.getGrid()[y_tile][x_tile];
 //        asyncService.openTiles(chunk,t, u);
         HashMap<ChunkId, TreeSet<Tile>> openedTiles = new HashMap<>();
-        recOpenTiles(chunk,t, openedTiles);
+        recOpenTiles(chunk, t, openedTiles);
 //        HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Tile>>>> tileMap = new HashMap<>();
         openedTiles.forEach((c, ts) -> {
             userService.registerChunkRequest(c, userId);
@@ -183,8 +183,9 @@ public class ChunkService {
 //                tileMap.get(c.getX()).put(c.getY(), new HashMap<>());
 //            HashMap<Integer, HashMap<Integer, Tile>> openedChunk = tileMap.get(c.getX()).get(c.getY());
             ts.forEach(open -> {
-                template.convertAndSend("/updates/" + c.getX() + "_" +c.getY(), new CellOperationResponse(c.getX(),c.getY(),open.getX(),open.getY(),u.getId(),false,open.getValue()));
-//                if (!openedChunk.containsKey(open.getX_tile()))
+                template.convertAndSend("/updates/" + c.getX() + "_" + c.getY(), new CellOperationResponse(c.getX(), c.getY(), open.getX(), open.getY(), u.getId(), false, open.getValue()));
+                System.out.println("Sending tile update request for " + open.getId());
+//                  if (!openedChunk.containsKey(open.getX_tile()))
 //                    openedChunk.put(open.getX_tile(), new HashMap<>());
 //                openedChunk.get(open.getX_tile()).put(open.getY_tile(), open);
                 open.setHidden(false);
@@ -195,7 +196,7 @@ public class ChunkService {
     }
 
     public void recOpenTiles(Chunk c, int x_tile, int y_tile, HashMap<ChunkId, TreeSet<Tile>> opened) {
-        recOpenTiles(c,c.getGrid()[y_tile][x_tile], opened);
+        recOpenTiles(c, c.getGrid()[y_tile][x_tile], opened);
     }
 
     public void recOpenTiles(Chunk startChunk, Tile t, HashMap<ChunkId, TreeSet<Tile>> opened) {
@@ -234,12 +235,12 @@ public class ChunkService {
 
                         int x = t.getX_tile() + xo;
                         try {
-                            recOpenTiles(c,row[x], opened);
+                            recOpenTiles(c, row[x], opened);
                         } catch (IndexOutOfBoundsException e) {
                             if (x < 0) {
-                                recOpenTiles(getOrCreateChunkContent(new ChunkId(c.getX() - 1, c.getY())),Config.CHUNK_SIZE - 1, y, opened);
+                                recOpenTiles(getOrCreateChunkContent(new ChunkId(c.getX() - 1, c.getY())), Config.CHUNK_SIZE - 1, y, opened);
                             } else {
-                                recOpenTiles(getOrCreateChunkContent(new ChunkId(c.getX() + 1, c.getY())),0, y, opened);
+                                recOpenTiles(getOrCreateChunkContent(new ChunkId(c.getX() + 1, c.getY())), 0, y, opened);
                             }
                         }
                     }

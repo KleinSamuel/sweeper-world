@@ -59,7 +59,7 @@ export default class Communicator {
         this.subsriptions[chunkX+"_"+chunkY] = this.client.subscribe("/updates/"+chunkX+"_"+chunkY, function(message) {
              let body = JSON.parse(message.body);
              if (body.user !== CONFIG.getID()) {
-                 callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user);
+                 callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user, body.value);
              }
         });
     }
