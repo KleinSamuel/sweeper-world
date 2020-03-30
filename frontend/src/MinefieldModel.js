@@ -306,7 +306,7 @@ export default class MinefieldModel extends PIXI.Container {
 
                 //requested cell != bomb
                 play("click_cell");
-            })
+            });
             return;
         }
 
@@ -319,37 +319,40 @@ export default class MinefieldModel extends PIXI.Container {
     allBombsKnown(cell) {
         let count = 0;
         let hidden = 0;
-        for (let y = -1; y < 2; y++) {
-            let cellY = cell.cellY + y;
-            let chunkY = cell.chunkY;
-            if (cellY < 0) {
-                chunkY--;
-                cellY += CONFIG.CHUNK_SIZE;
-            } else if (cellY >= CONFIG.CHUNK_SIZE) {
-                chunkY++;
-                cellY -= CONFIG.CHUNK_SIZE;
+
+        let cells= this.getAdjacentCells(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
+        // for (let y = -1; y < 2; y++) {
+        //     let cellY = cell.cellY + y;
+        //     let chunkY = cell.chunkY;
+        //     if (cellY < 0) {
+        //         chunkY--;
+        //         cellY += CONFIG.CHUNK_SIZE;
+        //     } else if (cellY >= CONFIG.CHUNK_SIZE) {
+        //         chunkY++;
+        //         cellY -= CONFIG.CHUNK_SIZE;
+        //     }
+        //     for (let x = -1; x < 2; x++) {
+        //         let cellX = cell.cellX + x;
+        //         let chunkX = cell.chunkX;
+        //         if (cellX < 0) {
+        //             chunkX--;
+        //             cellX += CONFIG.CHUNK_SIZE;
+        //         } else if (cellY >= CONFIG.CHUNK_SIZE) {
+        //             chunkX++;
+        //             cellX -= CONFIG.CHUNK_SIZE;
+        //         }
+        //         let adjCell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+        for (let adjCell of cells) {
+            if (adjCell.state.hidden) {
+                if (adjCell.state.user !== null)
+                    count++;
+                else
+                    hidden++;
+            } else {
+                if (adjCell.state.value === 9 && !adjCell.state.hidden)
+                    count++;
             }
-            for (let x = -1; x < 2; x++) {
-                let cellX = cell.cellX + x;
-                let chunkX = cell.chunkX;
-                if (cellX < 0) {
-                    chunkX--;
-                    cellX += CONFIG.CHUNK_SIZE;
-                } else if (cellY >= CONFIG.CHUNK_SIZE) {
-                    chunkX++;
-                    cellX -= CONFIG.CHUNK_SIZE;
-                }
-                let adjCell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-                if (adjCell.state.hidden) {
-                    if (adjCell.state.user !== null)
-                        count++;
-                    else
-                        hidden++;
-                } else {
-                    if (adjCell.state.value === 9 && !adjCell.state.hidden)
-                        count++;
-                }
-            }
+            // }
         }
         return (count === cell.state.value && hidden > 0)
     }
@@ -432,7 +435,7 @@ export default class MinefieldModel extends PIXI.Container {
     /**
      * Returns the cell right to the cell of the given coordinates
      *
-      * @param chunkX x coordinate of the chunk
+     * @param chunkX x coordinate of the chunk
      * @param chunkY y coordinate of the chunk
      * @param cellX coordinate of the cell
      * @param cellY coordinate of the cell
