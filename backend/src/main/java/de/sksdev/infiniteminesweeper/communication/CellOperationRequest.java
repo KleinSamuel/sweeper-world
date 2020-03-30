@@ -20,7 +20,6 @@ public class CellOperationRequest {
         this.cellY=cellY;
         this.user=user;
         this.hidden=hidden;
-
     }
 
     public int getChunkX() {

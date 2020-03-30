@@ -33,7 +33,7 @@ export default class MinefieldModel extends PIXI.Container {
         console.log("[ INFO ] MinefieldModel initialized");
 
         let context = this;
-        return new Promise(function(resolve, reject){
+        return new Promise(function (resolve, reject) {
             let promiseStack = [];
             for (let i = context.chunkX - CONFIG.BUFFER_ADD; i <= context.chunkX + CONFIG.BUFFER_ADD; i++) {
                 for (let j = context.chunkY - CONFIG.BUFFER_ADD; j <= context.chunkY + CONFIG.BUFFER_ADD; j++) {
@@ -56,7 +56,7 @@ export default class MinefieldModel extends PIXI.Container {
     retrieveChunkFromServer(chunkX, chunkY) {
         let context = this;
 
-        let clickWrapper = (function(isLeftclick, chunkX, chunkY, cellX, cellY) {
+        let clickWrapper = (function (isLeftclick, chunkX, chunkY, cellX, cellY) {
             // disables mouse clicks when menu is open
             if (this.viewer.denyInteractions()) {
                 return;
@@ -68,7 +68,7 @@ export default class MinefieldModel extends PIXI.Container {
             }
         }).bind(this);
 
-        let hoverWrapper = (function(chunkX, chunkY, cellX, cellY) {
+        let hoverWrapper = (function (chunkX, chunkY, cellX, cellY) {
             // disables mouse interactions when menu is open
             if (this.viewer.denyInteractions()) {
                 return;
@@ -76,11 +76,11 @@ export default class MinefieldModel extends PIXI.Container {
             this.hoverCell(chunkX, chunkY, cellX, cellY);
         }).bind(this);
 
-        let updateCellWrapper = (function(chunkX, chunkY, cellX, cellY, hidden, user) {
+        let updateCellWrapper = (function (chunkX, chunkY, cellX, cellY, hidden, user) {
             this.updateCell(chunkX, chunkY, cellX, cellY, hidden, user);
         }).bind(this);
 
-        return this.com.requestChunk(chunkX, chunkY).then(function(response){
+        return this.com.requestChunk(chunkX, chunkY).then(function (response) {
 
             console.log("request chunk");
 
@@ -88,7 +88,7 @@ export default class MinefieldModel extends PIXI.Container {
                 context.viewer.logout();
             }
 
-            return new Promise(function(resolve, reject){
+            return new Promise(function (resolve, reject) {
                 let chunk = response.data.tiles;
 
                 let c = new CellChunk(chunkX, chunkY);
@@ -100,27 +100,27 @@ export default class MinefieldModel extends PIXI.Container {
                     for (let j = 0; j < c.innerField[i].length; j++) {
                         let cell = c.innerField[i][j];
 
-                        cell.sprite.on("mousedown", function(event) {
+                        cell.sprite.on("mousedown", function (event) {
                             this.m_posX = event.data.global.x;
                             this.m_posY = event.data.global.y;
                         });
-                        cell.sprite.on("mouseup", function(event) {
+                        cell.sprite.on("mouseup", function (event) {
                             if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
                                 Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
                                 clickWrapper(true, cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
                             }
                         });
-                        cell.sprite.on("rightdown", function(event) {
+                        cell.sprite.on("rightdown", function (event) {
                             this.m_posX = event.data.global.x;
                             this.m_posY = event.data.global.y;
                         });
-                        cell.sprite.on("rightup", function(event) {
+                        cell.sprite.on("rightup", function (event) {
                             if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
                                 Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
                                 clickWrapper(false, cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
                             }
                         });
-                        cell.sprite.on("mouseover", function(event) {
+                        cell.sprite.on("mouseover", function (event) {
                             hoverWrapper(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
                         });
                     }
@@ -153,11 +153,11 @@ export default class MinefieldModel extends PIXI.Container {
 
     moveX(direction) {
         let context = this;
-        return new Promise(function(resolve, reject){
+        return new Promise(function (resolve, reject) {
             let promiseStack = [];
 
             // calculates new x coordinate
-            let genX = context.chunkX+(CONFIG.BUFFER_ADD*direction);
+            let genX = context.chunkX + (CONFIG.BUFFER_ADD * direction);
 
             // calculates all buffered y coordinates for the new chunks
             for (let i = -1 * CONFIG.BUFFER_ADD; i <= CONFIG.BUFFER_ADD; i++) {
@@ -169,7 +169,7 @@ export default class MinefieldModel extends PIXI.Container {
                 }
             }
             Promise.all(promiseStack).then(resolve);
-        }).then(function(){
+        }).then(function () {
             // computes the chunks that are out of buffer and can be removed
             let toRemove = [];
             for (let i in context.field) {
@@ -189,11 +189,11 @@ export default class MinefieldModel extends PIXI.Container {
 
     moveY(direction) {
         let context = this;
-        return new Promise(function(resolve, reject){
+        return new Promise(function (resolve, reject) {
             let promiseStack = [];
 
             // calculates new y coordinate
-            let genY = context.chunkY+(CONFIG.BUFFER_ADD*direction);
+            let genY = context.chunkY + (CONFIG.BUFFER_ADD * direction);
 
             // calculates all buffered x coordinates for the new chunks
             for (let i = -1 * CONFIG.BUFFER_ADD; i <= CONFIG.BUFFER_ADD; i++) {
@@ -205,7 +205,7 @@ export default class MinefieldModel extends PIXI.Container {
                 }
             }
             Promise.all(promiseStack).then(resolve);
-        }).then(function(){
+        }).then(function () {
             // computes the chunks that are out of buffer and can be removed
             let toRemove = [];
             for (let i in context.field) {
@@ -231,75 +231,76 @@ export default class MinefieldModel extends PIXI.Container {
     }
 
     addChunk(cellX, cellY, chunk) {
-        if(!this.field[""+cellX]) {
-            this.field[""+cellX] = {};
+        if (!this.field["" + cellX]) {
+            this.field["" + cellX] = {};
         }
-        this.field[""+cellX][""+cellY] = chunk;
+        this.field["" + cellX]["" + cellY] = chunk;
     }
 
     getChunk(cellX, cellY) {
-        if (this.field[""+cellX] && this.field[""+cellX][""+cellY]) {
-            return this.field[""+cellX][""+cellY];
+        if (this.field["" + cellX] && this.field["" + cellX]["" + cellY]) {
+            return this.field["" + cellX]["" + cellY];
         }
         return undefined;
     }
 
     removeChunk(cellX, cellY) {
         // removes the y coordinate dict
-        if (""+cellX in this.field && ""+cellY in this.field[""+cellX]) {
-            delete this.field[""+cellX][""+cellY];
+        if ("" + cellX in this.field && "" + cellY in this.field["" + cellX]) {
+            delete this.field["" + cellX]["" + cellY];
         }
         // checks if the x coordinate dict is empty and removes it if so
-        if (Object.keys(this.field[""+cellX]).length === 0) {
-            delete this.field[""+cellX];
+        if (Object.keys(this.field["" + cellX]).length === 0) {
+            delete this.field["" + cellX];
         }
     }
 
     hoverCell(chunkX, chunkY, cellX, cellY) {
         let posX = ~~(chunkX) * CONFIG.CHUNK_SIZE + ~~(cellX);
         let posY = ~~(chunkY) * CONFIG.CHUNK_SIZE + ~~(cellY);
-        this.viewer.ui.position_x.text = "X: "+posX;
-        this.viewer.ui.position_y.text = "Y: "+posY;
+        this.viewer.ui.position_x.text = "X: " + posX;
+        this.viewer.ui.position_y.text = "Y: " + posY;
         this.viewer.cursor.x = this.x + chunkX * CONFIG.CHUNK_PIXEL_SIZE + cellX * CONFIG.CELL_PIXEL_SIZE;
         this.viewer.cursor.y = this.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + cellY * CONFIG.CELL_PIXEL_SIZE;
     }
 
-    loadCells(chunkX,chunkY,cellX,cellY){
+    loadCells(chunkX, chunkY, cellX, cellY) {
         let context = this;
         let cells = [];
-        context.com.requestCell(chunkX,chunkY,cellX,cellY).then(function (response) {
-            let tiles = response.data;
-            console.log(tiles);
-            for(let cX in tiles){
-                for(let cY in tiles[cX]) {
-                    for(let tX in tiles[cX][cY]){
-                        let chunk =  context.getChunk(cX,cY);
-                        new Promise(function (resolve,reject
-                        ) {
-                            if(chunk === undefined)
-                                context.retrieveChunkFromServer(cX,cY).then(function () {
-                                    chunk =  context.getChunk(cX,cY);
-                                });
-                        }).then(function () {
-                            for(let tY in tiles[cX][cY][tX]){
-                                let cell = context.getChunk(cX,cY).getCell(tX,tY);
-                                cell.setState({"hidden":false, "user":cell.user, "value":cell.value});
-                                // cell.updateSprite();
-                                cells.push(cell);
-                            }
-                        })
-                    }
-                }
-            }
+        return context.com.requestCell(chunkX, chunkY, cellX, cellY).then(function (response) {
+            return response.data;
+            // let tiles = response.data;
+            // console.log(tiles);
+            // for(let cX in tiles){
+            //     for(let cY in tiles[cX]) {
+            //         for(let tX in tiles[cX][cY]){
+            //             let chunk =  context.getChunk(cX,cY);
+            //             new Promise(function (resolve,reject
+            //             ) {
+            //                 if(chunk === undefined)
+            //                     context.retrieveChunkFromServer(cX,cY).then(function () {
+            //                         chunk =  context.getChunk(cX,cY);
+            //                     });
+            //             }).then(function () {
+            //                 for(let tY in tiles[cX][cY][tX]){
+            //                     let cell = context.getChunk(cX,cY).getCell(tX,tY);
+            //                     cell.setState({"hidden":false, "user":cell.user, "value":cell.value});
+            //                     // cell.updateSprite();
+            //                     cells.push(cell);
+            //                 }
+            //             })
+            //         }
+            //     }
+            // }
         });
-        return cells;
+        // return cells;
     }
 
     clickCell(chunkX, chunkY, cellX, cellY) {
 
         // let cell = this.com.requestCell(chunkX,chunkY,cellX,cellY);
         // this.getChunk(chunkX, chunkY).setCell(cell);
-        let cell = this.getChunk(chunkX,chunkY).getCell(cellX,cellY);
+        let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
         // do nothing if the cell is flagged
         if (cell.state.hidden && cell.state.user) {
             play("click_no");
@@ -315,7 +316,7 @@ export default class MinefieldModel extends PIXI.Container {
         let updatedCells = [];
 
         // user clicked on a hidden cell
-        if ( cell.state.hidden) {
+        if (cell.state.hidden) {
             // this.loadCells(chunkX,chunkY,cellX,cellY);
             // adds the clicked cell
             // opens the clicked cell
@@ -323,7 +324,12 @@ export default class MinefieldModel extends PIXI.Container {
             // cell.updateSprite();
 
             // clicked on empty cell -> open empty block
-            updatedCells = this.loadCells(chunkX,chunkY,cellX,cellY);
+            let fullCell = this.loadCells(chunkX, chunkY, cellX, cellY);
+            // let cell = context.getChunk(cX,cY).getCell(tX,tY);
+            cell.setState({"hidden": fullCell.hidden, "user": fullCell.user, "value": fullCell.value});
+            updatedCells.push(cell);
+            // cell.updateSprite();
+            // cells.push(cell);
             // if (cell.state.value === 0) {
             //     updatedCells = updatedCells.push(cell);
             // }
@@ -471,6 +477,7 @@ export default class MinefieldModel extends PIXI.Container {
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX - 1, cellY);
     }
+
     /**
      * Returns the cell right to the cell of the given coordinates
      *
@@ -486,6 +493,7 @@ export default class MinefieldModel extends PIXI.Container {
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX + 1, cellY);
     }
+
     /**
      * Returns the cell to the top of the cell of the given coordinates
      *
@@ -501,6 +509,7 @@ export default class MinefieldModel extends PIXI.Container {
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX, cellY - 1);
     }
+
     /**
      * Returns the cell to the bottom of the cell of the given coordinates
      *
@@ -516,6 +525,7 @@ export default class MinefieldModel extends PIXI.Container {
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX, cellY + 1);
     }
+
     /**
      * Returns the cell to the top left of the cell of the given coordinates
      *
@@ -528,13 +538,14 @@ export default class MinefieldModel extends PIXI.Container {
     getTopLeftCell(chunkX, chunkY, cellX, cellY) {
         if (cellX === 0 && cellY === 0) {
             return this.getChunk(chunkX - 1, chunkY - 1).getCell(CONFIG.CHUNK_SIZE - 1, CONFIG.CHUNK_SIZE - 1);
-        } else if(cellX === 0) {
+        } else if (cellX === 0) {
             return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, cellY - 1);
-        } else if(cellY === 0) {
+        } else if (cellY === 0) {
             return this.getChunk(chunkX, chunkY - 1).getCell(cellX - 1, CONFIG.CHUNK_SIZE - 1);
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX - 1, cellY - 1);
     }
+
     /**
      * Returns the cell to the top right of the cell of the given coordinates
      *
@@ -547,13 +558,14 @@ export default class MinefieldModel extends PIXI.Container {
     getTopRightCell(chunkX, chunkY, cellX, cellY) {
         if (cellX === CONFIG.CHUNK_SIZE - 1 && cellY === 0) {
             return this.getChunk(chunkX + 1, chunkY - 1).getCell(0, CONFIG.CHUNK_SIZE - 1);
-        } else if(cellX === CONFIG.CHUNK_SIZE - 1) {
+        } else if (cellX === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX + 1, chunkY).getCell(0, cellY - 1);
-        } else if(cellY === 0) {
+        } else if (cellY === 0) {
             return this.getChunk(chunkX, chunkY - 1).getCell(cellX + 1, CONFIG.CHUNK_SIZE - 1);
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX + 1, cellY - 1);
     }
+
     /**
      * Returns the cell to the bottom left of the cell of the given coordinates
      *
@@ -566,13 +578,14 @@ export default class MinefieldModel extends PIXI.Container {
     getBottomLeftCell(chunkX, chunkY, cellX, cellY) {
         if (cellX === 0 && cellY === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX - 1, chunkY + 1).getCell(CONFIG.CHUNK_SIZE - 1, 0);
-        } else if(cellX === 0) {
+        } else if (cellX === 0) {
             return this.getChunk(chunkX - 1, chunkY).getCell(CONFIG.CHUNK_SIZE - 1, cellY + 1);
-        } else if(cellY === CONFIG.CHUNK_SIZE - 1) {
+        } else if (cellY === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX, chunkY + 1).getCell(cellX - 1, 0);
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX - 1, cellY + 1);
     }
+
     /**
      * Returns the cell to the bottom right of the cell of the given coordinates
      *
@@ -585,9 +598,9 @@ export default class MinefieldModel extends PIXI.Container {
     getBottomRightCell(chunkX, chunkY, cellX, cellY) {
         if (cellX === CONFIG.CHUNK_SIZE - 1 && cellY === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX + 1, chunkY + 1).getCell(0, 0);
-        } else if(cellX === CONFIG.CHUNK_SIZE - 1) {
+        } else if (cellX === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX + 1, chunkY).getCell(0, cellY + 1);
-        } else if(cellY === CONFIG.CHUNK_SIZE - 1) {
+        } else if (cellY === CONFIG.CHUNK_SIZE - 1) {
             return this.getChunk(chunkX, chunkY + 1).getCell(cellX + 1, 0);
         }
         return this.getChunk(chunkX, chunkY).getCell(cellX + 1, cellY + 1);
