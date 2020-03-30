@@ -261,8 +261,8 @@ export default class MinefieldModel extends PIXI.Container {
         this.viewer.cursor.y = this.y + chunkY * CONFIG.CHUNK_PIXEL_SIZE + cellY * CONFIG.CELL_PIXEL_SIZE;
     }
 
-    loadCells(chunkX, chunkY, cellX, cellY) {
-        return this.com.requestCell(chunkX, chunkY, cellX, cellY).then(function (response) {
+    loadCells(chunkX, chunkY, cellX, cellY, flag) {
+        return this.com.requestCell(chunkX, chunkY, cellX, cellY, flag).then(function (response) {
             return response;
         });
     }
@@ -281,110 +281,110 @@ export default class MinefieldModel extends PIXI.Container {
             return;
         }
 
-        // contains all cells that need to be updates because of the click
-        let isFree = checkFreedom(cell);
+        //check for auto-opening potential
+        let autoOpenValid = false;
+        if (!cell.state.hidden)
+            autoOpenValid = this.allBombsKnown(cell);
 
-        // user clicked on a hidden cell
-        if (cell.state.hidden | isFree) {
-            this.loadCells(chunkX, chunkY, cellX, cellY).then(function (response) {
+
+        if (cell.state.hidden || autoOpenValid) {
+            //send request for update broadcast
+            this.loadCells(chunkX, chunkY, cellX, cellY, false).then(function (response) {
                 let fullCell = response.data;
-                if (fullCell.length > 0) {
+
+                //update requested cell
+                if (fullCell.length > 0)
                     cell.setState({"hidden": fullCell.hidden, "user": fullCell.user, "value": fullCell.value});
-                    updatedCells.push(cell);
-                }
                 return fullCell;
             }).then(function (response) {
+
+                //requested cell == bomb -> explode
                 if (cell.state.value === 9) {
                     play("explosion");
-                }
-                if (response.length === 0) {
-                    play("click_no");
                     return;
                 }
+
+                //requested cell != bomb
+                play("click_cell");
             })
+            return;
         }
-        play("click_cell");
+
+        //requested_cell is not hidden but also not auto-open valid
+        play("click_no");
+
     }
 
-    checkFreedom(cell){
-
+    //evaluates for a cell if all adjacent bombs are known and if there are any cells left to open
+    allBombsKnown(cell) {
+        let count = 0;
+        let hidden = 0;
+        for (let y = -1; y < 2; y++) {
+            let cellY = cell.cellY + y;
+            let chunkY = cell.chunkY;
+            if (cellY < 0) {
+                chunkY--;
+                cellY += CONFIG.CHUNK_SIZE;
+            } else if (cellY >= CONFIG.CHUNK_SIZE) {
+                chunkY++;
+                cellY -= CONFIG.CHUNK_SIZE;
+            }
+            for (let x = -1; x < 2; x++) {
+                let cellX = cell.cellX + x;
+                let chunkX = cell.chunkX;
+                if (cellX < 0) {
+                    chunkX--;
+                    cellX += CONFIG.CHUNK_SIZE;
+                } else if (cellY >= CONFIG.CHUNK_SIZE) {
+                    chunkX++;
+                    cellX -= CONFIG.CHUNK_SIZE;
+                }
+                let adjCell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+                if (adjCell.state.hidden) {
+                    if (adjCell.state.user !== null)
+                        count++;
+                    else
+                        hidden++;
+                } else {
+                    if (adjCell.state.value === 9 && !adjCell.state.hidden)
+                        count++;
+                }
+            }
+        }
+        return (count === cell.state.value && hidden > 0)
     }
 
     flagCell(chunkX, chunkY, cellX, cellY) {
 
+        let context = this;
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+
         // returns if the flagged cell is already opened or flagged
         if (!cell.state.hidden || cell.state.hidden && cell.state.user) {
             play("click_no");
             return;
         }
-        // return if the flagged cell is not a bomb
-        if (cell.state.value !== 9) {
-            play("click_error");
-            return;
-        }
-        cell.state.user = 1;
-        cell.updateSprite();
-        this.com.flagCell(cell);
-        play("click_flag");
-    }
+        this.loadCells(chunkX, chunkY, cellX, cellY, true).then(function (response) {
 
-    /**
-     * Opens a field of empty cells and all adjacent fields.
-     *
-     * @param chunkX x coordinate of the chunk
-     * @param chunkY y coordinate of the chunk
-     * @param cellX coordinate of the cell
-     * @param cellY coordinate of the cell
-     */
-    openBlock(chunkX, chunkY, cellX, cellY) {
-
-        let updatedCells = [];
-        let stack = this.getAdjacentCells(chunkX, chunkY, cellX, cellY);
-
-        while (stack.length > 0) {
-            let c = stack.pop();
-
-            // skips the cell if it already opened
-            if (!c.state.hidden) {
-                continue;
-            }
-            // adds all adjacent cells to the stack if the cell is empty
-            if (c.state.value === 0) {
-                let toAdd = this.getAdjacentCells(c.chunkX, c.chunkY, c.cellX, c.cellY);
-                for (let cell of toAdd) {
-                    if (cell.state.hidden) {
-                        stack.push(cell);
-                    }
+                // broken request message
+                if (response.data.length === 0) {
+                    console.error("No response for tile flagging.")
+                    return;
                 }
-            }
-            // adds the cell to the cell that need to be updated
-            updatedCells.push(c);
-            c.state.hidden = false;
-            c.updateSprite();
-        }
 
-        return updatedCells;
-    }
-
-    openAdjacent(chunkX, chunkY, cellX, cellY) {
-        let adj = this.getAdjacentCells(chunkX, chunkY, cellX, cellY);
-        let toOpen = [];
-        for (let cell of adj) {
-            if (cell.state.hidden) {
-                if (cell.state.value === 9) {
-                    if (!cell.state.user) {
-                        return [];
-                    }
-                } else if (cell.state.value === 0) {
-                    toOpen.push(cell);
-                    toOpen = toOpen.concat(this.openBlock(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY));
-                } else {
-                    toOpen.push(cell);
+                // return if the flagged cell is not a bomb
+                if (!response.data) {
+                    play("click_error");
+                    return;
                 }
+
+                //server set ok message for tile flagging
+                let cell = context.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+                cell.state.user = 1;
+                cell.updateSprite();
+                play("click_flag");
             }
-        }
-        return toOpen;
+        );
     }
 
     /**

@@ -43,7 +43,7 @@ public class RequestController {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
                 if (!chunkService.registerChunkRequest(cid, userId)) {
-                    System.err.println("Chunk loading not permitted! chunk: "+x+":"+y+" for user "+userId);
+                    System.err.println("Chunk loading not permitted! chunk: " + x + ":" + y + " for user " + userId);
                     return null;
                 }
                 return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid));
@@ -56,14 +56,14 @@ public class RequestController {
 
     @RequestMapping(value = "/api/getTileContent")
     @ResponseBody
-    public String getTileContent(@RequestParam("u") Long userId, @RequestParam(value = "h", required = false) String hash, @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile) {
+    public String getTileContent(@RequestParam("u") Long userId, @RequestParam(value = "h", required = false) String hash, @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile, @RequestParam("f") boolean isFlag) {
         try {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
-//                if (userService.validateTileRequest(userId, cid))
-                return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
-//                else
-//                    return null;
+                if (!isFlag)
+                    return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
+                else
+                    return flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true))+"";
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -168,13 +168,15 @@ public class RequestController {
         return "" + (tile != null);
     }
 
-    @MessageMapping("/flagCell")
-    @ResponseBody
-    public String flagCell(CellOperationRequest message) {
-        TileId tid = new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY());
-        Tile tile = chunkService.registerTileUpdate(tid, message.getUser(), true);
+//    @MessageMapping("/flagCell")
+//    @ResponseBody
+    public boolean flagCell(CellOperationRequest message) {
+        Tile tile = chunkService.getTile(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()));
+        if (tile.getValue() != 9)
+            return false;
+        tile = chunkService.registerTileUpdate(tile.getId(), message.getUser(), true);
 
-        if (tile!=null) {
+        if (tile != null) {
             try {
                 String response = objectMapper.writeValueAsString(new CellOperationResponse(message, true, tile.getValue()));
                 template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
@@ -182,9 +184,9 @@ public class RequestController {
                 e.printStackTrace();
             }
         } else
-            System.err.println("Update of Tile " + tid + " by User " + message.getUser() + " was not permitted!");
+            System.err.println("Update of Tile " + new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()) + " by User " + message.getUser() + " was not permitted!");
 
-        return "" + (tile!=null);
+        return (tile != null);
     }
 
 }

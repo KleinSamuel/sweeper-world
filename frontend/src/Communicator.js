@@ -134,8 +134,8 @@ export default class Communicator {
         return axios.get(CONFIG.URL_API + "/api/getChunkContent?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash() + "&x=" + chunkX + "&y=" + chunkY);
     }
 
-    requestCell(chunkX, chunkY, cellX, cellY) {
-        return axios.get(CONFIG.URL_API + "/api/getTileContent?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash() + "&x=" + chunkX + "&y=" + chunkY + "&x_tile=" + cellX + "&y_tile=" + cellY);
+    requestCell(chunkX, chunkY, cellX, cellY, flag) {
+        return axios.get(CONFIG.URL_API + "/api/getTileContent?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash() + "&x=" + chunkX + "&y=" + chunkY + "&x_tile=" + cellX + "&y_tile=" + cellY+"&f="+flag);
     }
 
     updateSettings(design, soundsEnabled) {
