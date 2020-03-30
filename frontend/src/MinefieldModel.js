@@ -62,7 +62,6 @@ export default class MinefieldModel extends PIXI.Container {
                 return;
             }
             if (isLeftclick) {
-                this.loadCells(chunkX,chunkY,cellX,cellY);
                 this.clickCell(chunkX, chunkY, cellX, cellY);
             } else {
                 this.flagCell(chunkX, chunkY, cellX, cellY);
@@ -265,64 +264,33 @@ export default class MinefieldModel extends PIXI.Container {
 
     loadCells(chunkX,chunkY,cellX,cellY){
         let context = this;
+        let cells = [];
         context.com.requestCell(chunkX,chunkY,cellX,cellY).then(function (response) {
             let tiles = response.data;
+            console.log(tiles);
             for(let cX in tiles){
                 for(let cY in tiles[cX]) {
-                    // // let c = new CellChunk(chunkX, chunkY);
-                    // // c.position.set(chunkX * CONFIG.CHUNK_PIXEL_SIZE, chunkY * CONFIG.CHUNK_PIXEL_SIZE);
-                    //
-                    // // c.initFieldMaps(chunk);
-                    //
-                    // for (let i = 0; i < c.innerField.length; i++) {
-                    //     for (let j = 0; j < c.innerField[i].length; j++) {
-                    //
-                    //         let cell = c.innerField[i][j];
-                    //
-                    //         cell.sprite.on("mousedown", function(event) {
-                    //             this.m_posX = event.data.global.x;
-                    //             this.m_posY = event.data.global.y;
-                    //         });
-                    //         cell.sprite.on("mouseup", function(event) {
-                    //             if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
-                    //                 Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
-                    //                 clickWrapper(true, cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
-                    //             }
-                    //         });
-                    //         cell.sprite.on("rightdown", function(event) {
-                    //             this.m_posX = event.data.global.x;
-                    //             this.m_posY = event.data.global.y;
-                    //         });
-                    //         cell.sprite.on("rightup", function(event) {
-                    //             if (Math.abs(this.m_posX - event.data.global.x) < CONFIG.CELL_PIXEL_SIZE &&
-                    //                 Math.abs(this.m_posY - event.data.global.y) < CONFIG.CELL_PIXEL_SIZE) {
-                    //                 clickWrapper(false, cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
-                    //             }
-                    //         });
-                    //         cell.sprite.on("mouseover", function(event) {
-                    //             hoverWrapper(cell.chunkX, cell.chunkY, cell.cellX, cell.cellY);
-                    //         });
-                    //     }
-                    // }
-                    console.log(cX+"/"+cY);
-                    console.log(tiles[cX][cY])
                     for(let tX in tiles[cX][cY]){
-                        for(let tY in tiles[cX][cY][tX]){
-                            let cell = tiles[cX][cY][tX][tY];
-                            cell.setState({"hidden":cell.hidden, "user":cell.hidden, "value":cell.value})
-
-                            // context.getChunk(cX,cY).setCell(tX,tY,tiles[cX][cY]);
-                            // console.log(tiles[cX][cY]);
-                            // clickCell(cX,cY,tX,tY);
-                        }
+                        let chunk =  context.getChunk(cX,cY);
+                        new Promise(function (resolve,reject
+                        ) {
+                            if(chunk === undefined)
+                                context.retrieveChunkFromServer(cX,cY).then(function () {
+                                    chunk =  context.getChunk(cX,cY);
+                                });
+                        }).then(function () {
+                            for(let tY in tiles[cX][cY][tX]){
+                                let cell = context.getChunk(cX,cY).getCell(tX,tY);
+                                cell.setState({"hidden":false, "user":cell.user, "value":cell.value});
+                                // cell.updateSprite();
+                                cells.push(cell);
+                            }
+                        })
                     }
                 }
             }
         });
-
-
-
-
+        return cells;
     }
 
     clickCell(chunkX, chunkY, cellX, cellY) {
@@ -330,7 +298,6 @@ export default class MinefieldModel extends PIXI.Container {
         // let cell = this.com.requestCell(chunkX,chunkY,cellX,cellY);
         // this.getChunk(chunkX, chunkY).setCell(cell);
         let cell = this.getChunk(chunkX,chunkY).getCell(cellX,cellY);
-        console.log(cell);
         // do nothing if the cell is flagged
         if (cell.state.hidden && cell.state.user) {
             play("click_no");
@@ -347,19 +314,19 @@ export default class MinefieldModel extends PIXI.Container {
 
         // user clicked on a hidden cell
         if ( cell.state.hidden) {
-
+            // this.loadCells(chunkX,chunkY,cellX,cellY);
             // adds the clicked cell
-            updatedCells.push(cell);
             // opens the clicked cell
-            cell.state.hidden = false;
-            cell.updateSprite();
+            // cell.state.hidden = false;
+            // cell.updateSprite();
 
             // clicked on empty cell -> open empty block
-            if (cell.state.value === 0) {
-                updatedCells = updatedCells.concat(this.openBlock(chunkX, chunkY, cellX, cellY));
-            }
+            updatedCells = this.loadCells(chunkX,chunkY,cellX,cellY);
+            // if (cell.state.value === 0) {
+            //     updatedCells = updatedCells.push(cell);
+            // }
             // clicked on mine
-            else if (cell.state.value === 9) {
+            if (cell.state.value === 9) {
                 play("explosion");
                 return;
             }

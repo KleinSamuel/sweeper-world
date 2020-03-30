@@ -7,6 +7,7 @@ import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
+import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.repositories.TileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -161,6 +162,7 @@ public class ChunkService {
 
 
     public Object openTiles(ChunkId cid , int x_tile, int y_tile, long userId) {
+        User u =userService.getUser(userId);
         Chunk chunk= getOrCreateChunkContent(cid);
         Tile t = chunk.getGrid()[y_tile][x_tile];
         HashMap<ChunkId, TreeSet<Tile>> openedTiles = new HashMap<>();
@@ -177,6 +179,8 @@ public class ChunkService {
                 if (!openedChunk.containsKey(open.getX_tile()))
                     openedChunk.put(open.getX_tile(), new HashMap<>());
                 openedChunk.get(open.getX_tile()).put(open.getY_tile(), open);
+                open.setHidden(false);
+                open.setUser(u);
             });
         });
         return tileMap;

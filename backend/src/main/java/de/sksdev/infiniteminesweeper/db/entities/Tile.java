@@ -93,10 +93,10 @@ public class Tile implements Comparable<Tile>, Serializable {
         return new TileId(x, y, x_tile, y_tile);
     }
 
-    @JsonGetter("value")
-    public Integer getJsonValue() {
-        return user != null ? value : null;
-    }
+//    @JsonGetter("value")
+//    public Integer getJsonValue() {
+//        return user != null ? value : null;
+//    }
 
     public Integer getValue() {
         return value;

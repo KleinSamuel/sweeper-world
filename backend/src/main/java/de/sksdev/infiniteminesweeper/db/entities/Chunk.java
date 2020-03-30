@@ -85,24 +85,24 @@ public class Chunk implements Serializable {
         getTiles().forEach(t -> t.setValue(values[t.getY_tile()][t.getX_tile()]));
     }
 
-    @JsonGetter("tiles")
-    public Object getTilesJson() {
-        return tilesToMap(tiles);
-    }
-
+//    @JsonGetter("tiles")
+//    public Object getTilesJson() {
+//        return tilesToMap(tiles);
+//    }
+//
     public Set<Tile> getTiles() {
         return tiles;
     }
 
-//    @JsonGetter("tiles")
-//    public Object getJsonTiles() {
-//        TreeSet<Tile> ts = new TreeSet<>(tiles);
-//        tiles.forEach(t -> {
-//            if (t.isHidden() | t.getUser() != null)
-//                ts.remove(t);
-//        });
-//        return tilesToMap(ts);
-//    }
+    @JsonGetter("tiles")
+    public Object getJsonTiles() {
+        TreeSet<Tile> ts = new TreeSet<>();
+        tiles.forEach(t -> {
+            if ( t.getUser() != null)
+                ts.add(t);
+        });
+        return tilesToMap(ts);
+    }
 
     public Tile[][] getGrid() {
         if (grid == null) {
