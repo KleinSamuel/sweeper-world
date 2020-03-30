@@ -82,8 +82,6 @@ export default class MinefieldModel extends PIXI.Container {
 
         return this.com.requestChunk(chunkX, chunkY).then(function (response) {
 
-            console.log("request chunk");
-
             if (response.data.length === 0) {
                 context.viewer.logout();
             }
