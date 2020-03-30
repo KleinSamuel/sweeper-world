@@ -220,11 +220,11 @@ public class ChunkService {
                     } catch (IndexOutOfBoundsException ey) {
 
                         if (y < 0) {
-                            c = getOrCreateChunkContent(new ChunkId(t.getX(), t.getY() + 1));
+                            c = getOrCreateChunkContent(new ChunkId(t.getX(), t.getY() - 1));
                             row = c.getGrid()[Config.CHUNK_SIZE - 1];
                             y = Config.CHUNK_SIZE - 1;
                         } else {
-                            c = getOrCreateChunkContent(new ChunkId(t.getX(), t.getY() - 1));
+                            c = getOrCreateChunkContent(new ChunkId(t.getX(), t.getY() + 1));
                             row = c.getGrid()[0];
                             y = 0;
                         }

@@ -223,14 +223,10 @@ export default class MinefieldModel extends PIXI.Container {
         });
     }
 
+    //execute incoming cell updates
     updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value) {
-        console.log("update cell "+chunkX+"/"+chunkY+" "+cellX+"/"+cellY+" h="+hidden+" u="+user+" v="+value);
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-        // cell.state.hidden = hidden;
-        // cell.state.user = user;
-        // cell.state.value = value;
         cell.setState({hidden:hidden, user:user, value:value});
-        // cell.updateSprite();
     }
 
     addChunk(cellX, cellY, chunk) {
@@ -268,35 +264,9 @@ export default class MinefieldModel extends PIXI.Container {
     }
 
     loadCells(chunkX, chunkY, cellX, cellY) {
-        let context = this;
-        let cells = [];
-        return context.com.requestCell(chunkX, chunkY, cellX, cellY).then(function (response) {
+        return this.com.requestCell(chunkX, chunkY, cellX, cellY).then(function (response) {
             return response;
-            // let tiles = response.data;
-            // console.log(tiles);
-            // for(let cX in tiles){
-            //     for(let cY in tiles[cX]) {
-            //         for(let tX in tiles[cX][cY]){
-            //             let chunk =  context.getChunk(cX,cY);
-            //             new Promise(function (resolve,reject
-            //             ) {
-            //                 if(chunk === undefined)
-            //                     context.retrieveChunkFromServer(cX,cY).then(function () {
-            //                         chunk =  context.getChunk(cX,cY);
-            //                     });
-            //             }).then(function () {
-            //                 for(let tY in tiles[cX][cY][tX]){
-            //                     let cell = context.getChunk(cX,cY).getCell(tX,tY);
-            //                     cell.setState({"hidden":false, "user":cell.user, "value":cell.value});
-            //                     // cell.updateSprite();
-            //                     cells.push(cell);
-            //                 }
-            //             })
-            //         }
-            //     }
-            // }
         });
-        // return cells;
     }
 
     clickCell(chunkX, chunkY, cellX, cellY) {
