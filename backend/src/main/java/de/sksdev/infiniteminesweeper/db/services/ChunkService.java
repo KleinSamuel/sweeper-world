@@ -168,14 +168,18 @@ public class ChunkService {
 
 
     public Object openTiles(ChunkId cid, int x_tile, int y_tile, long userId) {
+
         User u = userService.getUser(userId);
         Chunk chunk = getOrCreateChunkContent(cid);
         Tile t = chunk.getGrid()[y_tile][x_tile];
         HashMap<ChunkId, TreeSet<Tile>> openedTiles = new HashMap<>();
-        if (t.isHidden())
+
+        if (t.isHidden()) {
             recOpenTiles(t, openedTiles);
-        else
+        } else {
             openAdjacentTiles(chunk, t, openedTiles);
+        }
+
         openedTiles.forEach((c, ts) -> {
             userService.registerChunkRequest(c, userId);
             ts.forEach(open -> {

@@ -5,7 +5,10 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.entities.UserSettings;
+import de.sksdev.infiniteminesweeper.db.entities.UserStats;
 import de.sksdev.infiniteminesweeper.db.repositories.UserRepository;
+import de.sksdev.infiniteminesweeper.db.repositories.UserSettingsRepository;
+import de.sksdev.infiniteminesweeper.db.repositories.UserStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +21,33 @@ import java.util.Optional;
 public class UserService {
 
     private UserRepository userRepository;
+    private UserStatsRepository userStatsRepository;
 
     private HashMap<ChunkId, HashSet<Long>> loadedChunks;
 
     private HashMap<Long, User> buffer;
+    private HashMap<Long, UserStats> stats;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserStatsRepository userStatsRepository) {
         this.userRepository = userRepository;
+        this.userStatsRepository = userStatsRepository;
         this.loadedChunks = new HashMap<>();
         this.buffer = new HashMap<>();
+        this.stats = new HashMap<>();
+    }
+
+    public UserStats loadStatsForUser(long userId) {
+        if (this.stats.containsKey(userId)) {
+            return this.stats.get(userId);
+        }
+        Optional<UserStats> statOpt = userStatsRepository.findByUserid(userId);
+        if (statOpt.isEmpty()) {
+            return statOpt.get();
+        }
+        UserStats stats = new UserStats(userId);
+        this.stats.put(userId, stats);
+        return stats;
     }
 
     public User createNewUser(String username, String password, TileId id) {
@@ -74,6 +94,7 @@ public class UserService {
         }
         User user = userOpt.get();
         putIntoBuffer(user);
+        loadStatsForUser(user.getId());
         return user;
     }
 

@@ -10,8 +10,8 @@ public class UserStats {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne
-    private User user;
+    @Column(unique = true)
+    private long userid;
 
     // temporary stats for the user
     @Column
@@ -45,8 +45,8 @@ public class UserStats {
 
     }
 
-    public UserStats(User user) {
-        this.user = user;
+    public UserStats(long userId) {
+        this.userid = userId;
     }
 
 }
