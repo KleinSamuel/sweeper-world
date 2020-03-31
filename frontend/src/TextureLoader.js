@@ -7,22 +7,25 @@ export let textures = null;
 
 export function init() {
     console.log("[ INFO ] TextureLoader initialized");
-    return preloadTextures().then(function(resources){
+    return preloadTextures().then(function (resources) {
         textures = {
             cursor: resources.cursor.texture,
             box_empty: resources.box_empty.texture,
             box_checked: resources.box_checked.texture,
+            box_close: resources.box_close.texture,
             button_logout: resources.button_logout.texture,
+            button_design: resources.button_design.texture,
+            button_options: resources.button_options.texture,
         };
-    }).then(function() {
+    }).then(function () {
         return updateCellDesign(CONFIG.getDesign());
-    }).catch(function(err){
+    }).catch(function (err) {
         console.log(err);
     });
 }
 
 export function updateCellDesign(designname) {
-    return setCellDesign(designname).then(function(resources) {
+    return setCellDesign(designname).then(function (resources) {
         textures["closed"] = resources["closed"].texture;
         textures["open"] = resources["open"].texture;
         textures["flag"] = resources["flag"].texture;
@@ -41,20 +44,20 @@ export function updateCellDesign(designname) {
 
 function setCellDesign(designname) {
 
-    let closed = CONFIG.URL_ASSETS+"/designs/"+designname+"/closed.png";
-    let open = CONFIG.URL_ASSETS+"/designs/"+designname+"/open.png";
-    let flag = CONFIG.URL_ASSETS+"/designs/"+designname+"/flag.png";
-    let mine = CONFIG.URL_ASSETS+"/designs/"+designname+"/mine.png";
-    let num1 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num1.png";
-    let num2 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num2.png";
-    let num3 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num3.png";
-    let num4 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num4.png";
-    let num5 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num5.png";
-    let num6 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num6.png";
-    let num7 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num7.png";
-    let num8 = CONFIG.URL_ASSETS+"/designs/"+designname+"/num8.png";
+    let closed = CONFIG.URL_ASSETS + "/designs/" + designname + "/closed.png";
+    let open = CONFIG.URL_ASSETS + "/designs/" + designname + "/open.png";
+    let flag = CONFIG.URL_ASSETS + "/designs/" + designname + "/flag.png";
+    let mine = CONFIG.URL_ASSETS + "/designs/" + designname + "/mine.png";
+    let num1 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num1.png";
+    let num2 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num2.png";
+    let num3 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num3.png";
+    let num4 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num4.png";
+    let num5 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num5.png";
+    let num6 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num6.png";
+    let num7 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num7.png";
+    let num8 = CONFIG.URL_ASSETS + "/designs/" + designname + "/num8.png";
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         loader
             .add("closed", closed)
             .add("open", open)
@@ -68,21 +71,24 @@ function setCellDesign(designname) {
             .add("num6", num6)
             .add("num7", num7)
             .add("num8", num8)
-            .load(function(loader, resources) {
+            .load(function (loader, resources) {
                 resolve(resources)
             });
     });
 }
 
 function preloadTextures() {
-    return new Promise(function(resolve, reject){
+    return new Promise(function (resolve, reject) {
         loader = new PIXI.Loader();
         loader.reset()
-            .add("cursor", CONFIG.URL_ASSETS+"/images/cursor.png")
-            .add("box_empty", CONFIG.URL_ASSETS+"/images/box_empty.png")
-            .add("box_checked", CONFIG.URL_ASSETS+"/images/box_checked.png")
-            .add("button_logout", CONFIG.URL_ASSETS+"/images/button_logout.png")
-            .load(function(loader, resources){
+            .add("cursor", CONFIG.URL_ASSETS + "/images/cursor.png")
+            .add("box_empty", CONFIG.URL_ASSETS + "/images/box_empty.png")
+            .add("box_checked", CONFIG.URL_ASSETS + "/images/box_checked.png")
+            .add("box_close", CONFIG.URL_ASSETS + "/images/box_close.png")
+            .add("button_logout", CONFIG.URL_ASSETS + "/images/button_logout.png")
+            .add("button_design", CONFIG.URL_ASSETS + "/images/button_design.png")
+            .add("button_options", CONFIG.URL_ASSETS + "/images/button_options.png")
+            .load(function (loader, resources) {
                 resolve(resources);
             });
     });

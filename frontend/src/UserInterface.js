@@ -23,7 +23,7 @@ export default class UserInterface extends PIXI.Container {
     }
 
     update() {
-        this.i_name.n.text = "ID: "+CONFIG.getID();
+        this.i_name.n.text = "ID: " + CONFIG.getID();
     }
 
     resize(width, height) {
@@ -42,15 +42,16 @@ export default class UserInterface extends PIXI.Container {
     openOptions() {
         this.options.visible = true;
     }
+
     closeOptions() {
         this.options.visible = false;
     }
 
     addInfoBackground() {
         let background = new PIXI.Graphics();
-        background.beginFill(0x550a46);
-        background.lineStyle(2, 0x54123b);
-        background.drawRect(0,0, CONFIG.MENU_INFO_WIDTH, CONFIG.MENU_INFO_HEIGHT);
+        background.beginFill(CONFIG.COLOR_BG);
+        background.lineStyle(2, CONFIG.COLOR_HIGHLIGHT);
+        background.drawRect(0, 0, CONFIG.MENU_INFO_WIDTH, CONFIG.MENU_INFO_HEIGHT);
         background.interactive = true;
         background.buttonMode = true;
         background.y = -2;
@@ -65,7 +66,7 @@ export default class UserInterface extends PIXI.Container {
 
         this.i_name.n = new PIXI.Text("ID: unknown", {
             fontSize: 28,
-            fill: 0xd12bea
+            fill: CONFIG.COLOR_HIGHLIGHT
         });
 
         this.i_name.addChild(this.i_name.n);
@@ -74,13 +75,13 @@ export default class UserInterface extends PIXI.Container {
 
     addOptionsButton() {
         let context = this;
-        this.b_logout = new PIXI.Sprite(textures.button_logout);
+        this.b_logout = new PIXI.Sprite(textures.button_options);
         this.b_logout.width = 60;
         this.b_logout.height = 30;
         this.b_logout.x = 15;
         this.b_logout.y = 110;
         this.b_logout.interactive = true;
-        this.b_logout.on("mousedown", function() {
+        this.b_logout.on("mousedown", function () {
             context.openOptions();
         });
         this.infoBackground.addChild(this.b_logout);
@@ -89,13 +90,13 @@ export default class UserInterface extends PIXI.Container {
     addPosition() {
         this.position_x = new PIXI.Text("X:", {
             fontSize: 28,
-            fill: 0x81f5ff
+            fill: CONFIG.COLOR_TEXT
         });
         this.position_x.x = 15;
         this.position_x.y = 45;
         this.position_y = new PIXI.Text("Y:", {
             fontSize: 28,
-            fill: 0xd12bea
+            fill: CONFIG.COLOR_TEXT
         });
         this.position_y.x = 15;
         this.position_y.y = 70;
@@ -118,25 +119,25 @@ export default class UserInterface extends PIXI.Container {
         this.options.position.set(window.innerWidth / 2 - this.options.width / 2, 200);
         // options background
         this.options.background = new PIXI.Graphics();
-        this.options.background.beginFill(0x679b9b);
-        this.options.background.lineStyle(2, 0x54123b);
-        this.options.background.drawRect(0,0, width, height);
+        this.options.background.beginFill(CONFIG.COLOR_BG);
+        this.options.background.lineStyle(2, CONFIG.COLOR_HIGHLIGHT);
+        this.options.background.drawRect(0, 0, width, height);
         this.options.addChildAt(this.options.background, 0);
 
-        this.options.close = new PIXI.Sprite(textures.box_empty);
+        this.options.close = new PIXI.Sprite(textures.box_close);
         this.options.close.width = 20;
         this.options.close.height = 20;
         this.options.close.x = width - this.options.close.width - 5;
         this.options.close.y = 5;
         this.options.close.interactive = true;
-        this.options.close.on("mousedown", function() {
+        this.options.close.on("mousedown", function () {
             context.closeOptions();
         });
         this.options.addChild(this.options.close);
 
         this.options.header = new PIXI.Text("OPTIONS", {
             fontSize: 28,
-            fill: 0xd12bea,
+            fill: CONFIG.COLOR_HIGHLIGHT,
             align: "center"
         });
         this.options.header.x = width / 2 - this.options.header.width / 2;
@@ -155,7 +156,7 @@ export default class UserInterface extends PIXI.Container {
         this.options.sound.button.height = 20;
         this.options.sound.button.x = left;
         this.options.sound.button.interactive = true;
-        this.options.sound.button.on("mousedown", function() {
+        this.options.sound.button.on("mousedown", function () {
             CONFIG.switchOptionSoundEnabled();
             context.options.sound.button.texture = CONFIG.getOptionSoundEnabled() ? textures.box_checked : textures.box_empty;
         });
@@ -163,7 +164,7 @@ export default class UserInterface extends PIXI.Container {
 
         this.options.sound.text = new PIXI.Text("enable sound", {
             fontSize: 18,
-            fill: 0xd12bea
+            fill: CONFIG.COLOR_TEXT
         });
         this.options.sound.text.x = width / 2 - left;
         this.options.sound.addChild(this.options.sound.text);
@@ -171,13 +172,13 @@ export default class UserInterface extends PIXI.Container {
         this.options.addChildAt(this.options.sound, 2);
 
         // DESIGN
-        this.options.design = new PIXI.Sprite(textures.button_logout);
+        this.options.design = new PIXI.Sprite(textures.button_design);
         this.options.design.width = 60;
         this.options.design.height = 30;
         this.options.design.x = width / 2 - this.options.design.width / 2;
         this.options.design.y = 150;
         this.options.design.interactive = true;
-        this.options.design.on("mousedown", function() {
+        this.options.design.on("mousedown", function () {
             context.design.visible = true;
         });
         this.options.addChild(this.options.design);
@@ -189,7 +190,7 @@ export default class UserInterface extends PIXI.Container {
         this.options.logout.x = width / 2 - this.options.logout.width / 2;
         this.options.logout.y = height - 40;
         this.options.logout.interactive = true;
-        this.options.logout.on("mousedown", function() {
+        this.options.logout.on("mousedown", function () {
             context.viewer.logout();
         });
         this.options.addChild(this.options.logout);
@@ -211,31 +212,43 @@ export default class UserInterface extends PIXI.Container {
         this.design.interactive = true;
         this.design.position.set(window.innerWidth / 2 - this.design.width / 2, 200);
 
+
         // BACKGROUND
         this.design.background = new PIXI.Graphics();
-        this.design.background.beginFill(0x200f21);
-        this.design.background.lineStyle(2, 0x54123b);
-        this.design.background.drawRect(0,0, width, height);
+        this.design.background.beginFill(CONFIG.COLOR_BG);
+        this.design.background.lineStyle(2, CONFIG.COLOR_HIGHLIGHT);
+        this.design.background.drawRect(0, 0, width, height);
         this.design.addChildAt(this.design.background, 0);
 
         // CLOSE BUTTON
-        this.design.close = new PIXI.Sprite(textures.box_empty);
+        this.design.close = new PIXI.Sprite(textures.box_close);
         this.design.close.width = 20;
         this.design.close.height = 20;
         this.design.close.x = width - this.design.close.width - 5;
         this.design.close.y = 5;
         this.design.close.interactive = true;
-        this.design.close.on("mousedown", function() {
+        this.design.close.on("mousedown", function () {
             context.design.visible = false;
         });
         this.design.addChild(this.design.close);
+
+
+        // HEADER
+        this.design.header = new PIXI.Text("DESIGNS", {
+            fontSize: 28,
+            fill: CONFIG.COLOR_HIGHLIGHT,
+            align: "center"
+        });
+        this.design.header.x = width / 2 - this.design.header.width / 2;
+        this.design.header.y = 15;
+        this.design.addChildAt(this.design.header, 1);
 
         // DESIGN OPTIONS
         for (let i = 0; i < CONFIG.DESIGNS.length; i++) {
             let d = CONFIG.DESIGNS[i];
             this.design[d] = new PIXI.Container();
             this.design[d].x = 0;
-            this.design[d].y = i*50 + 100;
+            this.design[d].y = i * 50 + 100;
 
             let texture = d === CONFIG.getDesign() ? textures.box_checked : textures.box_empty;
 
@@ -244,7 +257,7 @@ export default class UserInterface extends PIXI.Container {
             this.design[d].button.height = 20;
             this.design[d].button.x = 100;
             this.design[d].button.interactive = true;
-            this.design[d].button.on("mousedown", function() {
+            this.design[d].button.on("mousedown", function () {
                 for (let e of CONFIG.DESIGNS) {
                     context.design[e].button.texture = textures.box_empty;
                 }
@@ -256,7 +269,7 @@ export default class UserInterface extends PIXI.Container {
 
             this.design[d].text = new PIXI.Text(d, {
                 fontSize: 18,
-                fill: 0xd12bea
+                fill: CONFIG.COLOR_TEXT
             });
             this.design[d].text.x = width / 2 - 100;
             this.design[d].addChild(this.design[d].text);
@@ -310,7 +323,7 @@ export default class UserInterface extends PIXI.Container {
         let b = new PIXI.Graphics();
         b.beginFill(0x000000);
         b.lineStyle(1, 0xffffff);
-        b.drawRect(0,0, width+1, height);
+        b.drawRect(0, 0, width + 1, height);
         this.bottompanel.b = b;
         this.bottompanel.addChild(b);
 
@@ -323,7 +336,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.h1 = new PIXI.Graphics();
         c_info.h1.position.set(0, 10);
         c_info.h1.beginFill(0x22272c);
-        c_info.h1.drawRect(0,0, boxWidth, boxHeight/2);
+        c_info.h1.drawRect(0, 0, boxWidth, boxHeight / 2);
         c_info.addChild(c_info.h1);
         c_info.h1.t = new PIXI.Text("PLAYER INFO", {fontSize: 10, fill: 0xffffff, align: "center"});
         c_info.h1.t.position.set(5, 2);
@@ -333,7 +346,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b1 = new PIXI.Graphics();
         c_info.b1.position.set(0, 30);
         c_info.b1.beginFill(0x22272c);
-        c_info.b1.drawRect(0,0, boxWidth, boxHeight);
+        c_info.b1.drawRect(0, 0, boxWidth, boxHeight);
         c_info.addChild(c_info.b1);
         c_info.b1.t = new PIXI.Text("NAME", {fontSize: 18, fill: 0xffffff});
         c_info.b1.t.position.set(5, 5);
@@ -346,7 +359,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b2 = new PIXI.Graphics();
         c_info.b2.position.set(0, 30 + boxHeight + 5);
         c_info.b2.beginFill(0x22272c);
-        c_info.b2.drawRect(0,0, boxWidth, boxHeight);
+        c_info.b2.drawRect(0, 0, boxWidth, boxHeight);
         c_info.addChild(c_info.b2);
         c_info.b2.t = new PIXI.Text("ID", {fontSize: 18, fill: 0xffffff});
         c_info.b2.t.position.set(5, 5);
@@ -359,7 +372,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b3 = new PIXI.Graphics();
         c_info.b3.position.set(0, 30 + boxHeight * 2 + 10);
         c_info.b3.beginFill(0x22272c);
-        c_info.b3.drawRect(0,0, boxWidth, boxHeight);
+        c_info.b3.drawRect(0, 0, boxWidth, boxHeight);
         c_info.addChild(c_info.b3);
         c_info.b3.t = new PIXI.Text("SCORE", {fontSize: 18, fill: 0xffffff});
         c_info.b3.t.position.set(5, 5);
@@ -372,7 +385,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.h2 = new PIXI.Graphics();
         c_info.h2.position.set(boxWidth + 5, 10);
         c_info.h2.beginFill(0x22272c);
-        c_info.h2.drawRect(0,0, boxWidth + 5, boxHeight/2);
+        c_info.h2.drawRect(0, 0, boxWidth + 5, boxHeight / 2);
         c_info.addChild(c_info.h2);
         c_info.h2.t = new PIXI.Text("CURRENT SEASON STATS", {fontSize: 10, fill: 0xffffff, align: "center"});
         c_info.h2.t.position.set(5, 2);
@@ -382,7 +395,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b4 = new PIXI.Graphics();
         c_info.b4.position.set(boxWidth + 5, 30);
         c_info.b4.beginFill(0x22272c);
-        c_info.b4.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b4.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b4);
         c_info.b4.t = new PIXI.Text("CELLS", {fontSize: 18, fill: 0xffffff});
         c_info.b4.t.position.set(5, 5);
@@ -395,7 +408,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b5 = new PIXI.Graphics();
         c_info.b5.position.set(boxWidth + 5, 30 + boxHeight + 5);
         c_info.b5.beginFill(0x22272c);
-        c_info.b5.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b5.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b5);
         c_info.b5.t = new PIXI.Text("BOMBS", {fontSize: 18, fill: 0xffffff});
         c_info.b5.t.position.set(5, 5);
@@ -408,7 +421,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b6 = new PIXI.Graphics();
         c_info.b6.position.set(boxWidth + 10 + boxWidth / 2, 30);
         c_info.b6.beginFill(0x22272c);
-        c_info.b6.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b6.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b6);
         c_info.b6.t = new PIXI.Text("FLAGS", {fontSize: 18, fill: 0xffffff});
         c_info.b6.t.position.set(5, 5);
@@ -421,7 +434,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b7 = new PIXI.Graphics();
         c_info.b7.position.set(boxWidth + 10 + boxWidth / 2, 30 + boxHeight + 5);
         c_info.b7.beginFill(0x22272c);
-        c_info.b7.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b7.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b7);
         c_info.b7.t = new PIXI.Text("STREAK", {fontSize: 18, fill: 0xffffff});
         c_info.b7.t.position.set(5, 5);
@@ -434,7 +447,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b8 = new PIXI.Graphics();
         c_info.b8.position.set(boxWidth + 5, 30 + boxHeight * 2 + 10);
         c_info.b8.beginFill(0x22272c);
-        c_info.b8.drawRect(0,0, boxWidth + 5, boxHeight);
+        c_info.b8.drawRect(0, 0, boxWidth + 5, boxHeight);
         c_info.addChild(c_info.b8);
         c_info.b8.t = new PIXI.Text("SCORE", {fontSize: 18, fill: 0xffffff});
         c_info.b8.t.position.set(5, 5);
@@ -447,7 +460,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.h3 = new PIXI.Graphics();
         c_info.h3.position.set(boxWidth * 2 + 15, 10);
         c_info.h3.beginFill(0x22272c);
-        c_info.h3.drawRect(0,0, boxWidth + 5, boxHeight/2);
+        c_info.h3.drawRect(0, 0, boxWidth + 5, boxHeight / 2);
         c_info.addChild(c_info.h3);
         c_info.h3.t = new PIXI.Text("TOTAL STATS", {fontSize: 10, fill: 0xffffff, align: "center"});
         c_info.h3.t.position.set(5, 2);
@@ -457,7 +470,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b9 = new PIXI.Graphics();
         c_info.b9.position.set(boxWidth * 2 + 15, 30);
         c_info.b9.beginFill(0x22272c);
-        c_info.b9.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b9.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b9);
         c_info.b9.t = new PIXI.Text("CELLS", {fontSize: 18, fill: 0xffffff});
         c_info.b9.t.position.set(5, 5);
@@ -470,7 +483,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b10 = new PIXI.Graphics();
         c_info.b10.position.set(boxWidth * 2 + 15, 30 + boxHeight + 5);
         c_info.b10.beginFill(0x22272c);
-        c_info.b10.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b10.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b10);
         c_info.b10.t = new PIXI.Text("BOMBS", {fontSize: 18, fill: 0xffffff});
         c_info.b10.t.position.set(5, 5);
@@ -483,7 +496,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b11 = new PIXI.Graphics();
         c_info.b11.position.set(boxWidth * 2 + 20 + boxWidth / 2, 30);
         c_info.b11.beginFill(0x22272c);
-        c_info.b11.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b11.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b11);
         c_info.b11.t = new PIXI.Text("FLAGS", {fontSize: 18, fill: 0xffffff});
         c_info.b11.t.position.set(5, 5);
@@ -496,7 +509,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b12 = new PIXI.Graphics();
         c_info.b12.position.set(boxWidth * 2 + 20 + boxWidth / 2, 30 + boxHeight + 5);
         c_info.b12.beginFill(0x22272c);
-        c_info.b12.drawRect(0,0, boxWidth / 2, boxHeight);
+        c_info.b12.drawRect(0, 0, boxWidth / 2, boxHeight);
         c_info.addChild(c_info.b12);
         c_info.b12.t = new PIXI.Text("STREAK", {fontSize: 18, fill: 0xffffff});
         c_info.b12.t.position.set(5, 5);
@@ -509,7 +522,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b13 = new PIXI.Graphics();
         c_info.b13.position.set(boxWidth * 2 + 15, 30 + boxHeight * 2 + 10);
         c_info.b13.beginFill(0x22272c);
-        c_info.b13.drawRect(0,0, boxWidth + 5, boxHeight);
+        c_info.b13.drawRect(0, 0, boxWidth + 5, boxHeight);
         c_info.addChild(c_info.b13);
         c_info.b13.t = new PIXI.Text("SCORE", {fontSize: 18, fill: 0xffffff});
         c_info.b13.t.position.set(5, 5);
