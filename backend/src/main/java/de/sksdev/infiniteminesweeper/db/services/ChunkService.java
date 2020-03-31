@@ -3,7 +3,6 @@ package de.sksdev.infiniteminesweeper.db.services;
 
 import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.MineFieldGenerator;
-import de.sksdev.infiniteminesweeper.communication.CellOperationRequest;
 import de.sksdev.infiniteminesweeper.communication.CellOperationResponse;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
