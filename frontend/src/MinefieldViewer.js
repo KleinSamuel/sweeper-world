@@ -78,7 +78,6 @@ export default class MinefieldViewer {
         let context = this;
         return context.com.loginGuest()
             .then(function(response) {
-                console.log(response);
                 CONFIG.setID(response.data.id);
                 CONFIG.setHash(response.data.hash);
                 CONFIG.setDesign(response.data.userSettings.design);
@@ -89,7 +88,7 @@ export default class MinefieldViewer {
                 context.com.receiveStatUpdates(context.updateStats.bind(context));
                 context.startscreen.hide();
                 context.initialize();
-            }).catch(function(err) {
+            }).catch(function (err) {
                 console.log(err);
             });
     }
@@ -144,14 +143,17 @@ export default class MinefieldViewer {
     initApplication() {
         let context = this;
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
+            let bg = 0x000000;
+            if (CONFIG.getDesign() === "neon")
+                bg = 0x1e1e22;
             let app = new PIXI.Application({
                     width: 256,
                     height: 256,
                     antialias: false,
                     transparent: false,
                     resolution: 1,
-                    backgroundColor:0x000000
+                    backgroundColor: bg
                 }
             );
             document.body.appendChild(app.view);
@@ -199,7 +201,7 @@ export default class MinefieldViewer {
         context.exp = explosion;
         */
 
-        window.addEventListener("resize", function(){
+        window.addEventListener("resize", function () {
             context.app.renderer.resize(window.innerWidth, window.innerHeight);
             context.ui.resize(window.innerWidth, window.innerHeight);
         });
@@ -210,14 +212,14 @@ export default class MinefieldViewer {
         let mouseDownX = -1;
         let mouseDownY = -1;
 
-        window.addEventListener("mousedown", function(event){
+        window.addEventListener("mousedown", function (event) {
             mouseDownX = event.clientX;
             mouseDownY = event.clientY;
             fieldX = context.minefieldModel.x;
             fieldY = context.minefieldModel.y;
         });
 
-        window.addEventListener("mouseup", function(event){
+        window.addEventListener("mouseup", function (event) {
             context.cursor.sprite.visible = true;
             mouseDownX = -1;
             mouseDownY = -1;
@@ -225,7 +227,7 @@ export default class MinefieldViewer {
             fieldY = -1;
         });
 
-        window.addEventListener("mousemove", function(event){
+        window.addEventListener("mousemove", function (event) {
 
             // disables field dragging
             if (context.denyInteractions()) {
@@ -258,13 +260,13 @@ export default class MinefieldViewer {
                     // loads the next chunks if player moved out of buffer
                     let movedX = context.GLOBAL_POS_X - oldGlobalX;
                     if (movedX !== 0) {
-                        context.minefieldModel.moveX(movedX).then(function(){
+                        context.minefieldModel.moveX(movedX).then(function () {
                             context.updateVisible();
                         });
                     }
                     let movedY = context.GLOBAL_POS_Y - oldGlobalY;
                     if (movedY !== 0) {
-                        context.minefieldModel.moveY(movedY).then(function(){
+                        context.minefieldModel.moveY(movedY).then(function () {
                             context.updateVisible();
                         });
                     }
@@ -273,7 +275,7 @@ export default class MinefieldViewer {
 
         });
 
-        window.addEventListener("contextmenu", function(event){
+        window.addEventListener("contextmenu", function (event) {
             // disables the default behavior of the right mouse button click
             event.preventDefault();
         });
@@ -283,7 +285,7 @@ export default class MinefieldViewer {
 
     updateTextures(name) {
         CONFIG.setDesign(name);
-        this.com.updateSettings(CONFIG.getDesign(), CONFIG.getOptionSoundEnabled()).then(function() {
+        this.com.updateSettings(CONFIG.getDesign(), CONFIG.getOptionSoundEnabled()).then(function () {
             location.reload();
         });
     }
@@ -297,7 +299,7 @@ export default class MinefieldViewer {
     }
 
     logout() {
-        this.com.logout().then(function() {
+        this.com.logout().then(function () {
             CONFIG.logout();
             // TODO: this is only an ugly fix to destroy all current entities on logout
             location.reload();

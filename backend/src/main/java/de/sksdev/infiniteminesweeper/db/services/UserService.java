@@ -7,7 +7,6 @@ import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.entities.UserSettings;
 import de.sksdev.infiniteminesweeper.db.entities.UserStats;
 import de.sksdev.infiniteminesweeper.db.repositories.UserRepository;
-import de.sksdev.infiniteminesweeper.db.repositories.UserSettingsRepository;
 import de.sksdev.infiniteminesweeper.db.repositories.UserStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,13 +53,20 @@ public class UserService {
 
     public User createNewUser(String username, String password, TileId id) {
         // TODO: check if username and password is malformed
+        if (userNameExists(username))
+            return null;
         User user = new User(username, password, false, id);
         userRepository.save(user);
         return user;
     }
 
+    private boolean userNameExists(String username) {
+        return userRepository.findByName(username).isPresent();
+    }
+
     /**
      * Creates and returns a new guest user object which contains a random name,
+     *
      * @param name
      * @param tileId
      * @return
@@ -102,6 +108,7 @@ public class UserService {
 
     /**
      * Returns true if the user with the given id is currently logged in (in buffer)
+     *
      * @param id
      * @return
      */
@@ -112,6 +119,7 @@ public class UserService {
     /**
      * Removes the user with the given user id from the buffer and stores
      * it into the database.
+     *
      * @param id
      */
     public void logoutUser(long id) {
@@ -125,6 +133,7 @@ public class UserService {
 
     /**
      * Returns the user object for a given user id.
+     *
      * @param id
      * @return
      */
@@ -135,6 +144,7 @@ public class UserService {
     /**
      * Checks if the requested user is already in the buffer, if no it will be loaded
      * from the database and put into the buffer, and returns the user object.
+     *
      * @param id
      * @return
      */
@@ -146,7 +156,7 @@ public class UserService {
 
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
-            System.err.println("UserBuffer could not load user with id: "+id);
+            System.err.println("UserBuffer could not load user with id: " + id);
             return null;
         }
         User user = userOpt.get();
@@ -156,6 +166,7 @@ public class UserService {
 
     /**
      * Stores the provided user object in the buffer for currently logged in users
+     *
      * @param user
      */
     private void putIntoBuffer(User user) {
