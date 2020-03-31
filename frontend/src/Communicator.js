@@ -68,6 +68,10 @@ export default class Communicator {
         });
     }
 
+    getStats() {
+        return axios.get(CONFIG.URL_API+"/getStats?u="+CONFIG.getID()+"&h="+CONFIG.getHash());
+    }
+
     /**
      * Sends a message via the socket connection to the server.
      * @param message

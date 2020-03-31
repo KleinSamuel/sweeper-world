@@ -128,7 +128,6 @@ public class RequestController {
         return null;
     }
 
-
     @RequestMapping(value = "/guest", method = RequestMethod.GET)
     @ResponseBody
     public String loginGuest() {
@@ -171,6 +170,19 @@ public class RequestController {
         } else {
             return "error";
         }
+    }
+
+    @RequestMapping(value = "/getStats", method = RequestMethod.GET)
+    @ResponseBody
+    public String getStats(@RequestParam("u") long userId, @RequestParam("h") String hash) {
+        // TODO: check if user is permitted to load the stats
+        UserStats stats = userService.loadStatsForUser(userId);
+        try {
+            return objectMapper.writeValueAsString(stats);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public boolean flagCell(CellOperationRequest message) {

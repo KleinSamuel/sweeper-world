@@ -140,7 +140,9 @@ export default class MinefieldViewer {
             .then(this.initApplication.bind(this))
             .then(this.createField.bind(this))
             .then(function() {
-                context.updateStats(CONFIG.getStats());
+                return context.com.getStats().then(function(response) {
+                    context.updateStats(response.data);
+                });
             });
     }
 
