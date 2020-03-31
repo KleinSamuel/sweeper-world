@@ -178,7 +178,7 @@ public class UserStats {
         this.streak = 0;
     }
 
-    public void increaseCurrentScore(int toAdd) {
+    public void increaseCurrentScore(long toAdd) {
         this.currentScore += toAdd;
         this.totalScore += toAdd;
     }

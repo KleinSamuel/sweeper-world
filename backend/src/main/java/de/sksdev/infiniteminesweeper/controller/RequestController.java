@@ -2,6 +2,7 @@ package de.sksdev.infiniteminesweeper.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.communication.*;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
@@ -70,11 +71,13 @@ public class RequestController {
                     boolean isCorrect = flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true));
                     if (isCorrect) {
                         stats.increaseFlagsSet();
+                        System.out.println(Config.scoreFlag(stats.getStreak()));
+                        stats.increaseCurrentScore(Config.scoreFlag(stats.getStreak()));
                     } else {
                         stats.resetStreak();
                     }
-                    template.convertAndSend("/stats/id"+userId, stats);
-                    return ""+isCorrect;
+                    template.convertAndSend("/stats/id" + userId, stats);
+                    return "" + isCorrect;
                 }
 
             }

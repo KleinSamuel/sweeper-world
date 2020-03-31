@@ -66,7 +66,7 @@ public class ChunkBuffer {
 
     @Scheduled(fixedRate = Config.CLEANER_INTERVAL)
     public void executeBufferCleaner() {
-        if (Config.BUFFERD_CHUNK_CAP <= buffer.size()) {
+        if (Config.BUFFERED_CHUNK_CAP <= buffer.size()) {
             HashSet<Chunk> chunks = runBufferCleaner();
             removeAndSave(chunks);
         }

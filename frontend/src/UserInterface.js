@@ -352,7 +352,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b1.t = new PIXI.Text("NAME", {fontSize: 18, fill: 0xffffff});
         c_info.b1.t.position.set(5, 5);
         c_info.b1.addChild(c_info.b1.t);
-        c_info.b1.v = new PIXI.Text("SAM", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b1.v = new PIXI.Text(CONFIG.getName(), {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b1.v.position.set(5, 5);
         c_info.b1.v.x = boxWidth - c_info.b1.v.width - 5;
         c_info.b1.addChild(c_info.b1.v);
@@ -365,7 +365,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b2.t = new PIXI.Text("ID", {fontSize: 18, fill: 0xffffff});
         c_info.b2.t.position.set(5, 5);
         c_info.b2.addChild(c_info.b2.t);
-        c_info.b2.v = new PIXI.Text("12345", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b2.v = new PIXI.Text(CONFIG.getID(), {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b2.v.position.set(5, 5);
         c_info.b2.v.x = boxWidth - c_info.b2.v.width - 5;
         c_info.b2.addChild(c_info.b2.v);

@@ -63,6 +63,7 @@ export default class MinefieldViewer {
                 }
 
                 CONFIG.setID(response.data.id);
+                CONFIG.setName(username);
                 CONFIG.setHash(response.data.hash);
                 CONFIG.setDesign(response.data.userSettings.design);
                 CONFIG.setSoundsEnabled(response.data.userSettings.soundsEnabled);
@@ -73,7 +74,7 @@ export default class MinefieldViewer {
                 context.startscreen.hide();
                 context.initialize();
             }).catch(function(err) {
-                console.log("error while loggin in user");
+                console.log("error while logging in user");
                 console.log(err);
             });
     }
@@ -114,8 +115,8 @@ export default class MinefieldViewer {
         this.ui.currentStreak.text = body.currentLongestStreak ? body.currentLongestStreak : "0";
         this.ui.currentStreak.x = this.ui.boxWidth / 2 - this.ui.currentStreak.width - 5;
 
-        this.ui.totalScore.text = body.totalScore ? body.totalScore : "0";
-        this.ui.totalScore.x = this.ui.boxWidth / 2 - this.ui.totalScore.width - 5;
+        this.ui.currentScore.text = body.currentScore ? body.currentScore : "0";
+        this.ui.currentScore.x = this.ui.boxWidth / 2 - this.ui.currentScore.width - 5;
 
         this.ui.totalCellsOpened.text = body.totalCellsOpened ? body.totalCellsOpened : "0";
         this.ui.totalCellsOpened.x = this.ui.boxWidth / 2 - this.ui.totalCellsOpened.width - 5;

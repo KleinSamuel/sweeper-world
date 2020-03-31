@@ -188,18 +188,22 @@ public class ChunkService {
                 template.convertAndSend("/updates/" + c.getX() + "_" + c.getY(), new CellOperationResponse(c.getX(), c.getY(), open.getX_tile(), open.getY_tile(), u.getId(), false, open.getValue()));
                 open.setHidden(false);
                 open.setUser(u);
-                stats.increaseCellsOpened();
-                stats.increaseStreak();
+                if (open.getValue() != 9) {
+                    stats.increaseCurrentScore(Config.score(stats.getStreak(), open.getValue()));
+                    stats.increaseStreak();
+                    stats.increaseCellsOpened();
+                }
             });
         });
 
         if (t.getValue() == 9) {
             // click on bomb
+            stats.increaseCellsOpened();
             stats.increaseBombsExploded();
             stats.resetStreak();
         }
 
-        template.convertAndSend("/stats/id"+userId, stats);
+        template.convertAndSend("/stats/id" + userId, stats);
 
         return t;
     }

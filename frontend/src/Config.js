@@ -59,11 +59,13 @@ export function setSoundsEnabled(bool) {
 let USER_ID = -1;
 let USER_HASH = "";
 let DESIGN = "default";
+let USER_NAME="GUEST";
 
 // TODO: implement cookie check
 if (document.cookie) {
     USER_ID = parseInt(Cookies.get("id"));
     USER_HASH = Cookies.get("hash");
+    USER_NAME=Cookies.get("name");
     DESIGN = Cookies.get("design");
     STATS = Cookies.get("stats") ? JSON.parse(Cookies.get("stats")) : STATS;
 }
@@ -74,6 +76,7 @@ export function logout() {
     Cookies.remove("hash");
     Cookies.remove("design");
     Cookies.remove("stats");
+    Cookies.remove("name");
 }
 
 export function getID() {
@@ -83,6 +86,16 @@ export function setID(id) {
     USER_ID = id;
     Cookies.set("id", id);
 }
+
+export function  getName() {
+    return USER_NAME;
+}
+
+export function  setName(name) {
+    USER_NAME=name;
+    Cookies.set("name",name);
+}
+
 export function getHash() {
     return USER_HASH;
 }
