@@ -86,13 +86,16 @@ export default class MinefieldViewer {
         let context = this;
 
         return new Promise(function(resolve, reject) {
+            let bg = 0x000000;
+            if(CONFIG.getDesign() === "neon")
+                bg = 0x1e1e22;
             let app = new PIXI.Application({
                     width: 256,
                     height: 256,
                     antialias: false,
                     transparent: false,
                     resolution: 1,
-                    backgroundColor:0x000000
+                    backgroundColor:bg
                 }
             );
             document.body.appendChild(app.view);
