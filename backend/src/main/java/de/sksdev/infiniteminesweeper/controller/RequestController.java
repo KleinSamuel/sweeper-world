@@ -10,7 +10,6 @@ import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -150,26 +149,6 @@ public class RequestController {
         }
     }
 
-    @MessageMapping("/openCell")
-    @ResponseBody
-    public String openCell(CellOperationRequest message) {
-        TileId tid = new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY());
-        Tile tile = chunkService.registerTileUpdate(tid, message.getUser(), false);
-        if (tile != null) {
-            try {
-                String response = objectMapper.writeValueAsString(new CellOperationResponse(message, false, tile.getValue()));
-                template.convertAndSend("/updates/" + tile.getX() + "_" + tile.getY(), response);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        } else
-            System.err.println("Update of Tile " + tid + " by User " + message.getUser() + " was not permitted!");
-
-        return "" + (tile != null);
-    }
-
-//    @MessageMapping("/flagCell")
-//    @ResponseBody
     public boolean flagCell(CellOperationRequest message) {
         Tile tile = chunkService.getTile(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()));
         if (tile.getValue() != 9)
