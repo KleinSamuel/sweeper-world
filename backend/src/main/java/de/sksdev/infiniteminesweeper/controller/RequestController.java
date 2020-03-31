@@ -7,6 +7,8 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
+import de.sksdev.infiniteminesweeper.db.entities.UserSettings;
+import de.sksdev.infiniteminesweeper.db.entities.UserStats;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,10 +61,22 @@ public class RequestController {
         try {
             if (userService.validateUser(userId, hash)) {
                 ChunkId cid = new ChunkId(x, y);
-                if (!isFlag)
+                if (!isFlag) {
                     return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
-                else
-                    return flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true))+"";
+                } else {
+
+                    UserStats stats = userService.loadStatsForUser(userId);
+
+                    boolean isCorrect = flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true));
+                    if (isCorrect) {
+                        stats.increaseFlagsSet();
+                    } else {
+                        stats.resetStreak();
+                    }
+                    template.convertAndSend("/stats/id"+userId, stats);
+                    return ""+isCorrect;
+                }
+
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -82,7 +96,7 @@ public class RequestController {
             return null;
         }
 
-        LoginResponse response = new LoginResponse(user);
+        LoginResponse response = new LoginResponse(user, null, null);
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
@@ -97,7 +111,15 @@ public class RequestController {
 
         // TODO: check request for validity
         User user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
-        LoginResponse response = new LoginResponse(user);
+
+        if (user == null) {
+            return null;
+        }
+
+        UserSettings userSettings = user.getSettings();
+        UserStats userStats = userService.loadStatsForUser(user.getId());
+        LoginResponse response = new LoginResponse(user, userSettings, userStats);
+
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
@@ -112,7 +134,9 @@ public class RequestController {
     public String loginGuest() {
 
         User user = userService.getGuestUser(UUID.randomUUID().toString(), chunkService.getRandomTileId());
-        LoginResponse response = new LoginResponse(user);
+        UserSettings userSettings = user.getSettings();
+        UserStats userStats = userService.loadStatsForUser(user.getId());
+        LoginResponse response = new LoginResponse(user, userSettings, userStats);
 
         try {
             return objectMapper.writeValueAsString(response);
@@ -150,9 +174,11 @@ public class RequestController {
     }
 
     public boolean flagCell(CellOperationRequest message) {
+
         Tile tile = chunkService.getTile(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()));
-        if (tile.getValue() != 9)
+        if (tile.getValue() != 9) {
             return false;
+        }
         tile = chunkService.registerTileUpdate(tile.getId(), message.getUser(), true);
 
         if (tile != null) {

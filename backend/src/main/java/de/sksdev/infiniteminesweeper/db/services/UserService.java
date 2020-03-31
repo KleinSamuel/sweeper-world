@@ -42,10 +42,12 @@ public class UserService {
             return this.stats.get(userId);
         }
         Optional<UserStats> statOpt = userStatsRepository.findByUserid(userId);
-        if (statOpt.isEmpty()) {
-            return statOpt.get();
+        if (statOpt.isPresent()) {
+            UserStats stats = statOpt.get();
+            this.stats.put(userId, stats);
+            return stats;
         }
-        UserStats stats = new UserStats(userId);
+        UserStats stats = userStatsRepository.save(new UserStats(userId));
         this.stats.put(userId, stats);
         return stats;
     }
@@ -114,8 +116,10 @@ public class UserService {
      */
     public void logoutUser(long id) {
         User user = this.buffer.remove(id);
+        UserStats userStats = this.stats.remove(id);
         if (user != null) {
             userRepository.save(user);
+            userStatsRepository.save(userStats);
         }
     }
 

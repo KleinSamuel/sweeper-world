@@ -20,7 +20,7 @@ export default class StartScreen extends PIXI.Container {
 
         document.getElementById("particles-js").style.display = "none";
         particlesJS.load("particles-js", CONFIG.URL_ASSETS+"/particles.json", function() {
-            console.log("particles loaded");
+            //console.log("particles loaded");
         });
 
         // sets the favicon

@@ -28,12 +28,27 @@ export const BUFFER_REMOVE = 2;
 export const MENU_INFO_WIDTH = 300;
 export const MENU_INFO_HEIGHT = 151;
 
+let STATS = {
+    streak: 0,
+    currentScore: 0,
+    currentCellsOpened: 0,
+    currentBombsExploded: 0,
+    currentStreak: 0,
+    totalScore: 0,
+    totalCellsOpened: 0,
+    totalBombsExploded: 0,
+    totalStreak: 0
+};
+
 let ENABLED_SOUND = true;
 export function getOptionSoundEnabled() {
     return ENABLED_SOUND;
 }
 export function switchOptionSoundEnabled() {
     ENABLED_SOUND = !ENABLED_SOUND;
+}
+export function setSoundsEnabled(bool) {
+    ENABLED_SOUND = bool;
 }
 
 let USER_ID = -1;
@@ -45,6 +60,7 @@ if (document.cookie) {
     USER_ID = parseInt(Cookies.get("id"));
     USER_HASH = Cookies.get("hash");
     DESIGN = Cookies.get("design");
+    STATS = Cookies.get("stats") ? JSON.parse(Cookies.get("stats")) : STATS;
 }
 export function logout() {
     USER_ID = -1;
@@ -52,6 +68,7 @@ export function logout() {
     Cookies.remove("id");
     Cookies.remove("hash");
     Cookies.remove("design");
+    Cookies.remove("stats");
 }
 
 export function getID() {
@@ -77,4 +94,12 @@ export function setDesign(name) {
     }
     DESIGN = name;
     Cookies.set("design", name);
+}
+
+export function getStats() {
+    return STATS;
+}
+export function setStats(stats) {
+    STATS = stats;
+    Cookies.set("stats", JSON.stringify(STATS));
 }

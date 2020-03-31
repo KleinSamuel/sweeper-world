@@ -19,33 +19,22 @@ export default class MinefieldViewer {
 
         context.com = new Communicator();
 
-        context.startscreen = new StartScreen(
-            context.loginUser.bind(context),
-            context.registerUser.bind(context),
-            context.loginGuest.bind(context));
+        context.com.initClient().then(function() {
 
-        if (CONFIG.getID() === -1) {
-            context.startscreen.show();
-            return;
-        }
+            context.startscreen = new StartScreen(
+                context.loginUser.bind(context),
+                context.registerUser.bind(context),
+                context.loginGuest.bind(context));
 
-        this.initialize();
-    }
+            if (CONFIG.getID() === -1) {
+                context.startscreen.show();
+                return;
+            }
 
-    loginUser(username, password) {
-        let context = this;
-        return context.com.loginUser(username, password)
-            .then(function(response) {
-                CONFIG.setID(response.data.id);
-                CONFIG.setHash(response.data.hash);
-                // TODO: get player config
-                CONFIG.setDesign("default");
-                context.startscreen.hide();
-                context.initialize();
-            }).catch(function(err) {
-                console.log("error while loggin in user");
-                console.log(err);
-            });
+            context.com.receiveStatUpdates(context.updateStats.bind(context));
+
+            context.initialize();
+        });
     }
 
     registerUser(username, password, email) {
@@ -60,14 +49,44 @@ export default class MinefieldViewer {
             });
     }
 
+    loginUser(username, password) {
+        let context = this;
+        return context.com.loginUser(username, password)
+            .then(function(response) {
+
+                if(!response) {
+                    return;
+                }
+
+                CONFIG.setID(response.data.id);
+                CONFIG.setHash(response.data.hash);
+                CONFIG.setDesign(response.data.userSettings.design);
+                CONFIG.setSoundsEnabled(response.data.userSettings.soundsEnabled);
+
+                CONFIG.setStats(response.data.userStats);
+
+                context.com.receiveStatUpdates(context.updateStats.bind(context));
+                context.startscreen.hide();
+                context.initialize();
+            }).catch(function(err) {
+                console.log("error while loggin in user");
+                console.log(err);
+            });
+    }
+
     loginGuest() {
         let context = this;
         return context.com.loginGuest()
             .then(function(response) {
+                console.log(response);
                 CONFIG.setID(response.data.id);
                 CONFIG.setHash(response.data.hash);
-                // TODO: get player config
-                CONFIG.setDesign("default");
+                CONFIG.setDesign(response.data.userSettings.design);
+                CONFIG.setSoundsEnabled(response.data.userSettings.soundsEnabled);
+
+                CONFIG.setStats(response.data.userStats);
+
+                context.com.receiveStatUpdates(context.updateStats.bind(context));
                 context.startscreen.hide();
                 context.initialize();
             }).catch(function(err) {
@@ -75,11 +94,51 @@ export default class MinefieldViewer {
             });
     }
 
+    updateStats(body) {
+
+        this.ui.streak.text = body.streak ? body.streak : "0";
+        this.ui.streak.x = this.ui.boxWidth - this.ui.streak.width - 5;
+
+        this.ui.currentCellsOpened.text = body.currentCellsOpened ? body.currentCellsOpened : "0";
+        this.ui.currentCellsOpened.x = this.ui.boxWidth / 2 - this.ui.currentCellsOpened.width - 5;
+
+        this.ui.currentFlagsSet.text = body.currentFlagsSet ? body.currentFlagsSet : "0";
+        this.ui.currentFlagsSet.x = this.ui.boxWidth / 2 - this.ui.currentFlagsSet.width - 5;
+
+        this.ui.currentBombsExploded.text = body.currentBombsExploded ? body.currentBombsExploded : "0";
+        this.ui.currentBombsExploded.x = this.ui.boxWidth / 2 - this.ui.currentBombsExploded.width - 5;
+
+        this.ui.currentStreak.text = body.currentLongestStreak ? body.currentLongestStreak : "0";
+        this.ui.currentStreak.x = this.ui.boxWidth / 2 - this.ui.currentStreak.width - 5;
+
+        this.ui.totalScore.text = body.totalScore ? body.totalScore : "0";
+        this.ui.totalScore.x = this.ui.boxWidth / 2 - this.ui.totalScore.width - 5;
+
+        this.ui.totalCellsOpened.text = body.totalCellsOpened ? body.totalCellsOpened : "0";
+        this.ui.totalCellsOpened.x = this.ui.boxWidth / 2 - this.ui.totalCellsOpened.width - 5;
+
+        this.ui.totalFlagsSet.text = body.totalFlagsSet ? body.totalFlagsSet : "0";
+        this.ui.totalFlagsSet.x = this.ui.boxWidth / 2 - this.ui.totalFlagsSet.width - 5;
+
+        this.ui.totalBombsExploded.text = body.totalBombsExploded ? body.totalBombsExploded : "0";
+        this.ui.totalBombsExploded.x = this.ui.boxWidth / 2 - this.ui.totalBombsExploded.width - 5;
+
+        this.ui.totalStreak.text = body.totalLongestStreak ? body.totalLongestStreak : "0";
+        this.ui.totalStreak.x = this.ui.boxWidth / 2 - this.ui.totalStreak.width - 5;
+
+        this.ui.totalScore.text = body.totalScore ? body.totalScore : "0";
+        this.ui.totalScore.x = this.ui.boxWidth / 2 - this.ui.totalScore.width - 5;
+    }
+
     initialize() {
+        let context = this;
         Textures.init()
             .then(Sounds.init)
             .then(this.initApplication.bind(this))
-            .then(this.createField.bind(this));
+            .then(this.createField.bind(this))
+            .then(function() {
+                context.updateStats(CONFIG.getStats());
+            });
     }
 
     initApplication() {

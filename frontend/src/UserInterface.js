@@ -296,6 +296,7 @@ export default class UserInterface extends PIXI.Container {
         let height = 150;
 
         let boxWidth = 300;
+        this.boxWidth = 300;
         let boxHeight = 30;
 
         let colorBack = 0x200f21;
@@ -361,12 +362,13 @@ export default class UserInterface extends PIXI.Container {
         c_info.b3.beginFill(0x22272c);
         c_info.b3.drawRect(0,0, boxWidth, boxHeight);
         c_info.addChild(c_info.b3);
-        c_info.b3.t = new PIXI.Text("SCORE", {fontSize: 18, fill: 0xffffff});
+        c_info.b3.t = new PIXI.Text("CURRENT STREAK", {fontSize: 18, fill: 0xffffff});
         c_info.b3.t.position.set(5, 5);
         c_info.b3.addChild(c_info.b3.t);
-        c_info.b3.v = new PIXI.Text("978162398712", {fontSize: 18, fill: 0xffffff, align: "right"});
+        c_info.b3.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b3.v.position.set(5, 5);
         c_info.b3.v.x = boxWidth - c_info.b3.v.width - 5;
+        this.streak = c_info.b3.v;
         c_info.b3.addChild(c_info.b3.v);
 
         c_info.h2 = new PIXI.Graphics();
@@ -390,6 +392,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b4.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b4.v.position.set(5, 5);
         c_info.b4.v.x = boxWidth / 2 - c_info.b4.v.width - 5;
+        this.currentCellsOpened = c_info.b4.v;
         c_info.b4.addChild(c_info.b4.v);
 
         c_info.b5 = new PIXI.Graphics();
@@ -403,6 +406,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b5.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b5.v.position.set(5, 5);
         c_info.b5.v.x = boxWidth / 2 - c_info.b5.v.width - 5;
+        this.currentBombsExploded = c_info.b5.v;
         c_info.b5.addChild(c_info.b5.v);
 
         c_info.b6 = new PIXI.Graphics();
@@ -416,6 +420,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b6.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b6.v.position.set(5, 5);
         c_info.b6.v.x = boxWidth / 2 - c_info.b6.v.width - 5;
+        this.currentFlagsSet = c_info.b6.v;
         c_info.b6.addChild(c_info.b6.v);
 
         c_info.b7 = new PIXI.Graphics();
@@ -429,6 +434,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b7.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b7.v.position.set(5, 5);
         c_info.b7.v.x = boxWidth / 2 - c_info.b7.v.width - 5;
+        this.currentStreak = c_info.b7.v;
         c_info.b7.addChild(c_info.b7.v);
 
         c_info.b8 = new PIXI.Graphics();
@@ -442,6 +448,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b8.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b8.v.position.set(5, 5);
         c_info.b8.v.x = boxWidth - c_info.b8.v.width;
+        this.currentScore = c_info.b8.v;
         c_info.b8.addChild(c_info.b8.v);
 
         c_info.h3 = new PIXI.Graphics();
@@ -465,6 +472,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b9.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b9.v.position.set(5, 5);
         c_info.b9.v.x = boxWidth / 2 - c_info.b9.v.width - 5;
+        this.totalCellsOpened = c_info.b9.v;
         c_info.b9.addChild(c_info.b9.v);
 
         c_info.b10 = new PIXI.Graphics();
@@ -478,6 +486,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b10.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b10.v.position.set(5, 5);
         c_info.b10.v.x = boxWidth / 2 - c_info.b10.v.width - 5;
+        this.totalBombsExploded = c_info.b10.v;
         c_info.b10.addChild(c_info.b10.v);
 
         c_info.b11 = new PIXI.Graphics();
@@ -491,6 +500,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b11.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b11.v.position.set(5, 5);
         c_info.b11.v.x = boxWidth / 2 - c_info.b11.v.width - 5;
+        this.totalFlagsSet = c_info.b11.v;
         c_info.b11.addChild(c_info.b11.v);
 
         c_info.b12 = new PIXI.Graphics();
@@ -504,6 +514,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b12.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b12.v.position.set(5, 5);
         c_info.b12.v.x = boxWidth / 2 - c_info.b12.v.width - 5;
+        this.totalStreak = c_info.b12.v;
         c_info.b12.addChild(c_info.b12.v);
 
         c_info.b13 = new PIXI.Graphics();
@@ -517,6 +528,7 @@ export default class UserInterface extends PIXI.Container {
         c_info.b13.v = new PIXI.Text("0", {fontSize: 18, fill: 0xffffff, align: "right"});
         c_info.b13.v.position.set(5, 5);
         c_info.b13.v.x = boxWidth - c_info.b13.v.width;
+        this.totalScore = c_info.b13.v;
         c_info.b13.addChild(c_info.b13.v);
 
         this.bottompanel.c_info = c_info;

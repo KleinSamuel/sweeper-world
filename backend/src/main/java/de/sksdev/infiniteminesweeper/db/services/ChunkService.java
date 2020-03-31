@@ -9,6 +9,7 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
+import de.sksdev.infiniteminesweeper.db.entities.UserStats;
 import de.sksdev.infiniteminesweeper.db.repositories.TileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -169,6 +170,8 @@ public class ChunkService {
     public Object openTiles(ChunkId cid, int x_tile, int y_tile, long userId) {
 
         User u = userService.getUser(userId);
+        UserStats stats = userService.loadStatsForUser(userId);
+
         Chunk chunk = getOrCreateChunkContent(cid);
         Tile t = chunk.getGrid()[y_tile][x_tile];
         HashMap<ChunkId, TreeSet<Tile>> openedTiles = new HashMap<>();
@@ -185,8 +188,19 @@ public class ChunkService {
                 template.convertAndSend("/updates/" + c.getX() + "_" + c.getY(), new CellOperationResponse(c.getX(), c.getY(), open.getX_tile(), open.getY_tile(), u.getId(), false, open.getValue()));
                 open.setHidden(false);
                 open.setUser(u);
+                stats.increaseCellsOpened();
+                stats.increaseStreak();
             });
         });
+
+        if (t.getValue() == 9) {
+            // click on bomb
+            stats.increaseBombsExploded();
+            stats.resetStreak();
+        }
+
+        template.convertAndSend("/stats/id"+userId, stats);
+
         return t;
     }
 
