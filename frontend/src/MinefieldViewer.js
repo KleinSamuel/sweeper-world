@@ -41,8 +41,12 @@ export default class MinefieldViewer {
         let context = this;
         return context.com.registerUser(username, password, email)
             .then(function(response) {
-                console.log("got register response");
-                console.log(response);
+                if (response.data.length === 0) {
+                    //TODO display username already been taken message
+                    console.error("Username may already been taken!");
+                    return null;
+                }
+                return context.loginUser(username, password);
             }).catch(function(err) {
                 console.log("error while registering user");
                 console.log(err);
