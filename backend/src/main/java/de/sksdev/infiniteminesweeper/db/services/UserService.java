@@ -11,10 +11,7 @@ import de.sksdev.infiniteminesweeper.db.repositories.UserStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -49,6 +46,13 @@ public class UserService {
         UserStats stats = userStatsRepository.save(new UserStats(userId));
         this.stats.put(userId, stats);
         return stats;
+    }
+
+    public TreeMap<Long, User> getCurrentLeaderboard() {
+        TreeMap<Long, User> leaderboard = new TreeMap<>();
+        buffer.forEach((id, user) -> leaderboard.put(loadStatsForUser(id).getCurrentScore(), user));
+
+        return leaderboard;
     }
 
     public User createNewUser(String username, String password, TileId id) {

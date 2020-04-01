@@ -19,7 +19,7 @@ export default class MinefieldViewer {
 
         context.com = new Communicator();
 
-        context.com.initClient().then(function() {
+        context.com.initClient().then(function () {
 
             context.startscreen = new StartScreen(
                 context.loginUser.bind(context),
@@ -32,7 +32,7 @@ export default class MinefieldViewer {
             }
 
             context.com.receiveStatUpdates(context.updateStats.bind(context));
-
+            context.com.receiveLeaderboard(context.updateLeaderboard.bind(context));
             context.initialize();
         });
     }
@@ -40,14 +40,14 @@ export default class MinefieldViewer {
     registerUser(username, password, email) {
         let context = this;
         return context.com.registerUser(username, password, email)
-            .then(function(response) {
+            .then(function (response) {
                 if (response.data.length === 0) {
                     //TODO display username already been taken message
                     console.error("Username may already been taken!");
                     return null;
                 }
                 return context.loginUser(username, password);
-            }).catch(function(err) {
+            }).catch(function (err) {
                 console.log("error while registering user");
                 console.log(err);
             });
@@ -56,9 +56,9 @@ export default class MinefieldViewer {
     loginUser(username, password) {
         let context = this;
         return context.com.loginUser(username, password)
-            .then(function(response) {
+            .then(function (response) {
 
-                if(!response) {
+                if (!response) {
                     return;
                 }
 
@@ -73,7 +73,7 @@ export default class MinefieldViewer {
                 context.com.receiveStatUpdates(context.updateStats.bind(context));
                 context.startscreen.hide();
                 context.initialize();
-            }).catch(function(err) {
+            }).catch(function (err) {
                 console.log("error while logging in user");
                 console.log(err);
             });
@@ -82,7 +82,7 @@ export default class MinefieldViewer {
     loginGuest() {
         let context = this;
         return context.com.loginGuest()
-            .then(function(response) {
+            .then(function (response) {
                 CONFIG.setID(response.data.id);
                 CONFIG.setHash(response.data.hash);
                 CONFIG.setDesign(response.data.userSettings.design);
@@ -96,6 +96,10 @@ export default class MinefieldViewer {
             }).catch(function (err) {
                 console.log(err);
             });
+    }
+
+    updateLeaderboard(body) {
+        console.log(body)
     }
 
     updateStats(body) {
@@ -140,8 +144,8 @@ export default class MinefieldViewer {
             .then(Sounds.init)
             .then(this.initApplication.bind(this))
             .then(this.createField.bind(this))
-            .then(function() {
-                return context.com.getStats().then(function(response) {
+            .then(function () {
+                return context.com.getStats().then(function (response) {
                     context.updateStats(response.data);
                 });
             });

@@ -76,9 +76,9 @@ export default class StartScreen extends PIXI.Container {
                 return;
             }
 
-            if () {
-
-            }
+            // if () {
+            //
+            // }
 
             if (password1 !== password2) {
                 context.setStatusMessageRegister("your passwords do not match");

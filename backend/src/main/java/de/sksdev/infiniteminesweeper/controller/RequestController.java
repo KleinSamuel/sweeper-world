@@ -71,7 +71,6 @@ public class RequestController {
                     boolean isCorrect = flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true));
                     if (isCorrect) {
                         stats.increaseFlagsSet();
-                        System.out.println(Config.scoreFlag(stats.getStreak()));
                         stats.increaseCurrentScore(Config.scoreFlag(stats.getStreak()));
                     } else {
                         stats.resetStreak();
