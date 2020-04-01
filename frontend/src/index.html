@@ -7,8 +7,9 @@
         <!-- content -->
         <div id="login-container" style="display: none;
             background-color: #000000; color: #ffffff; border: 2px solid white;">
-            <div>
-                <h1>SWEEPER WORLD</h1>
+            <div id="header-container">
+                <div id="header">SWEEPER WORLD</div>
+                <div id="header-version">Version 0.1</div>
             </div>
             <div id="register-con">
                 <div>
@@ -23,9 +24,12 @@
                 <div>
                     <input id="input-register-password2" type="password" placeholder="PASSWORD">
                 </div>
+                <div id="status-message-register" class="status-message"></div>
                 <div>
-                    <button id="btn-other-login">GO TO LOGIN</button>
                     <button id="btn-register">REGISTER</button>
+                </div>
+                <div>
+                    <button id="btn-other-login">LOGIN WITH EXISTING ACCOUNT</button>
                 </div>
             </div>
             <div id="login-con">
@@ -35,9 +39,12 @@
                 <div>
                     <input id="input-password" type="password" placeholder="PASSWORD">
                 </div>
+                <div id="status-message-login" class="status-message"></div>
                 <div>
                     <button id="btn-login">LOGIN</button>
-                    <button id="btn-other-register">GO TO REGISTER</button>
+                </div>
+                <div>
+                    <button id="btn-other-register">REGISTER A NEW ACCOUNT</button>
                 </div>
                 <div>
                     <button id="btn-guest">PLAY AS GUEST</button>

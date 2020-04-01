@@ -57,6 +57,7 @@ export default class StartScreen extends PIXI.Container {
             let password = document.getElementById("input-password").value;
 
             if (!username || !password) {
+                context.setStatusMessageLogin("please check your input");
                 return;
             }
 
@@ -70,11 +71,22 @@ export default class StartScreen extends PIXI.Container {
             let password2 = document.getElementById("input-register-password2").value;
             let email = document.getElementById("input-register-email").value;
 
-            // TODO: create better check for validity of input
             if (!username || !password1 || !password2 || !email || password1 !== password2) {
-                console.log("error while registering new user");
+                context.setStatusMessageRegister("please fill out each field");
                 return;
             }
+
+            if () {
+
+            }
+
+            if (password1 !== password2) {
+                context.setStatusMessageRegister("your passwords do not match");
+                return;
+            }
+
+            // TODO: create better check for validity of input
+
 
             context.onRegister(username, password1, email);
         });
@@ -97,11 +109,29 @@ export default class StartScreen extends PIXI.Container {
         });
     }
 
+    setStatusMessageLogin(message) {
+        document.getElementById("status-message-login").innerText = message;
+    }
+
+    hideStatusMessageLogin() {
+        document.getElementById("status-message-login").innerText = "";
+    }
+
+    setStatusMessageRegister(message) {
+        document.getElementById("status-message-register").innerText = message;
+    }
+
+    hideStatusMessageRegister() {
+        document.getElementById("status-message-register").innerText = "";
+    }
+
     show() {
         this.visible = true;
         this.loginContainer.style.display = "block";
         document.body.style.backgroundImage = "url("+CONFIG.URL_ASSETS+"/images/sweeper-background.png)";
         document.getElementById("particles-js").style.display = "block";
+        this.hideStatusMessageLogin();
+        this.hideStatusMessageRegister();
     }
 
     hide() {
@@ -109,6 +139,8 @@ export default class StartScreen extends PIXI.Container {
         this.loginContainer.style.display = "none";
         document.body.style.backgroundImage = "none";
         document.getElementById("particles-js").style.display = "none";
+        this.hideStatusMessageLogin();
+        this.hideStatusMessageRegister();
     }
 
 }

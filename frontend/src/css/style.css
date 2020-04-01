@@ -10,12 +10,20 @@ body {
 #login-container {
     position: fixed;
     width: 700px;
-    height: 350px;
+    height: 500px;
     background-color: white;
     margin-left: calc(50% - 350px);
     margin-top: 200px;
     text-align: center;
     display: none;
+}
+
+#header-container {
+    margin-bottom: 20px;
+}
+#header {
+    font-size: 44px;
+    margin-top: 15px;
 }
 
 input {
@@ -39,9 +47,19 @@ button {
     font-family: "PixelFont";
     padding-top: 5px;
 }
+button:hover {
+    cursor: pointer;
+    border: 3px solid white;
+}
 
 #register-con {
     display: none;
+}
+
+.status-message {
+    color: red;
+    margin-bottom: 10px;
+    height: 30px;
 }
 
 .background {
