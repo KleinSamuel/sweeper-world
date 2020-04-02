@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class LeaderboardResponse {
 
+    int ownPos;
+
     ArrayList<Long> topScores;
     ArrayList<Long> topUsers;
     ArrayList<String> topNames;
@@ -25,12 +27,13 @@ public class LeaderboardResponse {
         this.topScores = topScores;
         this.topUsers = topUsers;
         this.topNames = topNames;
+        this.ownPos = 0;
 
         try {
             lastScore = topScores.get(0);
             lastUser = topUsers.get(0);
             lastName = topNames.get(0);
-        }catch (IndexOutOfBoundsException ignore){
+        } catch (IndexOutOfBoundsException ignore) {
 
         }
     }
@@ -143,6 +146,15 @@ public class LeaderboardResponse {
         setLastName(name);
         setLastScore(score);
         setLastUser(id);
+        ownPos++;
         return this;
+    }
+
+    public int getOwnPos() {
+        return ownPos;
+    }
+
+    public void setOwnPos(int ownPos) {
+        this.ownPos = ownPos;
     }
 }

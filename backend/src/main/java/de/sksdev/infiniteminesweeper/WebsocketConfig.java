@@ -14,7 +14,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     @CrossOrigin
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/updates", "/stats");
+        registry.enableSimpleBroker("/updates", "/stats","/leaderboard");
         registry.setApplicationDestinationPrefixes("/report");
     }
 
@@ -23,4 +23,6 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/minesweeper").setAllowedOrigins("*").withSockJS();
     }
+
+
 }

@@ -71,6 +71,7 @@ export default class MinefieldViewer {
                 CONFIG.setStats(response.data.userStats);
 
                 context.com.receiveStatUpdates(context.updateStats.bind(context));
+                context.com.receiveLeaderboard(context.updateLeaderboard.bind(context));
                 context.startscreen.hide();
                 context.initialize();
             }).catch(function (err) {
@@ -91,6 +92,7 @@ export default class MinefieldViewer {
                 CONFIG.setStats(response.data.userStats);
 
                 context.com.receiveStatUpdates(context.updateStats.bind(context));
+                context.com.receiveLeaderboard(context.updateLeaderboard.bind(context));
                 context.startscreen.hide();
                 context.initialize();
             }).catch(function (err) {
@@ -99,7 +101,32 @@ export default class MinefieldViewer {
     }
 
     updateLeaderboard(body) {
-        console.log(body)
+        if (this.ui === undefined)
+            return;
+
+        for (let p = 0; p < 10; p++) {
+            let text = "";
+            if (body.topNames.length > p)
+                text = "#"+(p+1)+": " + body.topScores[p] + " [" + body.topNames[p] + "]";
+            this.ui.top10[p].text=text
+        }
+
+        let last ="";
+        let self ="";
+        let next ="";
+
+        if(body.lastUser >0)
+            last="#"+(body.ownPos+1)+": "+body.lastScore+" ["+body.lastName+"]";
+        this.ui.p_last.text=last;
+
+        if(body.ownUser >0)
+            self="#"+body.ownPos+": "+body.ownScore+" ["+body.ownName+"]";
+        this.ui.p_own.text=self;
+
+        if(body.nextUser >0)
+            next="#"+(body.ownPos-1)+": "+body.nextScore+" ["+body.nextName+"]";
+        this.ui.p_next.text=next;
+
     }
 
     updateStats(body) {

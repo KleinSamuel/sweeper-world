@@ -33,7 +33,6 @@ public class Scheduler {
 
     @Scheduled(fixedRate = 5000)
     public void updateLeaderboard() {
-        System.out.println("Broadcasting Leaderboards:");
         ArrayList<Long> topScores = new ArrayList<>(10);
         ArrayList<Long> topUsers = new ArrayList<>(10);
         ArrayList<String> topNames = new ArrayList<>(10);
@@ -61,7 +60,6 @@ public class Scheduler {
 
     private void broadcastLeaderboard(LeaderboardResponse board) {
         String url = "/leaderboard/id" + board.getOwnUser();
-        System.out.println("To: " + url);
         String response = null;
         try {
             response = objectMapper.writeValueAsString(board);

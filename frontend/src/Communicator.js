@@ -64,7 +64,6 @@ export default class Communicator {
 
     receiveLeaderboard(callback) {
         this.test = this.client.subscribe("/leaderboard/id" +CONFIG.getID(), function (message) {
-            console.log(message)
             callback( JSON.parse(message.body));
         });
     }

@@ -17,6 +17,8 @@ export default class UserInterface extends PIXI.Container {
         this.addOptionsButton();
         this.addPosition();
 
+        this.addLeaderboard();
+
         this.addDesignOptions();
 
         this.resize(width, height)
@@ -303,6 +305,127 @@ export default class UserInterface extends PIXI.Container {
         # wrong flags
 
      */
+
+
+    addLeaderboard(){
+        this.addLeaderboardBackground();
+        this.addLeaderboardTitle();
+        this.addLeaderboardEntries();
+        this.addUserPosTitle();
+        this.addOwnPosition();
+    }
+
+
+    addLeaderboardBackground() {
+        let background = new PIXI.Graphics();
+        background.beginFill(CONFIG.COLOR_BG);
+        background.lineStyle(2, CONFIG.COLOR_HIGHLIGHT);
+        background.drawRect(0, 0, 301, 501);
+        background.interactive = true;
+        background.buttonMode = true;
+        background.y = -2;
+        this.leaderboardBackground = background;
+        this.addChildAt(this.leaderboardBackground, 0)
+    }
+
+
+    addLeaderboardTitle() {
+        this.l_title = new PIXI.Container();
+        this.l_title.x = 15;
+        this.l_title.y = 15;
+
+        this.l_title.n = new PIXI.Text("Leaders (online):", {
+            fontSize: 28,
+            fill: CONFIG.COLOR_HIGHLIGHT
+        });
+
+        this.l_title.addChild(this.l_title.n);
+        this.leaderboardBackground.addChild(this.l_title);
+    }
+
+    addLeaderboardEntries(){
+
+        this.leaderbox = new PIXI.Container();
+        this.leaderbox.visible = true;
+        this.leaderbox.width = 120;
+        this.leaderbox.height = 400;
+        this.leaderbox.position.set(15, 50);
+
+        this.leaderboardBackground.addChild(this.leaderbox);
+
+        let x = 5;
+        let y = 0;
+        let dist = 22;
+
+        this.top10 = [];
+
+        for(let p = 0; p<10; p++,y+=dist){
+            let pos = new PIXI.Text("",{
+                fontSize:20,
+                fill:CONFIG.COLOR_TEXT,
+            });
+            this.top10.push(pos);
+            pos.position.set(x,y);
+            this.leaderbox.addChild(pos);
+        }
+
+
+
+    }
+
+    addUserPosTitle() {
+        this.u_title = new PIXI.Container();
+        this.u_title.x = 15;
+        this.u_title.y = 300;
+
+        this.u_title.n = new PIXI.Text("Current:", {
+            fontSize: 28,
+            fill: CONFIG.COLOR_HIGHLIGHT
+        });
+
+        this.u_title.addChild(this.u_title.n);
+        this.leaderboardBackground.addChild(this.u_title);
+    }
+
+    addOwnPosition(){
+        this.userposbox = new PIXI.Container();
+        this.userposbox.visible = true;
+        this.userposbox.width = 120;
+        this.userposbox.height = 150;
+        this.userposbox.position.set(15, 350);
+
+        this.leaderboardBackground.addChild(this.userposbox);
+
+        let x = 5;
+        let y = 0;
+        let dist = 22;
+
+        this.p_next = new PIXI.Text("", {
+            fontSize:20,
+            fill:CONFIG.COLOR_TEXT,
+        });
+        this.p_next.position.set(x,y);
+        this.userposbox.addChild(this.p_next);
+
+
+        this.p_own = new PIXI.Text("", {
+            fontSize:20,
+            fill:CONFIG.COLOR_TEXT,
+        });
+        y+=dist;
+        this.p_own.position.set(x,y);
+        this.userposbox.addChild(this.p_own)
+
+        this.p_last = new PIXI.Text("", {
+            fontSize:20,
+            fill:CONFIG.COLOR_TEXT,
+        });
+        y+=dist;
+        this.p_last.position.set(x,y);
+        this.userposbox.addChild(this.p_last)
+    }
+
+
     addBottomPanel() {
 
         let width = window.innerWidth;
