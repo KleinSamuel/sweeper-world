@@ -224,11 +224,11 @@ export default class MinefieldModel extends PIXI.Container {
     //execute incoming cell updates
     updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value, factor) {
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-        if (cell.state.hidden !== hidden) {
-            cell.setState({hidden: hidden, user: user, value: value});
-            if (user === CONFIG.getID())
-                cell.showScore(factor, true);
-        }
+        // if (cell.state.hidden !== hidden) {
+        cell.setState({hidden: hidden, user: user, value: value});
+        if (user === CONFIG.getID())
+            cell.showScore(factor, true);
+        // }
 
     }
 
@@ -349,8 +349,8 @@ export default class MinefieldModel extends PIXI.Container {
             return;
         }
         this.loadCells(chunkX, chunkY, cellX, cellY, true).then(function (response) {
-            let cell = context.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-                if (response.data.length===0) {
+                let cell = context.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+                if (response.data.length === 0) {
                     play("click_error");
                     cell.showScore("100");
                     return;
@@ -359,7 +359,7 @@ export default class MinefieldModel extends PIXI.Container {
                 //server set ok message for tile flagging
                 cell.state.user = 1;
                 cell.updateSprite();
-                cell.showScore(response.data.factor);
+                // cell.showScore(response.data.factor);
                 play("click_flag");
             }
         );

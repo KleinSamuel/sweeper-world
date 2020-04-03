@@ -37,7 +37,7 @@ module.exports = {
     devtool: "inline-source-map",
     devServer: {
         contentBase: "./dist",
-        host: 'localhost',
+        host: '0.0.0.0',
         port: 8080,
         before: function(app) {
             app.use("/assets", express.static(__dirname+"/src/assets/"));
