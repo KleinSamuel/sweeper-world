@@ -45,6 +45,9 @@ export const COLOR_BG = 0x343434;
 export const COLOR_HIGHLIGHT=0xFF333C;
 export const COLOR_TEXT=0xffffff;
 
+export const COLOR_GOOD=0x00ff00;
+export const COLOR_BAD=0xff3300;
+
 let ENABLED_SOUND = true;
 export function getOptionSoundEnabled() {
     return ENABLED_SOUND;

@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import * as CONFIG from "./Config";
-import { textures } from "./TextureLoader";
+import {textures} from "./TextureLoader";
 
 /**
  * Represents a single cell within a cell chunk.
@@ -50,6 +50,37 @@ export default class Cell extends PIXI.Container {
         this.updateSprite();
     }
 
+    showScore(factor) {
+        if (this.state.value === 0)
+            return;
+        let message = factor;
+        let color = CONFIG.COLOR_GOOD;
+        if ((this.state.value === 9 && !this.state.hidden) || (this.state.hidden && this.state.user !== CONFIG.getID())) {
+            color = CONFIG.COLOR_BAD;
+            message = "\u2193" + message + "x";
+        } else
+            message = "x" + message;
+
+        let alpha = 1.0;
+        let f = new PIXI.Text(message, {
+            fontSize: 16,
+            alpha: alpha,
+            fill: color,
+        });
+        this.addChild(f);
+        let context = this;
+        let interval = setInterval(function () {
+            f.alpha = alpha;
+            alpha -= 0.02;
+            if (alpha < 0) {
+                context.removeChild(f);
+                clearInterval(interval);
+            }
+        });
+
+
+    }
+
     /**
      * Updates the internal sprite object to the respective
      * texture of the cell state.
@@ -64,7 +95,7 @@ export default class Cell extends PIXI.Container {
         } else if (this.state.value === 9) {
             this.sprite.texture = textures.mine;
         } else {
-            this.sprite.texture = textures["num"+this.state.value];
+            this.sprite.texture = textures["num" + this.state.value];
         }
     }
 }

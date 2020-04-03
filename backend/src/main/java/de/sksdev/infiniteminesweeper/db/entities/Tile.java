@@ -67,6 +67,12 @@ public class Tile implements Comparable<Tile>, Serializable {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Transient
+    private int factor;
+
+    @Transient
+    private long score;
+
     @JsonGetter("user")
     public Object getJsonUser() {
         try {
@@ -92,11 +98,6 @@ public class Tile implements Comparable<Tile>, Serializable {
     public TileId getId() {
         return new TileId(x, y, x_tile, y_tile);
     }
-
-//    @JsonGetter("value")
-//    public Integer getJsonValue() {
-//        return user != null ? value : null;
-//    }
 
     public Integer getValue() {
         return value;
@@ -175,5 +176,21 @@ public class Tile implements Comparable<Tile>, Serializable {
             return true;
         }
         return false;
+    }
+
+    public int getFactor() {
+        return factor;
+    }
+
+    public void setFactor(int factor) {
+        this.factor = factor;
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public void setScore(long score) {
+        this.score = score;
     }
 }

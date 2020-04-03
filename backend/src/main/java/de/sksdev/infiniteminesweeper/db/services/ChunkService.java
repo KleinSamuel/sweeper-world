@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ChunkService {
@@ -176,7 +177,18 @@ public class ChunkService {
         Tile t = chunk.getGrid()[y_tile][x_tile];
         HashMap<ChunkId, TreeSet<Tile>> openedTiles = new HashMap<>();
 
+
         if (t.isHidden()) {
+            if (t.getValue() == 9) {
+                // click on bomb
+                t.setUser(u);
+                t.setHidden(false);
+                t.setFactor(Config.getMultiplicator(stats.getStreak()));
+                stats.increaseCellsOpened();
+                stats.increaseBombsExploded();
+                stats.resetStreak();
+                return t;
+            }
             recOpenTiles(t, openedTiles);
         } else {
             openAdjacentTiles(chunk, t, openedTiles);
@@ -185,23 +197,18 @@ public class ChunkService {
         openedTiles.forEach((c, ts) -> {
             userService.registerChunkRequest(c, userId);
             ts.forEach(open -> {
-                template.convertAndSend("/updates/" + c.getX() + "_" + c.getY(), new CellOperationResponse(c.getX(), c.getY(), open.getX_tile(), open.getY_tile(), u.getId(), false, open.getValue()));
+                open.setFactor(Config.getMultiplicator(stats.getStreak()));
+                template.convertAndSend("/updates/" + c.getX() + "_" + c.getY(), new CellOperationResponse(c.getX(), c.getY(), open.getX_tile(), open.getY_tile(), u.getId(), false, open.getValue(), open.getFactor()));
                 open.setHidden(false);
                 open.setUser(u);
                 if (open.getValue() != 9) {
-                    stats.increaseCurrentScore(Config.score(stats.getStreak(), open.getValue()));
+                    long s = Config.score(stats.getStreak(), open.getValue());
+                    stats.increaseCurrentScore(s);
                     stats.increaseStreak();
                     stats.increaseCellsOpened();
                 }
             });
         });
-
-        if (t.getValue() == 9) {
-            // click on bomb
-            stats.increaseCellsOpened();
-            stats.increaseBombsExploded();
-            stats.resetStreak();
-        }
 
         template.convertAndSend("/stats/id" + userId, stats);
 

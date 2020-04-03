@@ -68,17 +68,19 @@ public class RequestController {
 
                     UserStats stats = userService.loadStatsForUser(userId);
 
-                    boolean isCorrect = flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true));
-                    if (isCorrect) {
+                    Tile flag = flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true));
+                    if (flag != null) {
                         stats.increaseFlagsSet();
                         stats.increaseCurrentScore(Config.scoreFlag(stats.getStreak()));
+                        flag.setFactor(Config.getMultiplicator(stats.getStreak()));
+                        flag.setScore(Config.FLAG_SCORE);
+                        template.convertAndSend("/stats/id" + userId, stats);
+                        return objectMapper.writeValueAsString(flag);
                     } else {
                         stats.resetStreak();
                     }
-                    template.convertAndSend("/stats/id" + userId, stats);
-                    return "" + isCorrect;
+                    return null;
                 }
-
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -187,25 +189,26 @@ public class RequestController {
         return null;
     }
 
-    public boolean flagCell(CellOperationRequest message) {
+    public Tile flagCell(CellOperationRequest message) {
 
         Tile tile = chunkService.getTile(new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()));
         if (tile.getValue() != 9) {
-            return false;
+            return null;
         }
         tile = chunkService.registerTileUpdate(tile.getId(), message.getUser(), true);
 
         if (tile != null) {
             try {
-                String response = objectMapper.writeValueAsString(new CellOperationResponse(message, true, tile.getValue()));
+                String response = objectMapper.writeValueAsString(new CellOperationResponse(message, true, Config.FLAG_SCORE, Config.getMultiplicator(userService.loadStatsForUser(message.getUser()).getStreak())));
                 template.convertAndSend("/updates/" + message.getChunkX() + "_" + message.getChunkY(), response);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-        } else
+            return tile;
+        } else {
             System.err.println("Update of Tile " + new TileId(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY()) + " by User " + message.getUser() + " was not permitted!");
-
-        return (tile != null);
+        }
+        return null;
     }
 
 }

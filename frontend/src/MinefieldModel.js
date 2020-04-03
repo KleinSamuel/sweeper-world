@@ -76,8 +76,8 @@ export default class MinefieldModel extends PIXI.Container {
             this.hoverCell(chunkX, chunkY, cellX, cellY);
         }).bind(this);
 
-        let updateCellWrapper = (function (chunkX, chunkY, cellX, cellY, hidden, user, value) {
-            this.updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value);
+        let updateCellWrapper = (function (chunkX, chunkY, cellX, cellY, hidden, user, value, factor) {
+            this.updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value, factor);
         }).bind(this);
 
         return this.com.requestChunk(chunkX, chunkY).then(function (response) {
@@ -222,9 +222,14 @@ export default class MinefieldModel extends PIXI.Container {
     }
 
     //execute incoming cell updates
-    updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value) {
+    updateCell(chunkX, chunkY, cellX, cellY, hidden, user, value, factor) {
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-        cell.setState({hidden: hidden, user: user, value: value});
+        if (cell.state.hidden !== hidden) {
+            cell.setState({hidden: hidden, user: user, value: value});
+            if (user === CONFIG.getID())
+                cell.showScore(factor, true);
+        }
+
     }
 
     addChunk(cellX, cellY, chunk) {
@@ -291,13 +296,12 @@ export default class MinefieldModel extends PIXI.Container {
             //send request for update broadcast
             this.loadCells(chunkX, chunkY, cellX, cellY, false).then(function (response) {
                 let fullCell = response.data;
-
                 //update requested cell
-                if (fullCell.length > 0)
-                    cell.setState({"hidden": fullCell.hidden, "user": fullCell.user, "value": fullCell.value});
-                return fullCell;
-            }).then(function (response) {
-
+                cell.setState({hidden: fullCell.hidden, user: fullCell.user, value: fullCell.value});
+                if (!autoOpenValid)
+                    cell.showScore(fullCell.factor, cell.state.value !== 9);
+                // return {hidden:washidden,factor:fullCell.factor}
+            }).then(function (data) {
                 //requested cell == bomb -> explode
                 if (cell.state.value === 9) {
                     play("explosion");
@@ -339,30 +343,23 @@ export default class MinefieldModel extends PIXI.Container {
 
         let context = this;
         let cell = this.getChunk(chunkX, chunkY).getCell(cellX, cellY);
-
         // returns if the flagged cell is already opened or flagged
         if (!cell.state.hidden || cell.state.hidden && cell.state.user) {
             play("click_no");
             return;
         }
         this.loadCells(chunkX, chunkY, cellX, cellY, true).then(function (response) {
-
-                // broken request message
-                if (response.data.length === 0) {
-                    console.error("No response for tile flagging.")
-                    return;
-                }
-
-                // return if the flagged cell is not a bomb
-                if (!response.data) {
+            let cell = context.getChunk(chunkX, chunkY).getCell(cellX, cellY);
+                if (response.data.length===0) {
                     play("click_error");
+                    cell.showScore("100");
                     return;
                 }
 
                 //server set ok message for tile flagging
-                let cell = context.getChunk(chunkX, chunkY).getCell(cellX, cellY);
                 cell.state.user = 1;
                 cell.updateSprite();
+                cell.showScore(response.data.factor);
                 play("click_flag");
             }
         );

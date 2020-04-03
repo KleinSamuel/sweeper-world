@@ -9,15 +9,16 @@ public class CellOperationResponse {
     private boolean hidden;
     private long user;
     private int value;
+    private long factor;
 
     public CellOperationResponse() {
     }
 
-    public CellOperationResponse(CellOperationRequest message, boolean hidden, int value) {
-        this(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY(), message.getUser(), hidden, value);
+    public CellOperationResponse(CellOperationRequest message, boolean hidden, int value, long factor) {
+        this(message.getChunkX(), message.getChunkY(), message.getCellX(), message.getCellY(), message.getUser(), hidden, value, factor);
     }
 
-    public CellOperationResponse(int chunkX, int chunkY, int cellX, int cellY, long user, boolean hidden, int value) {
+    public CellOperationResponse(int chunkX, int chunkY, int cellX, int cellY, long user, boolean hidden, int value, long factor) {
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.cellX = cellX;
@@ -25,6 +26,7 @@ public class CellOperationResponse {
         this.user = user;
         this.hidden = hidden;
         this.value = value;
+        this.factor = factor;
     }
 
     public int getChunkX() {
@@ -81,5 +83,13 @@ public class CellOperationResponse {
 
     public void setValue(int value) {
         this.value = value;
+    }
+
+    public long getFactor() {
+        return factor;
+    }
+
+    public void setFactor(long factor) {
+        this.factor = factor;
     }
 }

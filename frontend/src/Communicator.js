@@ -58,7 +58,7 @@ export default class Communicator {
     registerChunk(chunkX, chunkY, callback) {
         this.subsriptions[chunkX + "_" + chunkY] = this.client.subscribe("/updates/" + chunkX + "_" + chunkY, function (message) {
             let body = JSON.parse(message.body);
-            callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user, body.value);
+            callback(body.chunkX, body.chunkY, body.cellX, body.cellY, body.hidden, body.user, body.value, body.factor);
         });
     }
 
@@ -89,31 +89,31 @@ export default class Communicator {
         });
     }
 
-    openCell(cell) {
-        this.client.publish({
-            destination: "/report/openCell",
-            body: JSON.stringify({
-                chunkX: cell.chunkX,
-                chunkY: cell.chunkY,
-                cellX: cell.cellX,
-                cellY: cell.cellY,
-                user: CONFIG.getID()
-            })
-        });
-    }
-
-    flagCell(cell) {
-        this.client.publish({
-            destination: "/report/flagCell",
-            body: JSON.stringify({
-                chunkX: cell.chunkX,
-                chunkY: cell.chunkY,
-                cellX: cell.cellX,
-                cellY: cell.cellY,
-                user: CONFIG.getID()
-            })
-        });
-    }
+    // openCell(cell) {
+    //     this.client.publish({
+    //         destination: "/report/openCell",
+    //         body: JSON.stringify({
+    //             chunkX: cell.chunkX,
+    //             chunkY: cell.chunkY,
+    //             cellX: cell.cellX,
+    //             cellY: cell.cellY,
+    //             user: CONFIG.getID()
+    //         })
+    //     });
+    // }
+    //
+    // flagCell(cell) {
+    //     this.client.publish({
+    //         destination: "/report/flagCell",
+    //         body: JSON.stringify({
+    //             chunkX: cell.chunkX,
+    //             chunkY: cell.chunkY,
+    //             cellX: cell.cellX,
+    //             cellY: cell.cellY,
+    //             user: CONFIG.getID()
+    //         })
+    //     });
+    // }
 
     loginUser(username, password) {
         return axios.post(CONFIG.URL_API + "/login", {
