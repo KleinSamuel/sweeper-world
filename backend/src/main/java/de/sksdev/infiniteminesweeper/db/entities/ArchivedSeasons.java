@@ -18,9 +18,6 @@ public class ArchivedSeasons {
     private User user;
 
     public ArchivedSeasons() {
-
     }
-
-
 
 }

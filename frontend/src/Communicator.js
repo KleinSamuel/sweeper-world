@@ -22,7 +22,7 @@ export default class Communicator {
     initClient() {
         let context = this;
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
 
             context.client = new Client();
             context.subsriptions = {};
@@ -63,19 +63,19 @@ export default class Communicator {
     }
 
     receiveLeaderboard(callback) {
-        this.test = this.client.subscribe("/leaderboard/id" +CONFIG.getID(), function (message) {
-            callback( JSON.parse(message.body));
+        this.test = this.client.subscribe("/leaderboard/id" + CONFIG.getID(), function (message) {
+            callback(JSON.parse(message.body));
         });
     }
 
     receiveStatUpdates(callback) {
-        this.test = this.client.subscribe("/stats/id" + CONFIG.getID(), function(message) {
+        this.test = this.client.subscribe("/stats/id" + CONFIG.getID(), function (message) {
             callback(JSON.parse(message.body));
         });
     }
 
     getStats() {
-        return axios.get(CONFIG.URL_API+"/getStats?u="+CONFIG.getID()+"&h="+CONFIG.getHash());
+        return axios.get(CONFIG.URL_API + "/getStats?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash());
     }
 
     /**
@@ -88,32 +88,6 @@ export default class Communicator {
             body: message
         });
     }
-
-    // openCell(cell) {
-    //     this.client.publish({
-    //         destination: "/report/openCell",
-    //         body: JSON.stringify({
-    //             chunkX: cell.chunkX,
-    //             chunkY: cell.chunkY,
-    //             cellX: cell.cellX,
-    //             cellY: cell.cellY,
-    //             user: CONFIG.getID()
-    //         })
-    //     });
-    // }
-    //
-    // flagCell(cell) {
-    //     this.client.publish({
-    //         destination: "/report/flagCell",
-    //         body: JSON.stringify({
-    //             chunkX: cell.chunkX,
-    //             chunkY: cell.chunkY,
-    //             cellX: cell.cellX,
-    //             cellY: cell.cellY,
-    //             user: CONFIG.getID()
-    //         })
-    //     });
-    // }
 
     loginUser(username, password) {
         return axios.post(CONFIG.URL_API + "/login", {
@@ -147,11 +121,25 @@ export default class Communicator {
      * @returns {Promise<T>}
      */
     requestChunk(chunkX, chunkY) {
-        return axios.get(CONFIG.URL_API + "/api/getChunkContent?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash() + "&x=" + chunkX + "&y=" + chunkY);
+        return axios.post(CONFIG.URL_API + "/api/getChunk",{
+            chunkX:chunkX,
+            chunkY:chunkY,
+            userId: CONFIG.getID(),
+            hash:CONFIG.getHash(),
+        });
     }
 
     requestCell(chunkX, chunkY, cellX, cellY, flag) {
-        return axios.get(CONFIG.URL_API + "/api/getTileContent?u=" + CONFIG.getID() + "&h=" + CONFIG.getHash() + "&x=" + chunkX + "&y=" + chunkY + "&x_tile=" + cellX + "&y_tile=" + cellY+"&f="+flag);
+        return axios.post(CONFIG.URL_API + "/api/getCell",
+            {
+                userId: CONFIG.getID(),
+                hash: CONFIG.getHash(),
+                chunkX: chunkX,
+                chunkY: chunkY,
+                cellX: cellX,
+                cellY: cellY,
+                flag: flag
+            });
     }
 
     updateSettings(design, soundsEnabled) {

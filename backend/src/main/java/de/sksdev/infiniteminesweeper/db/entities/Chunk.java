@@ -6,7 +6,6 @@ import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.MineFieldGenerator;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.services.BufferedChunk;
-import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,7 +15,6 @@ import java.util.*;
 @Entity
 @Table(name = "chunks")
 public class Chunk implements Serializable {
-
 
     public Chunk() {
     }

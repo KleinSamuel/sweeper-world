@@ -1,6 +1,5 @@
 package de.sksdev.infiniteminesweeper.db.services;
 
-
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 
 public class BufferedChunk implements Comparable<BufferedChunk> {
@@ -14,10 +13,8 @@ public class BufferedChunk implements Comparable<BufferedChunk> {
         update();
     }
 
-
-    public BufferedChunk update() {
+    public void update() {
         timestamp = System.currentTimeMillis();
-        return this;
     }
 
     public Chunk getChunk() {
@@ -39,7 +36,7 @@ public class BufferedChunk implements Comparable<BufferedChunk> {
     @Override
     public int compareTo(BufferedChunk other) {
         long complete_dist = this.getTimestamp() - other.getTimestamp();
-        if(complete_dist!=0)
+        if (complete_dist != 0)
             return Long.signum(complete_dist)/* * Integer.MAX_VALUE*/;
         else
             return Integer.signum(this.getChunk().getId().compareTo(other.getChunk().getId()));

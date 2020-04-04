@@ -2,8 +2,7 @@ package de.sksdev.infiniteminesweeper.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.sksdev.infiniteminesweeper.communication.CellOperationResponse;
-import de.sksdev.infiniteminesweeper.communication.LeaderboardResponse;
+import de.sksdev.infiniteminesweeper.communication.responses.LeaderboardResponse;
 import de.sksdev.infiniteminesweeper.db.entities.User;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +17,16 @@ import java.util.TreeMap;
 @Component
 public class Scheduler {
 
-
     UserService userService;
     SimpMessagingTemplate template;
     ObjectMapper objectMapper;
+
 
     @Autowired
     public Scheduler(UserService userService, SimpMessagingTemplate template, ObjectMapper objectMapper) {
         this.userService = userService;
         this.template = template;
-        this.objectMapper =objectMapper;
+        this.objectMapper = objectMapper;
     }
 
 
@@ -42,21 +41,19 @@ public class Scheduler {
             topScores.add(scores.getKey());
             topUsers.add(scores.getValue().getId());
             topNames.add(scores.getValue().getName());
-            System.out.println("#" + scores.getValue().getName() + "[" + scores.getKey() + "]");
             if (topScores.size() == 10)
                 break;
         }
 
         LeaderboardResponse lr = new LeaderboardResponse(topScores, topUsers, topNames);
-
         leaderboard.descendingMap().forEach((score, user) -> {
             if (user.getId() == topUsers.get(0))
                 return;
             broadcastLeaderboard(lr.pushNextEntry(score, user.getId(), user.getName()));
         });
         broadcastLeaderboard(lr.pushNextEntry(0L, -1L, "none"));
-
     }
+
 
     private void broadcastLeaderboard(LeaderboardResponse board) {
         String url = "/leaderboard/id" + board.getOwnUser();
@@ -68,6 +65,5 @@ public class Scheduler {
         }
         template.convertAndSend(url, response);
     }
-
 
 }

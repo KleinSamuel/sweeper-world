@@ -14,7 +14,6 @@ public class ChunkId implements Serializable, Comparable<ChunkId> {
     private int y;
 
     public ChunkId() {
-
     }
 
     public ChunkId(int x, int y) {
@@ -64,10 +63,8 @@ public class ChunkId implements Serializable, Comparable<ChunkId> {
     public int compareTo(ChunkId other) {
         int x_dist = this.getX() - other.getX();
         if (x_dist == 0) {
-            int y_dist = this.getY() - other.getY();
-            return y_dist;
-//            return y_dist != 0 ? (y_dist > 0 ? 1 : -1) : 0;
+            return this.getY() - other.getY();
         }
-        return x_dist;// > 0 ? 1 : -1;
+        return x_dist;
     }
 }

@@ -1,4 +1,4 @@
-package de.sksdev.infiniteminesweeper.communication;
+package de.sksdev.infiniteminesweeper.communication.responses;
 
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.User;
@@ -27,17 +27,9 @@ public class LoginResponse {
         return hash;
     }
 
-//    public void setHash(String hash) {
-//        this.hash = hash;
-//    }
-
     public long getId() {
         return id;
     }
-
-//    public void setId(long id) {
-//        this.id = id;
-//    }
 
     public void setHometile(TileId id) {
         hometile = id;

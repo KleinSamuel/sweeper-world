@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingService {
 
-
-    AsyncService asyncService;
+    private final AsyncService asyncService;
 
     @Autowired
     public SavingService(AsyncService asyncService) {
@@ -22,6 +21,5 @@ public class SavingService {
     public void save(Chunk chunk) {
         asyncService.save(chunk);
     }
-
 
 }

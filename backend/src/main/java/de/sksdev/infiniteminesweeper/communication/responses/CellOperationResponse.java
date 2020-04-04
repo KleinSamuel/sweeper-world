@@ -1,4 +1,6 @@
-package de.sksdev.infiniteminesweeper.communication;
+package de.sksdev.infiniteminesweeper.communication.responses;
+
+import de.sksdev.infiniteminesweeper.communication.requests.CellOperationRequest;
 
 public class CellOperationResponse {
 

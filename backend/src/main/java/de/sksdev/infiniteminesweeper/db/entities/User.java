@@ -1,6 +1,5 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
-
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 
 import javax.persistence.*;
@@ -19,7 +18,7 @@ public class User implements Serializable {
     private String name;
 
     @Column(nullable = false)
-    private String password;
+    private String token;
 
     @Column
     private boolean isGuest;
@@ -33,14 +32,17 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user")
     private Set<Tile> tiles;
 
+    @Transient
+    private String hash;
+
     public User() {
     }
 
-    public User(String name, String password, boolean isGuest, TileId tile) {
+    public User(String name, String token, boolean isGuest, TileId tile) {
         this.name = name;
-        this.password = password;
         this.home = tile;
         this.settings = new UserSettings(this);
+        this.token = token;
     }
 
     public long getId() {
@@ -59,12 +61,12 @@ public class User implements Serializable {
         this.name = name;
     }
 
-    public String getPassword() {
-        return password;
+    public String getToken() {
+        return token;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public UserSettings getSettings() {
@@ -83,4 +85,11 @@ public class User implements Serializable {
         this.home = home;
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
 }

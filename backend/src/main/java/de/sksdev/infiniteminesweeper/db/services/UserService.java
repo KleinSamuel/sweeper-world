@@ -1,6 +1,7 @@
 package de.sksdev.infiniteminesweeper.db.services;
 
-import de.sksdev.infiniteminesweeper.communication.SettingsRequest;
+import de.sksdev.infiniteminesweeper.Authenticator;
+import de.sksdev.infiniteminesweeper.communication.requests.SettingsRequest;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.User;
@@ -16,13 +17,12 @@ import java.util.*;
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
-    private UserStatsRepository userStatsRepository;
-
+    private final UserRepository userRepository;
+    private final UserStatsRepository userStatsRepository;
     private HashMap<ChunkId, HashSet<Long>> loadedChunks;
-
     private HashMap<Long, User> buffer;
     private HashMap<Long, UserStats> stats;
+    private Authenticator authenticator;
 
     @Autowired
     public UserService(UserRepository userRepository, UserStatsRepository userStatsRepository) {
@@ -31,6 +31,7 @@ public class UserService {
         this.loadedChunks = new HashMap<>();
         this.buffer = new HashMap<>();
         this.stats = new HashMap<>();
+        this.authenticator = new Authenticator();
     }
 
     public UserStats loadStatsForUser(long userId) {
@@ -51,7 +52,6 @@ public class UserService {
     public TreeMap<Long, User> getCurrentLeaderboard() {
         TreeMap<Long, User> leaderboard = new TreeMap<>();
         buffer.forEach((id, user) -> leaderboard.put(loadStatsForUser(id).getCurrentScore(), user));
-
         return leaderboard;
     }
 
@@ -59,7 +59,7 @@ public class UserService {
         // TODO: check if username and password is malformed
         if (userNameExists(username))
             return null;
-        User user = new User(username, password, false, id);
+        User user = new User(username, authenticator.hash(password.toCharArray()), false, id);
         userRepository.save(user);
         return user;
     }
@@ -80,7 +80,9 @@ public class UserService {
             if (name.length() > 32) {
                 name = name.replaceAll("-", "").substring(0, 31);
             }
-            User user = userRepository.save(new User(name, "guestpassword", true, tileId));
+            User user = userRepository.save(new User(name, authenticator.hash(name.toCharArray()), true, tileId));
+            user.setName("Guest#" + user.getId());
+            user = userRepository.save(user);
             this.buffer.put(user.getId(), user);
             return user;
         } catch (Exception e) {
@@ -100,11 +102,14 @@ public class UserService {
      * @return
      */
     public User loginUser(String username, String password) {
-        Optional<User> userOpt = userRepository.findByNameAndPassword(username, password);
+        Optional<User> userOpt = userRepository.findByName(username);
+
         if (userOpt.isEmpty() || isLoggedIn(userOpt.get().getId())) {
             return null;
         }
         User user = userOpt.get();
+        if (!authenticator.authenticate(password.toCharArray(), user.getToken()))
+            return null;
         putIntoBuffer(user);
         loadStatsForUser(user.getId());
         return user;
@@ -189,14 +194,7 @@ public class UserService {
     }
 
     public boolean validateChunkRequest(long uid, ChunkId cid) {
-//        try {
-        if (isLoggedIn(uid)/* & !loadedChunks.get(cid).contains(uid)*/)
-            return true;
-//        } catch (NullPointerException ignore) {
-//            return true;
-//        }
-//        System.err.println("User " + uid + " may already have requested chunk " + cid + " !");
-        return false;
+        return isLoggedIn(uid);
     }
 
     public boolean validateTileRequest(long uid, ChunkId cid) {
@@ -205,7 +203,6 @@ public class UserService {
                 return true;
             }
         } catch (NullPointerException ignore) {
-            // do nothing
         }
         return false;
     }
@@ -223,7 +220,6 @@ public class UserService {
     }
 
     public boolean validateUser(Long userId, String hash) {
-        //TODO implement full validate
-        return true;
+        return buffer.get(userId).getHash().equals(hash);
     }
 }

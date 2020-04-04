@@ -22,4 +22,6 @@ public class Config {
     public static int getMultiplicator(long streak) {
         return (int)Math.min(STREAK_MULTI_MAX, 100 + (streak / 10));
     }
+
+
 }

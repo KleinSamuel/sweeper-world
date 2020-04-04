@@ -23,9 +23,7 @@ public class UserSettings {
     @Column
     private boolean soundsEnabled;
 
-
     public UserSettings() {
-
     }
 
     public UserSettings(User user) {

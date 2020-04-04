@@ -1,4 +1,4 @@
-package de.sksdev.infiniteminesweeper.communication;
+package de.sksdev.infiniteminesweeper.communication.responses;
 
 import java.util.ArrayList;
 

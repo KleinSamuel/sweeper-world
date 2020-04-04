@@ -12,15 +12,10 @@ import java.util.LinkedList;
 @Service
 public class AsyncService {
 
-
-    final
-    ChunkRepository chunkRepository;
-
-    final UserService userService;
-
-    //TODO intelligent queue (maybe 2 TreeSet queues (one used one not)), -> bulk save & not duplicate saving
-    LinkedList<Iterable<Chunk>> saveQueue;
-    boolean isSaving = false;
+    private final ChunkRepository chunkRepository;
+    private final UserService userService;
+    private LinkedList<Iterable<Chunk>> saveQueue;
+    private boolean isSaving = false;
 
     @Autowired
     public AsyncService(ChunkRepository chunkRepository, UserService userService) {
@@ -52,6 +47,5 @@ public class AsyncService {
         isSaving = false;
         System.gc();
     }
-
 
 }

@@ -1,12 +1,20 @@
-package de.sksdev.infiniteminesweeper.communication;
+package de.sksdev.infiniteminesweeper.communication.requests;
 
-public class LoginRequest {
+public class RegisterRequest {
 
+    private String email;
     private String username;
     private String password;
 
-    public LoginRequest() {
+    public RegisterRequest() {
+    }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getUsername() {

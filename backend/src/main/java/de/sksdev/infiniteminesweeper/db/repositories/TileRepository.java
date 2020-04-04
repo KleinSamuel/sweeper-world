@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TileRepository extends CrudRepository<Tile, TileId>{
 
-
     Optional<Tile> findById(TileId tileId);
+
 }

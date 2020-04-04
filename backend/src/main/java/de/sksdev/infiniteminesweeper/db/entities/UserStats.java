@@ -42,7 +42,6 @@ public class UserStats {
     private int totalLongestStreak;
 
     public UserStats() {
-
     }
 
     public UserStats(long userId) {

@@ -1,4 +1,4 @@
-package de.sksdev.infiniteminesweeper.communication;
+package de.sksdev.infiniteminesweeper.communication.requests;
 
 public class CellOperationRequest {
 
@@ -10,16 +10,19 @@ public class CellOperationRequest {
     private long user;
 
     public CellOperationRequest() {
-
     }
 
-    public CellOperationRequest(int chunkX, int chunkY, int cellX, int cellY, long user, boolean hidden){
-        this.chunkX=chunkX;
-        this.chunkY=chunkY;
-        this.cellX=cellX;
-        this.cellY=cellY;
-        this.user=user;
-        this.hidden=hidden;
+    public CellOperationRequest(int chunkX, int chunkY, int cellX, int cellY, long user, boolean hidden) {
+        this.chunkX = chunkX;
+        this.chunkY = chunkY;
+        this.cellX = cellX;
+        this.cellY = cellY;
+        this.user = user;
+        this.hidden = hidden;
+    }
+
+    public CellOperationRequest(CellRequest request, boolean hidden) {
+        this(request.getChunkX(), request.getChunkY(), request.getCellX(), request.getCellY(), request.getUserId(), hidden);
     }
 
     public int getChunkX() {

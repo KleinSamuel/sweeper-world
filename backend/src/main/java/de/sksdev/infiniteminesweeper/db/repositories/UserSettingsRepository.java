@@ -8,5 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserSettingsRepository extends CrudRepository<UserSettings, Long> {
+
     Optional<UserSettings> findById(Long id);
+
 }

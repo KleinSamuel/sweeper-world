@@ -3,7 +3,9 @@ package de.sksdev.infiniteminesweeper.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sksdev.infiniteminesweeper.Config;
-import de.sksdev.infiniteminesweeper.communication.*;
+import de.sksdev.infiniteminesweeper.communication.requests.*;
+import de.sksdev.infiniteminesweeper.communication.responses.CellOperationResponse;
+import de.sksdev.infiniteminesweeper.communication.responses.LoginResponse;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
@@ -25,7 +27,7 @@ public class RequestController {
     private ChunkService chunkService;
     private ObjectMapper objectMapper;
     private SimpMessagingTemplate template;
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     public RequestController(ObjectMapper objectMapper,
@@ -38,14 +40,15 @@ public class RequestController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/api/getChunkContent", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/api/getChunk", method = RequestMethod.POST)
     @ResponseBody
-    public String getChunkContent(@RequestParam("u") Long userId, @RequestParam(value = "h", required = false) String hash, @RequestParam("x") Integer x, @RequestParam("y") Integer y) {
+    public String getChunkContent(@RequestBody CellRequest cellRequest) {
         try {
-            if (userService.validateUser(userId, hash)) {
-                ChunkId cid = new ChunkId(x, y);
-                if (!chunkService.registerChunkRequest(cid, userId)) {
-                    System.err.println("Chunk loading not permitted! chunk: " + x + ":" + y + " for user " + userId);
+            if (userService.validateUser(cellRequest.getUserId(), cellRequest.getHash())) {
+                ChunkId cid = cellRequest.getChunkId();
+                if (!chunkService.registerChunkRequest(cid, cellRequest.getUserId())) {
+                    System.err.println("Chunk loading not permitted! chunk: " + cellRequest.getCellX() + ":" + cellRequest.getCellY() + " for user " + cellRequest.getUserId());
                     return null;
                 }
                 return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid));
@@ -56,25 +59,25 @@ public class RequestController {
         return null;
     }
 
-    @RequestMapping(value = "/api/getTileContent")
+
+    @RequestMapping(value = "/api/getCell", method = RequestMethod.POST)
     @ResponseBody
-    public String getTileContent(@RequestParam("u") Long userId, @RequestParam(value = "h", required = false) String hash, @RequestParam("x") Integer x, @RequestParam("y") Integer y, @RequestParam("x_tile") int x_tile, @RequestParam("y_tile") int y_tile, @RequestParam("f") boolean isFlag) {
+    public String getTileContent(@RequestBody CellRequest cellRequest) {
         try {
-            if (userService.validateUser(userId, hash)) {
-                ChunkId cid = new ChunkId(x, y);
-                if (!isFlag) {
-                    return objectMapper.writeValueAsString(chunkService.openTiles(cid, x_tile, y_tile, userId));
+            if (userService.validateUser(cellRequest.getUserId(), cellRequest.getHash())) {
+                ChunkId cid = cellRequest.getChunkId();
+                if (!cellRequest.isFlag()) {
+                    return objectMapper.writeValueAsString(chunkService.openTiles(cid, cellRequest.getCellX(), cellRequest.getCellY(), cellRequest.getUserId()));
                 } else {
+                    UserStats stats = userService.loadStatsForUser(cellRequest.getUserId());
 
-                    UserStats stats = userService.loadStatsForUser(userId);
-
-                    Tile flag = flagCell(new CellOperationRequest(x, y, x_tile, y_tile, userId, true));
+                    Tile flag = flagCell(new CellOperationRequest(cellRequest, true));
                     if (flag != null) {
                         stats.increaseFlagsSet();
                         stats.increaseCurrentScore(Config.scoreFlag(stats.getStreak()));
                         flag.setFactor(Config.getMultiplicator(stats.getStreak()));
                         flag.setScore(Config.FLAG_SCORE);
-                        template.convertAndSend("/stats/id" + userId, stats);
+                        template.convertAndSend("/stats/id" + cellRequest.getUserId(), stats);
                         return objectMapper.writeValueAsString(flag);
                     } else {
                         stats.resetStreak();
@@ -92,14 +95,12 @@ public class RequestController {
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public String register(@RequestBody RegisterRequest request) {
-
         // TODO: check if credentials are valid but maybe check in user service
         User user = userService.createNewUser(request.getUsername(), request.getPassword(), chunkService.getRandomTileId());
 
         if (user == null) {
             return null;
         }
-
         LoginResponse response = new LoginResponse(user, null, null);
         try {
             return objectMapper.writeValueAsString(response);
@@ -109,11 +110,10 @@ public class RequestController {
         return null;
     }
 
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
     public String login(@RequestBody LoginRequest loginRequest) {
-
-        // TODO: check request for validity
         User user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
 
         if (user == null) {
@@ -123,6 +123,7 @@ public class RequestController {
         UserSettings userSettings = user.getSettings();
         UserStats userStats = userService.loadStatsForUser(user.getId());
         LoginResponse response = new LoginResponse(user, userSettings, userStats);
+        user.setHash(response.getHash());
 
         try {
             return objectMapper.writeValueAsString(response);
@@ -132,10 +133,10 @@ public class RequestController {
         return null;
     }
 
+
     @RequestMapping(value = "/guest", method = RequestMethod.GET)
     @ResponseBody
     public String loginGuest() {
-
         User user = userService.getGuestUser(UUID.randomUUID().toString(), chunkService.getRandomTileId());
         UserSettings userSettings = user.getSettings();
         UserStats userStats = userService.loadStatsForUser(user.getId());

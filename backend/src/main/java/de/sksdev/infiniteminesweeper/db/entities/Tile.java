@@ -1,13 +1,11 @@
 package de.sksdev.infiniteminesweeper.db.entities;
 
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 
 import javax.persistence.*;
 import java.io.Serializable;
-
 
 @Entity
 @Table(name = "tiles")
@@ -94,6 +92,7 @@ public class Tile implements Comparable<Tile>, Serializable {
         return false;
     }
 
+
     @JsonIgnore
     public TileId getId() {
         return new TileId(x, y, x_tile, y_tile);
@@ -111,20 +110,16 @@ public class Tile implements Comparable<Tile>, Serializable {
         return hidden;
     }
 
-    public boolean setHidden(boolean hidden) {
+    public void setHidden(boolean hidden) {
         if (this.hidden & !hidden) {
             this.hidden = false;
-            return true;
         }
-        return false;
-
     }
 
 
     public void setValue(Integer value) {
         this.value = value;
     }
-
 
     public int getX_tile() {
         return x_tile;
@@ -167,7 +162,6 @@ public class Tile implements Comparable<Tile>, Serializable {
     public void setY(int y) {
         this.y = y;
     }
-
 
     public boolean open(User user) {
         if (this.hidden & this.user == null) {

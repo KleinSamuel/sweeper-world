@@ -3,7 +3,7 @@ package de.sksdev.infiniteminesweeper.db.services;
 
 import de.sksdev.infiniteminesweeper.Config;
 import de.sksdev.infiniteminesweeper.MineFieldGenerator;
-import de.sksdev.infiniteminesweeper.communication.CellOperationResponse;
+import de.sksdev.infiniteminesweeper.communication.responses.CellOperationResponse;
 import de.sksdev.infiniteminesweeper.db.entities.Chunk;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
@@ -16,28 +16,15 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ChunkService {
 
-
-    final
-    TileRepository tileRepository;
-
-    final
-    ChunkBuffer chunkBuffer;
-
-    final
-    UserService userService;
-
-    final
-    AsyncService asyncService;
-
-    final
-    SimpMessagingTemplate template;
-
-
+    private final TileRepository tileRepository;
+    private final ChunkBuffer chunkBuffer;
+    private final UserService userService;
+    private final AsyncService asyncService;
+    private final SimpMessagingTemplate template;
     private Random random;
 
     @Autowired
@@ -53,11 +40,9 @@ public class ChunkService {
         this.random = new Random(System.currentTimeMillis());
     }
 
-    //    TODO use objectgetter for cached entries?
     public synchronized Chunk getOrCreateChunk(ChunkId id) {
         return chunkBuffer.findById(id).orElseGet(() -> save(newChunk(id)));
     }
-
 
     public Chunk getOrCreateChunkContent(int x, int y, boolean persist) {
         Chunk c = getOrCreateChunk(new ChunkId(x, y));
@@ -318,10 +303,4 @@ public class ChunkService {
         }
     }
 
-
-//    private Tile save(Tile tile) {
-//        return save(tile.getChunk()).getGrid()[tile.getY_tile()][tile.getX_tile()];
-////        tileRepository.save(tile);
-////        return tile;
-//    }
 }

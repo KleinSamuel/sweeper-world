@@ -14,15 +14,10 @@ import java.util.*;
 public class ChunkBuffer {
 
     private HashMap<ChunkId, Chunk> buffer;
-
     private HashSet<BufferedChunk> stack;
-
-    final
-    ChunkRepository chunkRepository;
-
-    final SavingService savingService;
-
-    final AsyncService asyncService;
+    private final ChunkRepository chunkRepository;
+    private final SavingService savingService;
+    private final AsyncService asyncService;
 
     @Autowired
     public ChunkBuffer(ChunkRepository chunkRepository, SavingService savingService, AsyncService asyncService) {
@@ -70,7 +65,7 @@ public class ChunkBuffer {
             HashSet<Chunk> chunks = runBufferCleaner();
             removeAndSave(chunks);
         }
-        System.out.print("\rCleaner:done\tBuffer Size = " + buffer.size());
+        System.out.println("\rCleaner:done\tBuffer Size = " + buffer.size());
     }
 
     private void removeAndSave(HashSet<Chunk> chunks) {

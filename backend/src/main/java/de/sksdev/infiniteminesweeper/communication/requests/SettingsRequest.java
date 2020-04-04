@@ -1,15 +1,13 @@
-package de.sksdev.infiniteminesweeper.communication;
+package de.sksdev.infiniteminesweeper.communication.requests;
 
 public class SettingsRequest {
 
     private long id;
     private String hash;
-
     private String design;
     private boolean soundsEnabled;
 
     public SettingsRequest() {
-
     }
 
     public long getId() {
