@@ -14,6 +14,8 @@ import de.sksdev.infiniteminesweeper.db.entities.UserStats;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,27 +25,28 @@ import java.util.UUID;
 @Controller
 public class RequestController {
 
-    private ChunkService chunkService;
-    private ObjectMapper objectMapper;
-    private SimpMessagingTemplate template;
+    private final ChunkService chunkService;
+    private final ObjectMapper objectMapper;
+    private final SimpMessagingTemplate template;
     private final UserService userService;
+    private final JavaMailSender mailSender;
 
     @Autowired
     public RequestController(ObjectMapper objectMapper,
                              ChunkService chunkService,
                              SimpMessagingTemplate simpMessagingTemplate,
-                             UserService userService) {
+                             UserService userService, JavaMailSender mailSender) {
         this.objectMapper = objectMapper;
         this.chunkService = chunkService;
         this.template = simpMessagingTemplate;
         this.userService = userService;
+        this.mailSender = mailSender;
     }
 
 
     @RequestMapping(value = "/api/getChunk", method = RequestMethod.POST)
     @ResponseBody
     public String getChunkContent(@RequestBody ChunkRequest chunkRequest) {
-        System.out.println(chunkRequest.getUserId()+" "+chunkRequest.getUserId()+" "+chunkRequest.getHash());
         try {
             if (userService.validateUser(chunkRequest.getUserId(), chunkRequest.getHash())) {
                 ChunkId cid = chunkRequest.getChunkId();
@@ -96,18 +99,55 @@ public class RequestController {
     @ResponseBody
     public String register(@RequestBody RegisterRequest request) {
         // TODO: check if credentials are valid but maybe check in user service
-        User user = userService.createNewUser(request.getUsername(), request.getPassword(), chunkService.getRandomTileId());
+        if (userService.userNameExists(request.getUsername()))
+            return "Username already taken!";
+        if (userService.emailExists(request.getEmail()))
+            return "Email already taken!";
+
+        User user = userService.createNewUser(request.getUsername(), request.getPassword(), chunkService.getRandomTileId(), request.getEmail());
 
         if (user == null) {
-            return userService.userNameExists(request.getUsername()) ? "Username already taken!" : "Something went wrong!";
+            return "Something went wrong!";
         }
         LoginResponse response = new LoginResponse(user, userService.loadStatsForUser(user.getId()));
         try {
-            return objectMapper.writeValueAsString(response);
+            String resp = objectMapper.writeValueAsString(response);
+            sendVerificationMail(user);
+            return resp;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return "Something went wrong!";
+    }
+
+    private void sendVerificationMail(User user) {
+        String verificationURL = "http://sweeper.world/verify?u=" + user.getId() + "&v=" + user.getVerifier();
+
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setTo(user.getEmail());
+        mail.setSubject("Account Verifiation for sweeper.world");
+        mail.setText("Click here to verify the account you just created on sweeper.world:\n<a href='" + verificationURL + "'>click here</>");
+
+        //TODO configure mail
+//        mailSender.send(mail);
+    }
+
+    @RequestMapping(value = "/verify", method = RequestMethod.GET)
+    @ResponseBody
+    public void verify(@RequestParam("u") int userId, @RequestParam("v") String verifier) {
+        User u = userService.getUser(userId);
+        try {
+            if (u.isVerified())
+                return;
+        } catch (NullPointerException e) {
+            return;
+        }
+        if (u.getVerifier().equals(verifier)) {
+            u.setVerified(true);
+            u.setVerifier(null);
+        }
+
+        //TODO redirect to login
     }
 
 

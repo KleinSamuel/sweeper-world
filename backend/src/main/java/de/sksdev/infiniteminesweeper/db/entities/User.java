@@ -5,6 +5,7 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -32,17 +33,29 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user")
     private Set<Tile> tiles;
 
+    @Column(unique = true)
+    private String email;
+
     @Transient
     private String hash;
+
+    @Column
+    private boolean verified;
+
+    @Column
+    private String verifier;
 
     public User() {
     }
 
-    public User(String name, String token, boolean isGuest, TileId tile) {
+    public User(String name, String token, boolean isGuest, TileId tile, String email) {
         this.name = name;
         this.home = tile;
         this.settings = new UserSettings(this);
         this.token = token;
+        this.email = email;
+        this.verified = false;
+        this.verifier = UUID.randomUUID().toString().replaceAll("-", "").substring(10);
     }
 
     public long getId() {
@@ -91,5 +104,29 @@ public class User implements Serializable {
 
     public void setHash(String hash) {
         this.hash = hash;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+    public String getVerifier() {
+        return verifier;
+    }
+
+    public void setVerifier(String verifier) {
+        this.verifier = verifier;
     }
 }

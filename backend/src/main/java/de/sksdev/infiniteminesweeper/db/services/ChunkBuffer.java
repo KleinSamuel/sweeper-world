@@ -65,7 +65,7 @@ public class ChunkBuffer {
             HashSet<Chunk> chunks = runBufferCleaner();
             removeAndSave(chunks);
         }
-        System.out.println("\rCleaner:done\tBuffer Size = " + buffer.size());
+        System.out.println("Cleaner:done\tBuffer Size = " + buffer.size());
     }
 
     private void removeAndSave(HashSet<Chunk> chunks) {

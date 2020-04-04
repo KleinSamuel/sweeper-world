@@ -55,11 +55,9 @@ public class UserService {
         return leaderboard;
     }
 
-    public User createNewUser(String username, String password, TileId id) {
+    public User createNewUser(String username, String password, TileId id, String email) {
         // TODO: check if username and password is malformed
-        if (userNameExists(username))
-            return null;
-        User user = new User(username, authenticator.hash(password.toCharArray()), false, id);
+        User user = new User(username, authenticator.hash(password.toCharArray()), false, id,email);
         userRepository.save(user);
         putIntoBuffer(user);
         return user;
@@ -67,6 +65,10 @@ public class UserService {
 
     public boolean userNameExists(String username) {
         return userRepository.findByName(username).isPresent();
+    }
+
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 
     /**
@@ -81,7 +83,7 @@ public class UserService {
             if (name.length() > 32) {
                 name = name.replaceAll("-", "").substring(0, 31);
             }
-            User user = userRepository.save(new User(name, authenticator.hash(name.toCharArray()), true, tileId));
+            User user = userRepository.save(new User(name, authenticator.hash(name.toCharArray()), true, tileId,null));
             user.setName("Guest#" + user.getId());
             user = userRepository.save(user);
             this.buffer.put(user.getId(), user);
