@@ -3,6 +3,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const express = require("express");
 
+//let host_dev = "http://andimajore-mint.ncgxhh4fxk3rgyty.myfritz.net";
 let host_dev = "http://localhost";
 let host_prod = "http://sks-dev.de";
 
@@ -13,6 +14,8 @@ let host_assets_dev = host_dev+":8080";
 let host_assets_prod = host_prod+":8080";
 
 let isProduction = (process.env.IS_PRODUCTION === "true");
+
+
 
 module.exports = {
     entry: './src/index.js',
@@ -39,6 +42,8 @@ module.exports = {
         contentBase: "./dist",
         host: '0.0.0.0',
         port: 8080,
+        disableHostCheck:true,
+        compress:true,
         before: function(app) {
             app.use("/assets", express.static(__dirname+"/src/assets/"));
         }
@@ -78,5 +83,10 @@ module.exports = {
             }
             */
         ]
-    }
+    },
+    // devServer: {
+    //     compress: true,
+    //     disableHostCheck: true,   // That solved it
+
+    // }
 };
