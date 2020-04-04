@@ -41,13 +41,14 @@ export default class MinefieldViewer {
         let context = this;
         return context.com.registerUser(username, password, email)
             .then(function (response) {
-                if (response.data.length === 0) {
+                if (response.data.id === undefined) {
                     //TODO display username already been taken message
-                    console.error("Username may already been taken!");
+                    window.alert(response.data);
                     return null;
                 }
-                return context.loginUser(username, password);
-            }).catch(function (err) {
+                return response;
+            }).then(context.login.bind(context))
+            .catch(function (err) {
                 console.log("error while registering user");
                 console.log(err);
             });
@@ -56,46 +57,39 @@ export default class MinefieldViewer {
     loginUser(username, password) {
         let context = this;
         return context.com.loginUser(username, password)
-            .then(function (response) {
-
-                if (!response) {
-                    return;
-                }
-
-                CONFIG.setID(response.data.id);
-                CONFIG.setName(username);
-                CONFIG.setHash(response.data.hash);
-                CONFIG.setDesign(response.data.userSettings.design);
-                CONFIG.setSoundsEnabled(response.data.userSettings.soundsEnabled);
-
-                CONFIG.setStats(response.data.userStats);
-
-                context.com.receiveStatUpdates(context.updateStats.bind(context));
-                context.com.receiveLeaderboard(context.updateLeaderboard.bind(context));
-                context.startscreen.hide();
-                context.initialize();
-            }).catch(function (err) {
+            .then(context.login.bind(context))
+            .catch(function (err) {
                 console.log("error while logging in user");
                 console.log(err);
             });
     }
 
+    login(loginResponse) {
+        console.log(loginResponse);
+        if (loginResponse.data.id === undefined) {
+            window.alert(loginResponse.data);
+            return;
+        }
+
+        CONFIG.setID(loginResponse.data.id);
+        CONFIG.setName(loginResponse);
+        CONFIG.setHash(loginResponse.data.hash);
+        CONFIG.setDesign(loginResponse.data.userSettings.design);
+        CONFIG.setSoundsEnabled(loginResponse.data.userSettings.soundsEnabled);
+
+        CONFIG.setStats(loginResponse.data.userStats);
+
+        this.com.receiveStatUpdates(this.updateStats.bind(this));
+        this.com.receiveLeaderboard(this.updateLeaderboard.bind(this));
+        this.startscreen.hide();
+        this.initialize();
+    }
+
     loginGuest() {
         let context = this;
         return context.com.loginGuest()
-            .then(function (response) {
-                CONFIG.setID(response.data.id);
-                CONFIG.setHash(response.data.hash);
-                CONFIG.setDesign(response.data.userSettings.design);
-                CONFIG.setSoundsEnabled(response.data.userSettings.soundsEnabled);
-
-                CONFIG.setStats(response.data.userStats);
-
-                context.com.receiveStatUpdates(context.updateStats.bind(context));
-                context.com.receiveLeaderboard(context.updateLeaderboard.bind(context));
-                context.startscreen.hide();
-                context.initialize();
-            }).catch(function (err) {
+            .then(context.login.bind(context))
+            .catch(function (err) {
                 console.log(err);
             });
     }
@@ -107,25 +101,25 @@ export default class MinefieldViewer {
         for (let p = 0; p < 10; p++) {
             let text = "";
             if (body.topNames.length > p)
-                text = "#"+(p+1)+": " + body.topScores[p] + " [" + body.topNames[p] + "]";
-            this.ui.top10[p].text=text
+                text = "#" + (p + 1) + ": " + body.topScores[p] + " [" + body.topNames[p] + "]";
+            this.ui.top10[p].text = text
         }
 
-        let last ="";
-        let self ="";
-        let next ="";
+        let last = "";
+        let self = "";
+        let next = "";
 
-        if(body.lastUser >0)
-            last="#"+(body.ownPos+1)+": "+body.lastScore+" ["+body.lastName+"]";
-        this.ui.p_last.text=last;
+        if (body.lastUser > 0)
+            last = "#" + (body.ownPos + 1) + ": " + body.lastScore + " [" + body.lastName + "]";
+        this.ui.p_last.text = last;
 
-        if(body.ownUser >0)
-            self="#"+body.ownPos+": "+body.ownScore+" ["+body.ownName+"]";
-        this.ui.p_own.text=self;
+        if (body.ownUser > 0)
+            self = "#" + body.ownPos + ": " + body.ownScore + " [" + body.ownName + "]";
+        this.ui.p_own.text = self;
 
-        if(body.nextUser >0)
-            next="#"+(body.ownPos-1)+": "+body.nextScore+" ["+body.nextName+"]";
-        this.ui.p_next.text=next;
+        if (body.nextUser > 0)
+            next = "#" + (body.ownPos - 1) + ": " + body.nextScore + " [" + body.nextName + "]";
+        this.ui.p_next.text = next;
 
     }
 

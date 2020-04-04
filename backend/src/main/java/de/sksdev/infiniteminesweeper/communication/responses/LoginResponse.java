@@ -15,12 +15,13 @@ public class LoginResponse {
     private UserSettings userSettings;
     private UserStats userStats;
 
-    public LoginResponse(User u, UserSettings userSettings, UserStats userStats) {
+    public LoginResponse(User u, UserStats userStats) {
         this.id = u.getId();
         hash = UUID.randomUUID().toString();
+        u.setHash(hash);
         setHometile(u.getHome());
-        this.userSettings = userSettings;
-        this.userStats = userStats;
+        this.userSettings = u.getSettings();
+        this.userStats=userStats;
     }
 
     public String getHash() {

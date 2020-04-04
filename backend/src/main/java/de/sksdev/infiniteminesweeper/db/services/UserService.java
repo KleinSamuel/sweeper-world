@@ -61,10 +61,11 @@ public class UserService {
             return null;
         User user = new User(username, authenticator.hash(password.toCharArray()), false, id);
         userRepository.save(user);
+        putIntoBuffer(user);
         return user;
     }
 
-    private boolean userNameExists(String username) {
+    public boolean userNameExists(String username) {
         return userRepository.findByName(username).isPresent();
     }
 
@@ -220,6 +221,10 @@ public class UserService {
     }
 
     public boolean validateUser(Long userId, String hash) {
-        return buffer.get(userId).getHash().equals(hash);
+        try {
+            return buffer.get(userId).getHash().equals(hash);
+        } catch (NullPointerException e) {
+            return false;
+        }
     }
 }

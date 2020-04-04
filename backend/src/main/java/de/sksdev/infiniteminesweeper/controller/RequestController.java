@@ -10,7 +10,6 @@ import de.sksdev.infiniteminesweeper.db.entities.Ids.ChunkId;
 import de.sksdev.infiniteminesweeper.db.entities.Ids.TileId;
 import de.sksdev.infiniteminesweeper.db.entities.Tile;
 import de.sksdev.infiniteminesweeper.db.entities.User;
-import de.sksdev.infiniteminesweeper.db.entities.UserSettings;
 import de.sksdev.infiniteminesweeper.db.entities.UserStats;
 import de.sksdev.infiniteminesweeper.db.services.ChunkService;
 import de.sksdev.infiniteminesweeper.db.services.UserService;
@@ -43,12 +42,13 @@ public class RequestController {
 
     @RequestMapping(value = "/api/getChunk", method = RequestMethod.POST)
     @ResponseBody
-    public String getChunkContent(@RequestBody CellRequest cellRequest) {
+    public String getChunkContent(@RequestBody ChunkRequest chunkRequest) {
+        System.out.println(chunkRequest.getUserId()+" "+chunkRequest.getUserId()+" "+chunkRequest.getHash());
         try {
-            if (userService.validateUser(cellRequest.getUserId(), cellRequest.getHash())) {
-                ChunkId cid = cellRequest.getChunkId();
-                if (!chunkService.registerChunkRequest(cid, cellRequest.getUserId())) {
-                    System.err.println("Chunk loading not permitted! chunk: " + cellRequest.getCellX() + ":" + cellRequest.getCellY() + " for user " + cellRequest.getUserId());
+            if (userService.validateUser(chunkRequest.getUserId(), chunkRequest.getHash())) {
+                ChunkId cid = chunkRequest.getChunkId();
+                if (!chunkService.registerChunkRequest(cid, chunkRequest.getUserId())) {
+                    System.err.println("Chunk loading not permitted! chunk: " + chunkRequest.getChunkX() + ":" + chunkRequest.getChunkY() + " for user " + chunkRequest.getUserId());
                     return null;
                 }
                 return objectMapper.writeValueAsString(chunkService.getOrCreateChunkContent(cid));
@@ -99,15 +99,15 @@ public class RequestController {
         User user = userService.createNewUser(request.getUsername(), request.getPassword(), chunkService.getRandomTileId());
 
         if (user == null) {
-            return null;
+            return userService.userNameExists(request.getUsername()) ? "Username already taken!" : "Something went wrong!";
         }
-        LoginResponse response = new LoginResponse(user, null, null);
+        LoginResponse response = new LoginResponse(user, userService.loadStatsForUser(user.getId()));
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return null;
+        return "Something went wrong!";
     }
 
 
@@ -117,20 +117,18 @@ public class RequestController {
         User user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
 
         if (user == null) {
-            return null;
+            return (userService.userNameExists(loginRequest.getUsername()) ? "Wrong Password!" : "Username does not exist!");
         }
 
-        UserSettings userSettings = user.getSettings();
-        UserStats userStats = userService.loadStatsForUser(user.getId());
-        LoginResponse response = new LoginResponse(user, userSettings, userStats);
-        user.setHash(response.getHash());
+        LoginResponse response = new LoginResponse(user, userService.loadStatsForUser(user.getId()));
+//        user.setHash(response.getHash());
 
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return null;
+        return (userService.userNameExists(loginRequest.getUsername()) ? "Wrong Password!" : "Username does not exist!");
     }
 
 
@@ -138,16 +136,15 @@ public class RequestController {
     @ResponseBody
     public String loginGuest() {
         User user = userService.getGuestUser(UUID.randomUUID().toString(), chunkService.getRandomTileId());
-        UserSettings userSettings = user.getSettings();
-        UserStats userStats = userService.loadStatsForUser(user.getId());
-        LoginResponse response = new LoginResponse(user, userSettings, userStats);
+        LoginResponse response = new LoginResponse(user, userService.loadStatsForUser(user.getId()));
+
 
         try {
             return objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return null;
+        return "Something went wrong!";
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
