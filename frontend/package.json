@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@stomp/stompjs": "^5.4.4",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "gsap": "^3.2.5",
     "howler": "^2.1.3",
     "js-cookie": "^2.2.1",
